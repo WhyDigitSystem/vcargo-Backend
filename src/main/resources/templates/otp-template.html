@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f7;
+      margin: 0;
+      padding: 40px 0;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px 28px;
+      border-radius: 12px;
+      max-width: 480px;
+      margin: auto;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      border: 1px solid #e6e6e6;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .text {
+      font-size: 16px;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .otp-box {
+      font-size: 36px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: 10px;
+      background: #f7f7f7;
+      padding: 20px 30px;
+      border-radius: 10px;
+      text-align: center;
+      margin: 25px auto;
+      width: fit-content;
+      border: 1px solid #ddd;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header">
+      <div class="header-title">Email Verification</div>
+    </div>
+
+    <p class="text">
+      To continue with your verification, please use the One-Time Password (OTP) provided below.
+    </p>
+
+    <div class="otp-box">{{OTP}}</div>
+
+    <p class="text">
+      This OTP is valid for the next <strong>5 minutes</strong>.  
+      Please do not share this code with anyone.
+    </p>
+
+    <div class="footer">
+      Thank you,<br>
+      <strong>Team EFIT Transport</strong>
+    </div>
+
+  </div>
+
+</body>
+</html>
