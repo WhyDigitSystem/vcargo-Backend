@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +25,6 @@ import com.efit.savaari.dto.TripReportMisDTO;
 import com.efit.savaari.dto.TripsDTO;
 import com.efit.savaari.dto.TvehicleDTO;
 import com.efit.savaari.dto.VendorInvoiceDTO;
-import com.efit.savaari.entity.ApprovedQuoteVO;
 import com.efit.savaari.entity.AuctionsVO;
 import com.efit.savaari.entity.CustomerBookingRequestVO;
 import com.efit.savaari.entity.DocumentVO;
@@ -114,7 +115,12 @@ public interface TransactionService {
 
 //	Map<String, Object> createUpdateTvehicle( @Valid TvehicleDTO dto, List<MultipartFile> documents) throws Exception;
 
-	Map<String, Object> createUpdateTvehicle(@Valid TvehicleDTO dto) throws Exception;
+	Map<String, Object> createUpdateTvehicle(@Valid TvehicleDTO dto,MultipartFile[] rcFiles,
+			MultipartFile[] insuranceFiles,
+			MultipartFile[] fcFiles,
+			MultipartFile[] permitFiles,
+			MultipartFile[] pucFiles,
+			MultipartFile[] otherFiles) throws Exception;
 
 	TvehicleVO getTvehiclesById(Long id) throws ApplicationException;
 
@@ -163,5 +169,7 @@ public interface TransactionService {
 	List<Map<String, Object>> getTripDetailsListByOrgId(String branchCode, Long orgId);
 
 	Map<String, Object> getApprovedQuotesByOrgId(Long orgId, int page, int count);
+	
+	ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException;
 
 }

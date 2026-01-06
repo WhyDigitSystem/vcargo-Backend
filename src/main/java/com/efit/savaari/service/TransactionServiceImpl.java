@@ -3,7 +3,12 @@ package com.efit.savaari.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -28,14 +34,20 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.efit.savaari.dto.AuctionsDTO;
 import com.efit.savaari.dto.CustomerBookingRequestDTO;
@@ -51,6 +63,8 @@ import com.efit.savaari.dto.TripGeofenceAlertsDTO;
 import com.efit.savaari.dto.TripReportMisDTO;
 import com.efit.savaari.dto.TripsDTO;
 import com.efit.savaari.dto.TvehicleDTO;
+import com.efit.savaari.dto.TvehicleDocumentResponseDTO;
+import com.efit.savaari.dto.TvehicleResponseDTO;
 import com.efit.savaari.dto.VendorInvoiceChargesDTO;
 import com.efit.savaari.dto.VendorInvoiceDTO;
 import com.efit.savaari.dto.VendorInvoiceTripsDetailsDTO;
@@ -78,6 +92,7 @@ import com.efit.savaari.entity.TripReportMisVO;
 import com.efit.savaari.entity.TripsDLVerificationVO;
 import com.efit.savaari.entity.TripsPitStopVO;
 import com.efit.savaari.entity.TripsVO;
+import com.efit.savaari.entity.TvehicleDocumentsVO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.UserVO;
 import com.efit.savaari.entity.VehicleVO;
@@ -869,7 +884,7 @@ public class TransactionServiceImpl implements TransactionService {
 			bccEmailIds.append(vo1.getUserName());
 			n1.setUserid(userId);
 			n1.setAuctionsid(vo.getId());
-			n1.setMessage(vo.getOrganizationName()+" ,Auction ID: "+vo.getId()+" Bid and Win...");
+			n1.setMessage(vo.getOrganizationName() + " ,Auction ID: " + vo.getId() + " Bid and Win...");
 			n1.setNotificationType("New Auction");
 			n.add(n1);
 		}
@@ -896,19 +911,16 @@ public class TransactionServiceImpl implements TransactionService {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a");
 
 			String formattedStartDate = vo.getStartDate().formatted(formatter);
-			String loadDate=vo.getLoadingDate().toString();
+			String loadDate = vo.getLoadingDate().toString();
 			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
 
 			String formattedLoadingTime = vo.getLoadingTime() != null ? vo.getLoadingTime().formatted(timeFormatter)
 					: "";
 
 			return html.replace("${organizationName}", vo.getOrganizationName())
-					.replace("${auctionType}", vo.getAuctionsType())
-					.replace("${bidType}", vo.getBidType())
-					.replace("${loadingDate}", loadDate)
-					.replace("${loading}", vo.getLoading())
-					.replace("${loadingTime}", formattedLoadingTime)
-					.replace("${unloading}", vo.getUnloading())
+					.replace("${auctionType}", vo.getAuctionsType()).replace("${bidType}", vo.getBidType())
+					.replace("${loadingDate}", loadDate).replace("${loading}", vo.getLoading())
+					.replace("${loadingTime}", formattedLoadingTime).replace("${unloading}", vo.getUnloading())
 					.replace("${material}", vo.getMaterial())
 					.replace("${materialQuantity}", String.valueOf(vo.getMaterialQuantity()))
 					.replace("${vehicle}", vo.getVehicle())
@@ -1560,14 +1572,19 @@ public class TransactionServiceImpl implements TransactionService {
 //	public Map<String, Object> createUpdateTvehicle(TvehicleDTO dto, List<MultipartFile> documents)
 //			throws ApplicationException {
 
+	@Value("${file.upload.path}")
+	private String uploadBasePath;
+
 	@Override
 	@Transactional
-	public Map<String, Object> createUpdateTvehicle(TvehicleDTO dto) throws ApplicationException {
+	public Map<String, Object> createUpdateTvehicle(TvehicleDTO dto, MultipartFile[] rcFiles,
+			MultipartFile[] insuranceFiles, MultipartFile[] fcFiles, MultipartFile[] permitFiles,
+			MultipartFile[] pucFiles, MultipartFile[] otherFiles) throws ApplicationException {
 		TvehicleVO vo;
 		String message;
 
 		// UPDATE
-		if (dto.getId() != null) {
+		if (ObjectUtils.isNotEmpty(dto.getId())) {
 
 			vo = tvehicleRepo.findById(dto.getId()).orElseThrow(() -> new ApplicationException("Invalid Vehicle ID"));
 
@@ -1593,47 +1610,174 @@ public class TransactionServiceImpl implements TransactionService {
 
 		// BASIC MAPPING
 		mapTvehicleDTOtoVO(dto, vo);
+		vo = tvehicleRepo.save(vo);
+		String vehicleNo = vo.getVehicleNumber();
 
-		// ======================
-		// DOCUMENTS HANDLING
-		// ======================
-//		List<TvehicleDocumentsVO> documentsList = new ArrayList<>();
-//
-//		List<TvehicleDocumentsDTO> dtoDocs = dto.getTvehicleDocumentsDTO();
-//
-//		if (dtoDocs != null && documents != null) {
-//			for (int i = 0; i < dtoDocs.size(); i++) {
-//
-//				TvehicleDocumentsVO doc = new TvehicleDocumentsVO();
-//				TvehicleDocumentsDTO d = dtoDocs.get(i);
-//
-//				doc.setName(d.getName());
-//				doc.setTvehicleVO(vo);
-//
-//				// file matching by index
-//				if (i < documents.size() && !documents.get(i).isEmpty()) {
-//					try {
-//						doc.setDocuments(documents.get(i).getBytes());
-//					} catch (IOException e) {
-//						throw new ApplicationException("Unable to read file " + d.getName());
-//					}
-//				}
-//
-//				documentsList.add(doc);
-//			}
-//		}
-//
-//		vo.setTvehicleDocumentsVO(documentsList);
+		// 2️⃣ Base vehicle folder
+		Path vehicleFolder = Paths.get(uploadBasePath, vehicleNo);
+		createDirectory(vehicleFolder);
 
-		// SAVE MASTER + CHILD
-		tvehicleRepo.save(vo);
-
+		replaceDocuments(vo, "RC", rcFiles, vehicleFolder);
+		replaceDocuments(vo, "INSURANCE", insuranceFiles, vehicleFolder);
+		replaceDocuments(vo, "FC", fcFiles, vehicleFolder);
+		replaceDocuments(vo, "PERMIT", permitFiles, vehicleFolder);
+		replaceDocuments(vo, "PUC", pucFiles, vehicleFolder);
+		replaceDocuments(vo, "OTHER", otherFiles, vehicleFolder);
 		// RESPONSE
+		TvehicleResponseDTO tvehicleResponseDTO = mapToResponseDTO(vo);
 		Map<String, Object> response = new HashMap<>();
-		response.put("tvehicleVO", vo);
+		response.put("tvehicleVO", tvehicleResponseDTO);
 		response.put("message", message);
 
 		return response;
+	}
+
+	public TvehicleResponseDTO mapToResponseDTO(TvehicleVO vehicle) {
+
+		TvehicleResponseDTO dto = new TvehicleResponseDTO();
+
+		dto.setId(vehicle.getId());
+		dto.setVehicleNumber(vehicle.getVehicleNumber());
+		dto.setType(vehicle.getType());
+		dto.setModel(vehicle.getModel());
+		dto.setCapacity(vehicle.getCapacity());
+
+		if (vehicle.getUser() != null) {
+			dto.setUser(vehicle.getUser().getId());
+		}
+
+		dto.setDriver(vehicle.getDriver());
+		dto.setDriverPhone(vehicle.getDriverPhone());
+		dto.setCurrentLocation(vehicle.getCurrentLocation());
+
+		dto.setFuelEfficiency(vehicle.getFuelEfficiency());
+		dto.setMaintenanceRequired(vehicle.isMaintenanceRequired());
+
+		dto.setYear(vehicle.getYear());
+		dto.setChassisNumber(vehicle.getChassisNumber());
+		dto.setEngineNumber(vehicle.getEngineNumber());
+		dto.setPermitType(vehicle.getPermitType());
+		dto.setOwnerName(vehicle.getOwnerName());
+
+		dto.setInsuranceExpiry(vehicle.getInsuranceExpiry());
+		dto.setFitnessExpiry(vehicle.getFitnessExpiry());
+		dto.setLastService(vehicle.getLastService());
+		dto.setNextService(vehicle.getNextService());
+
+		dto.setActive(vehicle.isActive());
+		dto.setCancel(vehicle.isCancel());
+
+		dto.setOrgId(vehicle.getOrgId());
+		dto.setBranchCode(vehicle.getBranchCode());
+		dto.setBranchName(vehicle.getBranchName());
+
+		if (vehicle.getDocuments() == null) {
+			dto.setDocuments(null);
+		} else {
+			dto.setDocuments(vehicle.getDocuments().stream().map(doc -> {
+				TvehicleDocumentResponseDTO d = new TvehicleDocumentResponseDTO();
+				d.setId(doc.getId());
+				d.setDocumentType(doc.getDocumentType());
+				d.setFileName(doc.getFileName());
+
+				String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/transaction/files")
+						.toUriString();
+
+				d.setFilePath(baseUrl + doc.getFilePath());
+				d.setFileType(doc.getFileType());
+				d.setFileSize(doc.getFileSize());
+				d.setUploadedOn(doc.getUploadedOn());
+				return d;
+			}).toList());
+		}
+
+		return dto;
+	}
+
+	private void replaceDocuments(TvehicleVO vehicle, String documentType, MultipartFile[] files, Path vehicleFolder) {
+
+		if (files == null || files.length == 0)
+			return;
+
+		// 1️⃣ Fetch old docs
+		List<TvehicleDocumentsVO> oldDocs = tvehicleDocumentsRepo.findByTvehicleAndDocumentType(vehicle, documentType);
+
+		// 2️⃣ Delete physical files
+		for (TvehicleDocumentsVO doc : oldDocs) {
+			deleteFileSafely(doc.getFilePath());
+		}
+
+		// 3️⃣ Delete DB rows
+		tvehicleDocumentsRepo.deleteAll(oldDocs);
+
+		// 4️⃣ Remove from persistence context
+		if (vehicle.getDocuments() != null) {
+			vehicle.getDocuments().removeIf(d -> documentType.equals(d.getDocumentType()));
+		}
+
+		// 5️⃣ Save new files
+		saveFiles(vehicle, documentType, files, vehicleFolder);
+	}
+
+	private void deleteFileSafely(String path) {
+		try {
+			Path filePath = Paths.get(path);
+			if (Files.exists(filePath)) {
+				Files.delete(filePath);
+			}
+		} catch (Exception e) {
+			// log only – don't break transaction
+			System.err.println("Unable to delete file: " + path);
+		}
+	}
+
+	private void saveFiles(TvehicleVO vehicle, String documentType, MultipartFile[] files, Path vehicleFolder) {
+		if (files == null || files.length == 0)
+			return;
+
+		try {
+			Path docFolder = vehicleFolder.resolve(documentType);
+			createDirectory(docFolder);
+
+			for (MultipartFile file : files) {
+
+				String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+				Path filePath = docFolder.resolve(fileName);
+
+				// ✅ IMPORTANT: close stream
+				try (InputStream is = file.getInputStream()) {
+					Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
+				}
+
+				// Save DB entry
+				TvehicleDocumentsVO doc = new TvehicleDocumentsVO();
+				doc.setTvehicle(vehicle);
+				doc.setDocumentType(documentType);
+				doc.setFileName(fileName);
+				doc.setFilePath(filePath.toString().replace("\\", "/"));
+				doc.setFileType(file.getContentType());
+				doc.setFileSize(file.getSize());
+				doc.setUploadedOn(LocalDateTime.now());
+
+				tvehicleDocumentsRepo.save(doc);
+				if (vehicle.getDocuments() == null) {
+				    vehicle.setDocuments(new ArrayList<>());
+				}
+			}
+
+		} catch (IOException e) {
+			throw new RuntimeException("File upload failed for " + documentType, e);
+		}
+	}
+
+	private void createDirectory(Path path) {
+		try {
+			if (!Files.exists(path)) {
+				Files.createDirectories(path);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Could not create directory: " + path);
+		}
 	}
 
 	private void mapTvehicleDTOtoVO(TvehicleDTO dto, TvehicleVO vo) {
@@ -1663,6 +1807,48 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setBranchName(dto.getBranchName());
 	}
 
+    @Override
+    public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
+
+        String uri = request.getRequestURI();
+
+        // Remove API prefix
+        String relativePath = uri.replace("/api/transaction/files/", "");
+
+        // Decode URL (%20 → space)
+        relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
+
+        // Remove uploads/vehicles since base path already points there
+        if (relativePath.startsWith("uploads/vehicles/")) {
+            relativePath = relativePath.substring("uploads/vehicles/".length());
+        }
+
+        Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
+        Path filePath = baseDir.resolve(relativePath).normalize();
+
+        // 🔐 Security check
+        if (!filePath.startsWith(baseDir)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (!Files.exists(filePath)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = Files.probeContentType(filePath);
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        byte[] data = Files.readAllBytes(filePath);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(data);
+    }
+
+
 	@Override
 	public TvehicleVO getTvehiclesById(Long id) throws ApplicationException {
 		return tvehicleRepo.findById(id).orElseThrow(() -> new ApplicationException("Tvehicle not found"));
@@ -1680,9 +1866,12 @@ public class TransactionServiceImpl implements TransactionService {
 
 		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("vehiclenumber").ascending());
 		Page<TvehicleVO> TvehiclePage = tvehicleRepo.getTvehiclesByOrgId(branchCode, userId, search, pageable);
+		
+		Page<TvehicleResponseDTO> dtoPage =
+				TvehiclePage.map(this::mapToResponseDTO);
 
 		// return paginated response
-		return paginationService.buildResponse(TvehiclePage);
+		return paginationService.buildResponse(dtoPage);
 
 	}
 

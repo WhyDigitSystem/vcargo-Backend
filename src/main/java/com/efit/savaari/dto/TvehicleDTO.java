@@ -14,7 +14,6 @@ public class TvehicleDTO {
 	private Long id;
 	private String vehicleNumber;
     private Long userId;
-
 	private String type;
 	private String model;
 	private String capacity;
@@ -37,7 +36,5 @@ public class TvehicleDTO {
 	private Long orgId;
 	private String branchCode;
 	private String branchName;
-
-//	List<TvehicleDocumentsDTO> tvehicleDocumentsDTO;
 
 }
