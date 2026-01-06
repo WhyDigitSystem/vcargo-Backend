@@ -1,17 +1,27 @@
 package com.efit.savaari.controller;
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +51,6 @@ import com.efit.savaari.dto.TripReportMisDTO;
 import com.efit.savaari.dto.TripsDTO;
 import com.efit.savaari.dto.TvehicleDTO;
 import com.efit.savaari.dto.VendorInvoiceDTO;
-import com.efit.savaari.entity.ApprovedQuoteVO;
 import com.efit.savaari.entity.AuctionsVO;
 import com.efit.savaari.entity.CustomerBookingRequestVO;
 import com.efit.savaari.entity.DocumentVO;
@@ -960,13 +969,14 @@ public class TransactionController extends BaseController {
 		return ResponseEntity.ok(responseDTO);
 	}
 
-//	@PutMapping(value = "/createUpdateTvehicle", consumes = "multipart/form-data")
 	@PutMapping(value = "/createUpdateTvehicle")
-	public ResponseEntity<ResponseDTO> createUpdateTvehicle(
-//			@RequestPart("tvehicleDTO") TvehicleDTO tvehicleDTO,
-			@RequestBody TvehicleDTO tvehicleDTO
-//	        @RequestPart(value = "documents", required = false) List<MultipartFile> documents
-	) {
+	public ResponseEntity<ResponseDTO> createUpdateTvehicle(@RequestPart("tvehicleDTO") TvehicleDTO tvehicleDTO,
+			@RequestPart(value = "RC", required = false) MultipartFile[] rcFiles,
+			@RequestPart(value = "INSURANCE", required = false) MultipartFile[] insuranceFiles,
+			@RequestPart(value = "FC", required = false) MultipartFile[] fcFiles,
+			@RequestPart(value = "PERMIT", required = false) MultipartFile[] permitFiles,
+			@RequestPart(value = "PUC", required = false) MultipartFile[] pucFiles,
+			@RequestPart(value = "OTHER", required = false) MultipartFile[] otherFiles) {
 
 		String methodName = "createUpdateTvehicle()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
@@ -974,7 +984,8 @@ public class TransactionController extends BaseController {
 		Map<String, Object> responseMap = new HashMap<>();
 
 		try {
-			Map<String, Object> serviceResponse = transactionService.createUpdateTvehicle(tvehicleDTO);
+			Map<String, Object> serviceResponse = transactionService.createUpdateTvehicle(tvehicleDTO, rcFiles,
+					insuranceFiles, fcFiles, permitFiles, pucFiles, otherFiles);
 
 			responseMap.put("message", serviceResponse.get("message"));
 			responseMap.put("tvehicleVO", serviceResponse.get("tvehicleVO"));
@@ -989,6 +1000,11 @@ public class TransactionController extends BaseController {
 			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
 		}
+	}
+
+	@GetMapping("/files/**")
+	public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
+		return transactionService.viewFile(request);
 	}
 
 	@GetMapping("/getTvehiclesById")

@@ -1,15 +1,20 @@
 package com.efit.savaari.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -111,9 +116,8 @@ public class TvehicleVO {
 	@Column(name = "cancel")
 	private boolean cancel = false;
 
-//	@OneToMany(mappedBy = "tvehicleVO", cascade = CascadeType.ALL)
-//	@JsonManagedReference
-//	private List<TvehicleDocumentsVO> tvehicleDocumentsVO;
+	@OneToMany(mappedBy = "tvehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<TvehicleDocumentsVO> documents;
 
 	@Embedded
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
