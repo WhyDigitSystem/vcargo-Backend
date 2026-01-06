@@ -1,7 +1,10 @@
 package com.efit.savaari.entity;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,15 +33,25 @@ public class TdriverDocumentsVO {
     @Column(name = "tdriverdocumentsid")
     private Long id;
 
-    @Column(name = "name")
-    private String name;
-    
-	@Lob
-	@Column(name = "documents")
-	private byte[] documents;
+    @Column(name = "documenttype", length = 50)
+    private String documentType;   // RC, INSURANCE, FC, PERMIT, PUC, OTHER
 
-//    @ManyToOne
-//    @JoinColumn(name = "tdriverid")
-//    @JsonBackReference
-//    private TdriverVO tdriverVO;
+    @Column(name = "filename", length = 255)
+    private String fileName;
+
+    @Column(name = "filepath", length = 500)
+    private String filePath;
+
+    @Column(name = "filetype", length = 50)
+    private String fileType;       // PDF, JPG, PNG
+
+    @Column(name = "filesize")
+    private Long fileSize;
+
+    @Column(name = "uploadedon")
+    private LocalDateTime uploadedOn;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tdriverid", nullable = false)
+    private TdriverVO tdriverVO;
 }

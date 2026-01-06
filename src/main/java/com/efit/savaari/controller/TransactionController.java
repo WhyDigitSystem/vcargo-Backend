@@ -1071,19 +1071,22 @@ public class TransactionController extends BaseController {
 
 //	@PutMapping(value = "/createUpdateTdriver", consumes = "multipart/form-data")
 	@PutMapping(value = "/createUpdateTdriver")
-	public ResponseEntity<ResponseDTO> createUpdateTdriver(
-//	        @RequestPart("tdriverDTO") TdriverDTO tdriverDTO,
-			@RequestBody TdriverDTO tdriverDTO
-//	        @RequestPart(value = "documents", required = false) List<MultipartFile> documents 
-	) {
+	public ResponseEntity<ResponseDTO> createUpdateTdriver(@RequestPart("tdriverDTO") TdriverDTO tdriverDTO,
+			@RequestPart(value = "DL", required = false) MultipartFile[] dlFiles,
+			@RequestPart(value = "AADHAR", required = false) MultipartFile[] aadharFiles,
+			@RequestPart(value = "PAN", required = false) MultipartFile[] panFiles,
+			@RequestPart(value = "PHOTO", required = false) MultipartFile[] photoFiles,
+			@RequestPart(value = "EXP", required = false) MultipartFile[] expFiles,
+			@RequestPart(value = "MEDICAL", required = false) MultipartFile[] medicalFiles,
+			@RequestPart(value = "OTHER", required = false) MultipartFile[] otherFiles) {
 
-		String methodName = "createUpdateTvehicle()";
+		String methodName = "createUpdateTdriver()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 
 		try {
-			Map<String, Object> serviceResponse = transactionService.createUpdateTdriver(tdriverDTO);
+			Map<String, Object> serviceResponse = transactionService.createUpdateTdriver(tdriverDTO,dlFiles,aadharFiles,panFiles,photoFiles,expFiles,medicalFiles,otherFiles);
 
 			responseMap.put("message", serviceResponse.get("message"));
 			responseMap.put("tdriverVO", serviceResponse.get("tdriverVO"));
@@ -1098,6 +1101,11 @@ public class TransactionController extends BaseController {
 			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
 		}
+	}
+
+	@GetMapping("/driverFiles/**")
+	public ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException {
+		return transactionService.viewDriverFile(request);
 	}
 
 	@GetMapping("/getTdriverById")

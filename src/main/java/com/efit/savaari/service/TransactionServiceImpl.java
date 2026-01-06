@@ -59,6 +59,8 @@ import com.efit.savaari.dto.QuoteDTO;
 import com.efit.savaari.dto.RequestforQuotesDTO;
 import com.efit.savaari.dto.TaggingDTO;
 import com.efit.savaari.dto.TdriverDTO;
+import com.efit.savaari.dto.TdriverDocumentResponseDTO;
+import com.efit.savaari.dto.TdriverResponseDTO;
 import com.efit.savaari.dto.TripAlertsDTO;
 import com.efit.savaari.dto.TripGeofenceAlertsDTO;
 import com.efit.savaari.dto.TripReportMisDTO;
@@ -85,6 +87,7 @@ import com.efit.savaari.entity.PayoutsVendorDetailsVO;
 import com.efit.savaari.entity.QuoteVO;
 import com.efit.savaari.entity.RequestforQuotesVO;
 import com.efit.savaari.entity.TaggingVO;
+import com.efit.savaari.entity.TdriverDocumentsVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripAlertsVO;
 import com.efit.savaari.entity.TripGeofenceAlertsVO;
@@ -1812,40 +1815,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
 
-		String uri = request.getRequestURI();
-
-		// Remove API prefix
-		String relativePath = uri.replace("/api/transaction/files/", "");
-
-		// Decode URL (%20 → space)
-		relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
-
-		// Remove uploads/vehicles since base path already points there
-		if (relativePath.startsWith("uploads/vehicles/")) {
-			relativePath = relativePath.substring("uploads/vehicles/".length());
-		}
-
-		Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
-		Path filePath = baseDir.resolve(relativePath).normalize();
-
-		// 🔐 Security check
-		if (!filePath.startsWith(baseDir)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		}
-
-		if (!Files.exists(filePath)) {
-			return ResponseEntity.notFound().build();
-		}
-
-		String contentType = Files.probeContentType(filePath);
-		if (contentType == null) {
-			contentType = "application/octet-stream";
-		}
-
-		byte[] data = Files.readAllBytes(filePath);
-
-		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-				.header(HttpHeaders.CONTENT_DISPOSITION, "inline").body(data);
+		return serveFile(request, "/api/transaction/files/", uploadBasePath, "uploads/vehicles/");
 	}
 
 	@Override
@@ -1873,35 +1843,30 @@ public class TransactionServiceImpl implements TransactionService {
 
 	}
 
-//	@Override
-//	@Transactional
-//	public Map<String, Object> createUpdateTdriver(TdriverDTO dto, List<MultipartFile> documents)
-//			throws ApplicationException {
+	@Value("${driver.file.upload.path}")
+	private String uploadDriverBasePath;
 
 	@Override
 	@Transactional
-	public Map<String, Object> createUpdateTdriver(TdriverDTO dto) throws ApplicationException {
+	public Map<String, Object> createUpdateTdriver(TdriverDTO dto, MultipartFile[] dlFiles, MultipartFile[] aadharFiles,
+			MultipartFile[] panFiles, MultipartFile[] photoFiles, MultipartFile[] expFiles,
+			MultipartFile[] medicalFiles, MultipartFile[] otherFiles) throws ApplicationException {
 
 		TdriverVO vo;
 		String message;
 
-		// ========== UPDATE ==========
-		if (dto.getId() != null) {
-
+		// UPDATE
+		if (ObjectUtils.isNotEmpty(dto.getId())) {
 			vo = tdriverRepo.findById(dto.getId()).orElseThrow(() -> new ApplicationException("Invalid Driver ID"));
-
-			// Delete existing child docs
-//			tdriverDocumentsRepo.deleteAll(tdriverDocumentsRepo.findByTdriverVO(vo));
-
 			vo.setUpdatedBy(dto.getCreatedBy());
-			message = "TDriver Updated Successfully";
-
-		} else {
-			// ========== CREATE ==========
+			message = "Driver Updated Successfully";
+		}
+		// CREATE
+		else {
 			vo = new TdriverVO();
 			vo.setCreatedBy(dto.getCreatedBy());
 			vo.setUpdatedBy(dto.getCreatedBy());
-			message = "TDriver Created Successfully";
+			message = "Driver Created Successfully";
 		}
 
 		if (dto.getUserId() != null) {
@@ -1910,48 +1875,137 @@ public class TransactionServiceImpl implements TransactionService {
 			vo.setUser(user);
 		}
 
-		// ===== MAP BASIC FIELDS =====
 		mapTdriverDTOtoVO(dto, vo);
+		vo = tdriverRepo.save(vo);
 
-		// ===== CHILD TABLE: DOCUMENTS =====
-//		List<TdriverDocumentsVO> documentList = new ArrayList<>();
-//
-//		if (dto.getTdriverDocumentsDTO() != null) {
-//
-//			for (int i = 0; i < dto.getTdriverDocumentsDTO().size(); i++) {
-//
-//				TdriverDocumentsDTO d = dto.getTdriverDocumentsDTO().get(i);
-//				TdriverDocumentsVO doc = new TdriverDocumentsVO();
-//
-//				doc.setName(d.getName());
-//				doc.setTdriverVO(vo);
-//
-//				// match each document file with its index
-//				if (documents != null && i < documents.size()) {
-//					MultipartFile file = documents.get(i);
-//					if (!file.isEmpty()) {
-//						try {
-//							doc.setDocuments(file.getBytes());
-//						} catch (Exception ex) {
-//							throw new ApplicationException("Error reading document file");
-//						}
-//					}
-//				}
-//				documentList.add(doc);
-//			}
-//		}
-//
-//		vo.setTdriverDocumentsVO(documentList);
+		String licenceNo = vo.getLicenseNumber();
 
-		// ===== SAVE =====
-		tdriverRepo.save(vo);
+		// Base driver folder
+		Path driverFolder = Paths.get(uploadDriverBasePath, licenceNo);
+		createDirectory(driverFolder);
 
-		// ===== RESPONSE =====
+		replaceDriverDocuments(vo, "DL", dlFiles, driverFolder);
+		replaceDriverDocuments(vo, "AADHAR", aadharFiles, driverFolder);
+		replaceDriverDocuments(vo, "PAN", panFiles, driverFolder);
+		replaceDriverDocuments(vo, "PHOTO", photoFiles, driverFolder);
+		replaceDriverDocuments(vo, "EXP", expFiles, driverFolder);
+		replaceDriverDocuments(vo, "MEDICAL", medicalFiles, driverFolder);
+		replaceDriverDocuments(vo, "OTHER", otherFiles, driverFolder);
+
 		Map<String, Object> response = new HashMap<>();
-		response.put("tdriverVO", vo);
+		response.put("tdriverVO", mapToDriverResponseDTO(vo));
 		response.put("message", message);
 
 		return response;
+	}
+
+	public TdriverResponseDTO mapToDriverResponseDTO(TdriverVO driver) {
+
+		TdriverResponseDTO dto = new TdriverResponseDTO();
+
+		dto.setId(driver.getId());
+		dto.setName(driver.getName());
+		dto.setPhone(driver.getPhone());
+		dto.setEmail(driver.getEmail());
+
+		if (driver.getUser() != null) {
+			dto.setUserId(driver.getUser().getId());
+		}
+
+		dto.setLicenseNumber(driver.getLicenseNumber());
+		dto.setActive(driver.isActive());
+		dto.setOrgId(driver.getOrgId());
+		dto.setBranchCode(driver.getBranchCode());
+		dto.setBranchName(driver.getBranchName());
+
+		if (driver.getTdriverDocumentsVO() == null) {
+			dto.setDocuments(null);
+		} else {
+			dto.setDocuments(driver.getTdriverDocumentsVO().stream().map(doc -> {
+				TdriverDocumentResponseDTO d = new TdriverDocumentResponseDTO();
+				d.setId(doc.getId());
+				d.setDocumentType(doc.getDocumentType());
+				d.setFileName(doc.getFileName());
+
+				String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+						.path("/api/transaction/driverFiles/").toUriString();
+
+				d.setFilePath(baseUrl + doc.getFilePath());
+				d.setFileType(doc.getFileType());
+				d.setFileSize(doc.getFileSize());
+				d.setUploadedOn(doc.getUploadedOn());
+				return d;
+			}).toList());
+		}
+
+		return dto;
+	}
+
+	private void replaceDriverDocuments(TdriverVO driver, String documentType, MultipartFile[] files,
+			Path driverFolder) {
+		if (files == null || files.length == 0)
+			return;
+
+		// 1️⃣ Fetch old docs
+		List<TdriverDocumentsVO> oldDocs = tdriverDocumentsRepo.findByTdriverVOAndDocumentType(driver, documentType);
+
+		// 2️⃣ Delete physical files
+		for (TdriverDocumentsVO doc : oldDocs) {
+			deleteFileSafely(doc.getFilePath());
+		}
+
+		// 3️⃣ Delete DB rows
+		tdriverDocumentsRepo.deleteAll(oldDocs);
+
+		// 4️⃣ Remove from persistence context
+		if (driver.getTdriverDocumentsVO() != null) {
+			driver.getTdriverDocumentsVO().removeIf(d -> documentType.equals(d.getDocumentType()));
+		}
+
+		// 5️⃣ Save new files
+		saveDriverFiles(driver, documentType, files, driverFolder);
+
+	}
+
+	private void saveDriverFiles(TdriverVO driver, String documentType, MultipartFile[] files, Path driverFolder) {
+		if (files == null || files.length == 0)
+			return;
+
+		try {
+			Path docFolder = driverFolder.resolve(documentType);
+			createDirectory(docFolder);
+
+			for (MultipartFile file : files) {
+
+				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+				Path filePath = docFolder.resolve(fileName);
+
+				// ✅ IMPORTANT: close stream
+				try (InputStream is = file.getInputStream()) {
+					Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
+				}
+
+				// Save DB entry
+				TdriverDocumentsVO doc = new TdriverDocumentsVO();
+				doc.setTdriverVO(driver);
+				doc.setDocumentType(documentType);
+				doc.setFileName(fileName);
+				doc.setFilePath(filePath.toString().replace("\\", "/"));
+				doc.setFileType(file.getContentType());
+				doc.setFileSize(file.getSize());
+				doc.setUploadedOn(LocalDateTime.now());
+
+				tdriverDocumentsRepo.save(doc);
+				if (driver.getTdriverDocumentsVO() == null) {
+					driver.setTdriverDocumentsVO(new ArrayList<>());
+				}
+				driver.getTdriverDocumentsVO().add(doc);
+			}
+
+		} catch (IOException e) {
+			throw new RuntimeException("File upload failed for " + documentType, e);
+		}
+
 	}
 
 	private void mapTdriverDTOtoVO(TdriverDTO dto, TdriverVO vo) {
@@ -1977,6 +2031,51 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setOrgId(dto.getOrgId());
 		vo.setBranchCode(dto.getBranchCode());
 		vo.setBranchName(dto.getBranchName());
+	}
+
+	@Override
+	public ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException {
+
+		return serveFile(request, "/api/transaction/driverFiles/", uploadDriverBasePath,"uploads/driver/");
+	}
+
+	private ResponseEntity<byte[]> serveFile(HttpServletRequest request, String apiPrefix, String uploadBasePath,
+			String uploadFolderPrefix) throws IOException {
+
+		String uri = request.getRequestURI();
+
+		// Remove API prefix
+		String relativePath = uri.replace(apiPrefix, "");
+
+		// Decode URL (%20 → space)
+		relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
+
+		// Remove logical upload folder from URL path
+		if (relativePath.startsWith(uploadFolderPrefix)) {
+			relativePath = relativePath.substring(uploadFolderPrefix.length());
+		}
+
+		Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
+		Path filePath = baseDir.resolve(relativePath).normalize();
+
+		// 🔐 Security check
+		if (!filePath.startsWith(baseDir)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		if (!Files.exists(filePath)) {
+			return ResponseEntity.notFound().build();
+		}
+
+		String contentType = Files.probeContentType(filePath);
+		if (contentType == null) {
+			contentType = "application/octet-stream";
+		}
+
+		byte[] data = Files.readAllBytes(filePath);
+
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline").body(data);
 	}
 
 	@Override
