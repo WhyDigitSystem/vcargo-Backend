@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -1741,7 +1742,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 			for (MultipartFile file : files) {
 
-				String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 				Path filePath = docFolder.resolve(fileName);
 
 				// ✅ IMPORTANT: close stream
@@ -1761,8 +1762,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 				tvehicleDocumentsRepo.save(doc);
 				if (vehicle.getDocuments() == null) {
-				    vehicle.setDocuments(new ArrayList<>());
+					vehicle.setDocuments(new ArrayList<>());
 				}
+				vehicle.getDocuments().add(doc);
 			}
 
 		} catch (IOException e) {
@@ -1807,47 +1809,44 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setBranchName(dto.getBranchName());
 	}
 
-    @Override
-    public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
+	@Override
+	public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
 
-        String uri = request.getRequestURI();
+		String uri = request.getRequestURI();
 
-        // Remove API prefix
-        String relativePath = uri.replace("/api/transaction/files/", "");
+		// Remove API prefix
+		String relativePath = uri.replace("/api/transaction/files/", "");
 
-        // Decode URL (%20 → space)
-        relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
+		// Decode URL (%20 → space)
+		relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
 
-        // Remove uploads/vehicles since base path already points there
-        if (relativePath.startsWith("uploads/vehicles/")) {
-            relativePath = relativePath.substring("uploads/vehicles/".length());
-        }
+		// Remove uploads/vehicles since base path already points there
+		if (relativePath.startsWith("uploads/vehicles/")) {
+			relativePath = relativePath.substring("uploads/vehicles/".length());
+		}
 
-        Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
-        Path filePath = baseDir.resolve(relativePath).normalize();
+		Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
+		Path filePath = baseDir.resolve(relativePath).normalize();
 
-        // 🔐 Security check
-        if (!filePath.startsWith(baseDir)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+		// 🔐 Security check
+		if (!filePath.startsWith(baseDir)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
 
-        if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
-        }
+		if (!Files.exists(filePath)) {
+			return ResponseEntity.notFound().build();
+		}
 
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
+		String contentType = Files.probeContentType(filePath);
+		if (contentType == null) {
+			contentType = "application/octet-stream";
+		}
 
-        byte[] data = Files.readAllBytes(filePath);
+		byte[] data = Files.readAllBytes(filePath);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
-                .body(data);
-    }
-
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline").body(data);
+	}
 
 	@Override
 	public TvehicleVO getTvehiclesById(Long id) throws ApplicationException {
@@ -1866,9 +1865,8 @@ public class TransactionServiceImpl implements TransactionService {
 
 		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("vehiclenumber").ascending());
 		Page<TvehicleVO> TvehiclePage = tvehicleRepo.getTvehiclesByOrgId(branchCode, userId, search, pageable);
-		
-		Page<TvehicleResponseDTO> dtoPage =
-				TvehiclePage.map(this::mapToResponseDTO);
+
+		Page<TvehicleResponseDTO> dtoPage = TvehiclePage.map(this::mapToResponseDTO);
 
 		// return paginated response
 		return paginationService.buildResponse(dtoPage);
