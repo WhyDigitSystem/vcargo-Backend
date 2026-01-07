@@ -1904,19 +1904,35 @@ public class TransactionServiceImpl implements TransactionService {
 		TdriverResponseDTO dto = new TdriverResponseDTO();
 
 		dto.setId(driver.getId());
-		dto.setName(driver.getName());
-		dto.setPhone(driver.getPhone());
-		dto.setEmail(driver.getEmail());
+	    dto.setName(driver.getName());
+	    dto.setPhone(driver.getPhone());
+	    dto.setEmail(driver.getEmail());
 
-		if (driver.getUser() != null) {
-			dto.setUserId(driver.getUser().getId());
-		}
+	    if (driver.getUser() != null) {
+	        dto.setUserId(driver.getUser().getId());
+	    }
 
-		dto.setLicenseNumber(driver.getLicenseNumber());
-		dto.setActive(driver.isActive());
-		dto.setOrgId(driver.getOrgId());
-		dto.setBranchCode(driver.getBranchCode());
-		dto.setBranchName(driver.getBranchName());
+	    dto.setLicenseNumber(driver.getLicenseNumber());
+	    dto.setLicenseExpiry(driver.getLicenseExpiry());
+	    dto.setAadharNumber(driver.getAadharNumber());
+	    dto.setAddress(driver.getAddress());
+	    dto.setStatus(driver.getStatus());
+	    dto.setExperience(driver.getExperience());
+	    dto.setSalary(driver.getSalary());
+	    dto.setAssignedVehicle(driver.getAssignedVehicle());
+	    dto.setCurrentLocation(driver.getCurrentLocation());
+	    dto.setBloodGroup(driver.getBloodGroup());
+	    dto.setEmergencyContact(driver.getEmergencyContact());
+	    dto.setPerformance(driver.getPerformance());
+	    dto.setJoinedDate(driver.getJoinedDate());
+	    dto.setLastTrip(driver.getLastTrip());
+
+	    dto.setActive(driver.isActive());
+	    dto.setCreatedBy(driver.getCreatedBy());
+
+	    dto.setOrgId(driver.getOrgId());
+	    dto.setBranchCode(driver.getBranchCode());
+	    dto.setBranchName(driver.getBranchName());
 
 		if (driver.getTdriverDocumentsVO() == null) {
 			dto.setDocuments(null);
@@ -2096,8 +2112,9 @@ public class TransactionServiceImpl implements TransactionService {
 		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("name").ascending());
 		Page<TdriverVO> quotePage = tdriverRepo.getTdriverByOrgId(branchCode, userId, search, pageable);
 
+		Page<TdriverResponseDTO> dtoPage = quotePage.map(this::mapToDriverResponseDTO);
 		// return paginated response
-		return paginationService.buildResponse(quotePage);
+		return paginationService.buildResponse(dtoPage);
 
 	}
 

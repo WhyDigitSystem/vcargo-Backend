@@ -2,6 +2,13 @@ package com.efit.savaari.dto;
 
 import java.math.BigDecimal;
 
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import com.efit.savaari.entity.DriverVO;
+import com.efit.savaari.entity.VehicleVO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,22 +18,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FuelMasterDTO {
 
-    private Long vehicleId;
-    private Long driverId;
-
+	private Long id;
+    private String vehicle;
+    private String driver;
     private String fuelType;
-
     private BigDecimal quantity;
     private BigDecimal cost;
-
     private BigDecimal odometerReading;
     private BigDecimal previousOdometer;
-
     private String station;
-
-    private String date;   // yyyy-MM-dd
-    private String time;   // HH:mm
-
+    private String date;   
+    private String time;   
     private String receiptNumber;
     private String notes;
+	private String createdBy;
+	private String branchCode;
+	private String branchName;
+	private Long orgId;
 }
