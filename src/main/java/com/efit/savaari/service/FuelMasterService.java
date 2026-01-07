@@ -1,24 +1,23 @@
 package com.efit.savaari.service;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.FuelMasterDTO;
-import com.efit.savaari.entity.FuelMasterVO;
+import com.efit.savaari.entity.FuelVO;
+import com.efit.savaari.exception.ApplicationException;
 
 @Service
 public interface FuelMasterService {
 
-    FuelMasterVO createFuelEntry(FuelMasterDTO dto);
+    FuelVO getFuelById(Long fuelId);
 
-    List<FuelMasterVO> getFuelByVehicle(Long vehicleId);
+    Map<String, Object> getAllFuelByOrgId(Long orgId, int page, int count);
+   
+	Map<String, Object> createUpdateFuelMaster(FuelMasterDTO dto) throws ApplicationException;
 
-    List<FuelMasterVO> getFuelByDriver(Long driverId);
 
-    FuelMasterVO getFuelById(Long fuelId);
+	Map<String, Object> getFuelByVehicle(Long vehicleId, int page, int count);
 
-    void deleteFuelEntry(Long fuelId);
-    
-    FuelMasterVO saveOrUpdateFuel(FuelMasterDTO dto);
 }

@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,182 +23,89 @@ import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.FuelMasterDTO;
 import com.efit.savaari.dto.ResponseDTO;
-import com.efit.savaari.entity.FuelMasterVO;
+import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.service.FuelMasterService;
 
 @RestController
 @RequestMapping("/api/fuel")
 public class FuelMasterController extends BaseController {
 
-    @Autowired
-    FuelMasterService fuelMasterService;
 
-    /**
-     * Create Fuel Entry
-     */
-    @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> createFuel(@RequestBody FuelMasterDTO fuelMasterDTO) {
+	public static final Logger LOGGER = LoggerFactory.getLogger(FuelMasterController.class);
 
-        String methodName = "createFuel()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	@Autowired
+	FuelMasterService fuelMasterService;
 
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
+	@PutMapping("/createUpdateFuel")
+	public ResponseEntity<ResponseDTO> createUpdateFuel(@RequestBody FuelMasterDTO fuelMasterDTO) {
 
-        try {
-            FuelMasterVO fuel = fuelMasterService.createFuelEntry(fuelMasterDTO);
-            responseObjectsMap.put("fuel", fuel);
-            responseDTO = createServiceResponse(responseObjectsMap);
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-            responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Fuel entry creation failed",
-                errorMsg
-            );
-        }
+		String methodName = "createUpdateFuel()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		Map<String, Object> responseMap = new HashMap<>();
 
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
+		try {
+			Map<String, Object> fuel = fuelMasterService.createUpdateFuelMaster(fuelMasterDTO);
+			responseMap.put("message", fuel.get("message"));
+			responseMap.put("fuel", fuel.get("fuel"));
 
-    /**
-     * Get Fuel By Vehicle
-     */
-    @GetMapping("/byVehicle")
-    public ResponseEntity<ResponseDTO> getFuelByVehicle(@RequestParam Long vehicleId) {
+			ResponseDTO responseDTO = createServiceResponse(responseMap);
+			return ResponseEntity.ok(responseDTO);
+		} catch (Exception e) {
 
-        String methodName = "getFuelByVehicle()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+			LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
 
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
-        List<FuelMasterVO> fuelList = new ArrayList<>();
+			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+		}
+	}
 
-        try {
-            fuelList = fuelMasterService.getFuelByVehicle(vehicleId);
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-        }
+	@GetMapping("/getFuelByVehicle")
+	public ResponseEntity<ResponseDTO> getFuelByVehicle(
+			@RequestParam Long vehicleId, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int count) {
+		String methodName = "getFuelByVehicle()";
+		LOGGER.debug("Starting {}", methodName);
 
-        if (StringUtils.isBlank(errorMsg)) {
-            responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Fuel details fetched successfully");
-            responseObjectsMap.put("fuelList", fuelList);
-            responseDTO = createServiceResponse(responseObjectsMap);
-        } else {
-            responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Fuel details fetch failed",
-                errorMsg
-            );
-        }
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
+		try {
+			Map<String, Object> fuel = fuelMasterService.getFuelByVehicle(vehicleId, page, count);
+			responseMap.put("message", "Fuel Details retrieved successfully");
+			responseMap.put("fuel", fuel);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
 
-    
-    @PostMapping("/save")
-    public ResponseEntity<ResponseDTO> saveFuel(@RequestBody FuelMasterDTO fuelMasterDTO) {
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/getAllFuelByOrgId")
+	public ResponseEntity<ResponseDTO> getAllFuelByOrgId(
+			@RequestParam Long orgId, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int count) {
+		String methodName = "getAllFuelByOrgId()";
+		LOGGER.debug("Starting {}", methodName);
 
-        String methodName = "saveFuel()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
+		try {
+			Map<String, Object> fuel = fuelMasterService.getAllFuelByOrgId(orgId, page, count);
+			responseMap.put("message", "Fuel Details retrieved successfully");
+			responseMap.put("fuel", fuel);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
 
-        try {
-            FuelMasterVO fuel = fuelMasterService.saveOrUpdateFuel(fuelMasterDTO);
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
-            String msg = fuelMasterDTO.getFuelId() == null
-                    ? "Fuel entry created successfully"
-                    : "Fuel entry updated successfully";
-
-            responseObjectsMap.put(CommonConstant.STRING_MESSAGE, msg);
-            responseObjectsMap.put("fuel", fuel);
-
-            responseDTO = createServiceResponse(responseObjectsMap);
-
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-            responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Fuel save failed",
-                errorMsg
-            );
-        }
-
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
-
-    
-    /**
-     * Get Fuel By Driver
-     */
-    @GetMapping("/byDriver")
-    public ResponseEntity<ResponseDTO> getFuelByDriver(@RequestParam Long driverId) {
-
-        String methodName = "getFuelByDriver()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
-        List<FuelMasterVO> fuelList = new ArrayList<>();
-
-        try {
-            fuelList = fuelMasterService.getFuelByDriver(driverId);
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-        }
-
-        if (StringUtils.isBlank(errorMsg)) {
-            responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Fuel details fetched successfully");
-            responseObjectsMap.put("fuelList", fuelList);
-            responseDTO = createServiceResponse(responseObjectsMap);
-        } else {
-            responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Fuel details fetch failed",
-                errorMsg
-            );
-        }
-
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
-
-    /**
-     * Delete Fuel Entry
-     */
-    @PutMapping("/delete")
-    public ResponseEntity<ResponseDTO> deleteFuel(@RequestParam Long fuelId) {
-
-        String methodName = "deleteFuel()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
-
-        try {
-            fuelMasterService.deleteFuelEntry(fuelId);
-            responseDTO = createServiceResponse(responseObjectsMap);
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-            responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
-        }
-
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
+	
 }

@@ -1,5 +1,7 @@
 package com.efit.savaari.repo;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.entity.VehicleVO;
 
 @Repository
@@ -42,6 +45,9 @@ public interface VehicleRepo extends JpaRepository<VehicleVO, Long>{
 		        @Param("orgId") Long orgId, @Param("search") String search,
 		        Pageable pageable
 		);
+
+
+	Optional<VehicleVO> findByOrgIdAndVehicleNumber(Long orgId, String vehicle);
 
 
 }

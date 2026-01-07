@@ -2,104 +2,189 @@ package com.efit.savaari.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.FuelMasterDTO;
-import com.efit.savaari.entity.FuelMasterVO;
-import com.efit.savaari.repo.FuelMasterRepo;
+import com.efit.savaari.dto.FuelResponseDTO;
+import com.efit.savaari.entity.DriverVO;
+import com.efit.savaari.entity.FuelVO;
+import com.efit.savaari.entity.TdriverVO;
+import com.efit.savaari.entity.TvehicleVO;
+import com.efit.savaari.entity.VehicleVO;
+import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.repo.DriverRepo;
+import com.efit.savaari.repo.FuelRepo;
+import com.efit.savaari.repo.TdriverRepo;
+import com.efit.savaari.repo.TvehicleRepo;
+import com.efit.savaari.repo.VehicleRepo;
 
 @Service
 public class FuelMasterServiceImpl implements FuelMasterService {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(FuelMasterServiceImpl.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(FuelMasterServiceImpl.class);
 
-    @Autowired
-    private FuelMasterRepo fuelMasterRepo;
+	@Autowired
+	FuelRepo fuelRepo;
 
-    @Override
-    @Transactional
-    public FuelMasterVO createFuelEntry(FuelMasterDTO dto) {
+	@Autowired
+	TvehicleRepo vehicleRepo;
 
-        FuelMasterVO fuel = new FuelMasterVO();
+	@Autowired
+	TdriverRepo driverRepo;
+	
+	@Autowired
+	PaginationService paginationService;
 
-        fuel.setVehicleId(dto.getVehicleId());
-        fuel.setDriverId(dto.getDriverId());
-        fuel.setFuelType(dto.getFuelType());
-        fuel.setQuantity(dto.getQuantity());
-        fuel.setCost(dto.getCost());
-        fuel.setOdometerReading(dto.getOdometerReading());
-        fuel.setPreviousOdometer(dto.getPreviousOdometer());
-        fuel.setStation(dto.getStation());
-
-        // Convert String → LocalDate / LocalTime
-        fuel.setDate(LocalDate.parse(dto.getDate()));
-        fuel.setTime(LocalTime.parse(dto.getTime()));
-
-        fuel.setReceiptNumber(dto.getReceiptNumber());
-        fuel.setNotes(dto.getNotes());
-
-        LOGGER.info("Saving fuel entry for vehicle {}", dto.getVehicleId());
-
-        return fuelMasterRepo.save(fuel);
-    }
-    
-    @Override
-    @Transactional
-    public FuelMasterVO saveOrUpdateFuel(FuelMasterDTO dto) {
-
-        FuelMasterVO fuel;
-
-        if (dto.getFuelId() != null) {
-            // UPDATE
-            fuel = fuelMasterRepo.findById(dto.getFuelId())
-                    .orElseThrow(() -> new RuntimeException("Fuel entry not found"));
-        } else {
-            // CREATE
-            fuel = new FuelMasterVO();
-        }
-
-        fuel.setVehicleId(dto.getVehicleId());
-        fuel.setDriverId(dto.getDriverId());
-        fuel.setFuelType(dto.getFuelType());
-        fuel.setQuantity(dto.getQuantity());
-        fuel.setCost(dto.getCost());
-        fuel.setOdometerReading(dto.getOdometerReading());
-        fuel.setPreviousOdometer(dto.getPreviousOdometer());
-        fuel.setStation(dto.getStation());
-        fuel.setDate(LocalDate.parse(dto.getDate()));
-        fuel.setTime(LocalTime.parse(dto.getTime()));
-        fuel.setReceiptNumber(dto.getReceiptNumber());
-        fuel.setNotes(dto.getNotes());
-
-        return fuelMasterRepo.save(fuel);
-    }
+	@Override
+	@Transactional
+	public Map<String, Object> createUpdateFuelMaster(FuelMasterDTO dto) throws ApplicationException {
 
 
-    @Override
-    public List<FuelMasterVO> getFuelByVehicle(Long vehicleId) {
-        return fuelMasterRepo.findByVehicleId(vehicleId);
-    }
+		FuelVO fuel;
+		String message;
 
-    @Override
-    public List<FuelMasterVO> getFuelByDriver(Long driverId) {
-        return fuelMasterRepo.findByDriverId(driverId);
-    }
+		if (dto.getId() != null) {
+			fuel = fuelRepo.findById(dto.getId()).orElseThrow(() -> new ApplicationException("Invalid Fuel ID"));
+			fuel.setUpdatedBy(dto.getCreatedBy());
+			message = "Fuel Entry Updated Successfully";
+		} else {
+			fuel = new FuelVO();
+			fuel.setCreatedBy(dto.getCreatedBy());
+			fuel.setUpdatedBy(dto.getCreatedBy());
+			message = "Fuel Entry Created Successfully";
+		}
 
-    @Override
-    public FuelMasterVO getFuelById(Long fuelId) {
-        return fuelMasterRepo.findById(fuelId).orElseThrow();
-    }
+		// ===== VEHICLE =====
+		if (dto.getVehicle() != null) {
+			TvehicleVO vehicle = vehicleRepo.findById(Long.parseLong(dto.getVehicle()))
+					.orElseThrow(() -> new ApplicationException("Invalid Vehicle"));
+			fuel.setVehicle(vehicle);
+		}
 
-    @Override
-    @Transactional
-    public void deleteFuelEntry(Long fuelId) {
-        fuelMasterRepo.deleteById(fuelId);
-    }
+		// ===== DRIVER =====
+		if (dto.getDriver() != null) {
+			TdriverVO driver = driverRepo.findById(Long.parseLong(dto.getDriver()))
+					.orElseThrow(() -> new ApplicationException("Invalid Driver"));
+			fuel.setDriver(driver);
+		}
+
+		// ===== VALIDATION =====
+//        if (dto.getOdometerReading() != null && dto.getPreviousOdometer() != null) {
+//            if (dto.getOdometerReading().compareTo(dto.getPreviousOdometer()) <= 0) {
+//                throw new ApplicationException("Current odometer must be greater than previous odometer");
+//            }
+//        }
+
+		// ===== BASIC MAPPING =====
+		mapFuelDTOtoVO(dto, fuel);
+
+		fuel = fuelRepo.save(fuel);
+
+		FuelResponseDTO fuelResponseDTO = mapToFuelResponseDTO(fuel);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("fuel", fuelResponseDTO);
+		response.put("message", message);
+
+		return response;
+	}
+
+	public FuelResponseDTO mapToFuelResponseDTO(FuelVO fuel) {
+
+		FuelResponseDTO dto = new FuelResponseDTO();
+
+		dto.setId(fuel.getId());
+
+		if (fuel.getVehicle() != null) {
+			TvehicleVO vehicle = fuel.getVehicle();
+			dto.setVehicle(vehicle.getVehicleNumber());
+		}
+
+		if (fuel.getDriver() != null) {
+			TdriverVO driverVO = fuel.getDriver();
+			dto.setDriver(driverVO.getName());
+		}
+
+		dto.setFuelType(fuel.getFuelType());
+		dto.setQuantity(fuel.getQuantity());
+		dto.setCost(fuel.getCost());
+
+		dto.setPreviousOdometer(fuel.getPreviousOdometer());
+		dto.setOdometerReading(fuel.getOdometerReading());
+
+		dto.setStation(fuel.getStation());
+		dto.setReceiptNumber(fuel.getReceiptNumber());
+		dto.setDate(fuel.getDate());
+		dto.setTime(fuel.getTime());
+		dto.setNotes(fuel.getNotes());
+		dto.setActive(fuel.isActive());
+
+		dto.setCreatedBy(fuel.getCreatedBy());
+		dto.setOrgId(fuel.getOrgId());
+		dto.setBranchCode(fuel.getBranchCode());
+		dto.setBranchName(fuel.getBranchName());
+
+		return dto;
+	}
+
+	public void mapFuelDTOtoVO(FuelMasterDTO dto, FuelVO fuel) {
+
+		fuel.setFuelType(dto.getFuelType());
+		fuel.setQuantity(dto.getQuantity());
+		fuel.setCost(dto.getCost());
+		fuel.setOdometerReading(dto.getOdometerReading());
+		fuel.setPreviousOdometer(dto.getPreviousOdometer());
+		fuel.setStation(dto.getStation());
+
+		if (dto.getDate() != null) {
+			fuel.setDate(LocalDate.parse(dto.getDate()));
+		}
+
+		if (dto.getTime() != null) {
+			fuel.setTime(LocalTime.parse(dto.getTime()));
+		}
+
+		fuel.setReceiptNumber(dto.getReceiptNumber());
+		fuel.setNotes(dto.getNotes());
+
+		fuel.setBranchCode(dto.getBranchCode());
+		fuel.setBranchName(dto.getBranchName());
+		fuel.setOrgId(dto.getOrgId());
+	}
+
+	@Override
+	public Map<String, Object> getFuelByVehicle(Long vehicleId, int page, int count) {
+		
+		Pageable pageable = PageRequest.of(page - 1, count);
+		Page<FuelVO> quotePage = fuelRepo.getFuelByVehicle(vehicleId,  pageable);
+		
+		Page<FuelResponseDTO> dtoPage = quotePage.map(this::mapToFuelResponseDTO);
+		return  paginationService.buildResponse(dtoPage);
+	}
+
+	@Override
+	public FuelVO getFuelById(Long fuelId) {
+		return fuelRepo.findById(fuelId).orElseThrow();
+	}
+
+	@Override
+	public Map<String, Object> getAllFuelByOrgId(Long orgId, int page, int count) {
+		Pageable pageable = PageRequest.of(page - 1, count);
+		Page<FuelVO> quotePage = fuelRepo.getFuelByOrgId(orgId,  pageable);
+		
+		Page<FuelResponseDTO> dtoPage = quotePage.map(this::mapToFuelResponseDTO);
+		return  paginationService.buildResponse(dtoPage);
+	}
+
 }
