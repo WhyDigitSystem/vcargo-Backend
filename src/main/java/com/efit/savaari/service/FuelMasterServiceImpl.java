@@ -49,6 +49,38 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 
         return fuelMasterRepo.save(fuel);
     }
+    
+    @Override
+    @Transactional
+    public FuelMasterVO saveOrUpdateFuel(FuelMasterDTO dto) {
+
+        FuelMasterVO fuel;
+
+        if (dto.getFuelId() != null) {
+            // UPDATE
+            fuel = fuelMasterRepo.findById(dto.getFuelId())
+                    .orElseThrow(() -> new RuntimeException("Fuel entry not found"));
+        } else {
+            // CREATE
+            fuel = new FuelMasterVO();
+        }
+
+        fuel.setVehicleId(dto.getVehicleId());
+        fuel.setDriverId(dto.getDriverId());
+        fuel.setFuelType(dto.getFuelType());
+        fuel.setQuantity(dto.getQuantity());
+        fuel.setCost(dto.getCost());
+        fuel.setOdometerReading(dto.getOdometerReading());
+        fuel.setPreviousOdometer(dto.getPreviousOdometer());
+        fuel.setStation(dto.getStation());
+        fuel.setDate(LocalDate.parse(dto.getDate()));
+        fuel.setTime(LocalTime.parse(dto.getTime()));
+        fuel.setReceiptNumber(dto.getReceiptNumber());
+        fuel.setNotes(dto.getNotes());
+
+        return fuelMasterRepo.save(fuel);
+    }
+
 
     @Override
     public List<FuelMasterVO> getFuelByVehicle(Long vehicleId) {

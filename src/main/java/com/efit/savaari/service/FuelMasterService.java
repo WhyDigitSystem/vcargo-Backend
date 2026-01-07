@@ -19,4 +19,6 @@ public interface FuelMasterService {
     FuelMasterVO getFuelById(Long fuelId);
 
     void deleteFuelEntry(Long fuelId);
+    
+    FuelMasterVO saveOrUpdateFuel(FuelMasterDTO dto);
 }

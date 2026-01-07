@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FuelMasterDTO {
 
+	private Long fuelId; 
     private Long vehicleId;
     private Long driverId;
 

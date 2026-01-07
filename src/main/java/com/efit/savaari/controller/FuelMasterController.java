@@ -98,6 +98,44 @@ public class FuelMasterController extends BaseController {
         return ResponseEntity.ok().body(responseDTO);
     }
 
+    
+    @PostMapping("/save")
+    public ResponseEntity<ResponseDTO> saveFuel(@RequestBody FuelMasterDTO fuelMasterDTO) {
+
+        String methodName = "saveFuel()";
+        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+        String errorMsg = null;
+        Map<String, Object> responseObjectsMap = new HashMap<>();
+        ResponseDTO responseDTO = null;
+
+        try {
+            FuelMasterVO fuel = fuelMasterService.saveOrUpdateFuel(fuelMasterDTO);
+
+            String msg = fuelMasterDTO.getFuelId() == null
+                    ? "Fuel entry created successfully"
+                    : "Fuel entry updated successfully";
+
+            responseObjectsMap.put(CommonConstant.STRING_MESSAGE, msg);
+            responseObjectsMap.put("fuel", fuel);
+
+            responseDTO = createServiceResponse(responseObjectsMap);
+
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+            responseDTO = createServiceResponseError(
+                responseObjectsMap,
+                "Fuel save failed",
+                errorMsg
+            );
+        }
+
+        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+        return ResponseEntity.ok().body(responseDTO);
+    }
+
+    
     /**
      * Get Fuel By Driver
      */
