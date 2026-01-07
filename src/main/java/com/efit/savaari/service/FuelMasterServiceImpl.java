@@ -50,6 +50,7 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 	@Transactional
 	public Map<String, Object> createUpdateFuelMaster(FuelMasterDTO dto) throws ApplicationException {
 
+
 		FuelVO fuel;
 		String message;
 
@@ -185,4 +186,5 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 		Page<FuelResponseDTO> dtoPage = quotePage.map(this::mapToFuelResponseDTO);
 		return  paginationService.buildResponse(dtoPage);
 	}
+
 }

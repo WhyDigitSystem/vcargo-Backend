@@ -30,6 +30,7 @@ import com.efit.savaari.service.FuelMasterService;
 @RequestMapping("/api/fuel")
 public class FuelMasterController extends BaseController {
 
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(FuelMasterController.class);
 
 	@Autowired
