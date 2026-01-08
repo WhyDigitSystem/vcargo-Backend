@@ -21,12 +21,14 @@ import com.efit.savaari.entity.DriverVO;
 import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TvehicleVO;
+import com.efit.savaari.entity.UserVO;
 import com.efit.savaari.entity.VehicleVO;
 import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.repo.DriverRepo;
 import com.efit.savaari.repo.FuelRepo;
 import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TvehicleRepo;
+import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.repo.VehicleRepo;
 
 @Service
@@ -45,6 +47,9 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 	
 	@Autowired
 	PaginationService paginationService;
+	
+	@Autowired
+	UserRepo userRepo;
 
 	@Override
 	@Transactional
@@ -78,13 +83,13 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 					.orElseThrow(() -> new ApplicationException("Invalid Driver"));
 			fuel.setDriver(driver);
 		}
+		
+		if (dto.getUser() != null) {
+			UserVO user = userRepo.findById(dto.getUser()).orElseThrow(() -> new ApplicationException("Invalid User"));
+			fuel.setUser(user);
+		}
 
-		// ===== VALIDATION =====
-//        if (dto.getOdometerReading() != null && dto.getPreviousOdometer() != null) {
-//            if (dto.getOdometerReading().compareTo(dto.getPreviousOdometer()) <= 0) {
-//                throw new ApplicationException("Current odometer must be greater than previous odometer");
-//            }
-//        }
+
 
 		// ===== BASIC MAPPING =====
 		mapFuelDTOtoVO(dto, fuel);
@@ -108,12 +113,19 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 
 		if (fuel.getVehicle() != null) {
 			TvehicleVO vehicle = fuel.getVehicle();
+			dto.setVehicleId(vehicle.getId());
 			dto.setVehicle(vehicle.getVehicleNumber());
 		}
 
 		if (fuel.getDriver() != null) {
 			TdriverVO driverVO = fuel.getDriver();
+			dto.setDriverId(driverVO.getId());
 			dto.setDriver(driverVO.getName());
+		}
+		
+		if (fuel.getUser() != null) {
+			UserVO userVo = fuel.getUser();
+			dto.setUser(userVo.getId());
 		}
 
 		dto.setFuelType(fuel.getFuelType());

@@ -88,6 +88,10 @@ public class FuelVO {
 	private Long orgId;
 	
 	@ManyToOne
+	@JoinColumn(name = "userid")
+    private UserVO user;
+	
+	@ManyToOne
 	@JoinColumn(name = "vehicle")
 	private TvehicleVO vehicle;
 	

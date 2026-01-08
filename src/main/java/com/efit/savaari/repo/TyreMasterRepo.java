@@ -1,8 +1,9 @@
 package com.efit.savaari.repo;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.efit.savaari.entity.TyreMasterVO;
@@ -10,7 +11,8 @@ import com.efit.savaari.entity.TyreMasterVO;
 @Repository
 public interface TyreMasterRepo extends JpaRepository<TyreMasterVO, Long> {
 
-    List<TyreMasterVO> findByVehicleId(Long vehicleId);
+   
 
-    List<TyreMasterVO> findByStatus(String status);
+    @Query(nativeQuery = true, value = "select a.* from tyremaster a where a.orgid=:orgId",countQuery = "select a.* from tyremaster a where a.orgid=:orgId")
+	Page<TyreMasterVO> getTyreByOrgId(Long orgId, Pageable pageable);
 }

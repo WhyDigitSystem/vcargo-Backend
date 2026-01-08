@@ -17,7 +17,6 @@ public interface FuelMasterService {
    
 	Map<String, Object> createUpdateFuelMaster(FuelMasterDTO dto) throws ApplicationException;
 
-
 	Map<String, Object> getFuelByVehicle(Long vehicleId, int page, int count);
 
 }

@@ -36,6 +36,7 @@ public class TvehicleResponseDTO {
     private LocalDate fitnessExpiry;
     private LocalDate lastService;
     private LocalDate nextService;
+    private String registrationType;
 
     // Status
     private boolean active;
