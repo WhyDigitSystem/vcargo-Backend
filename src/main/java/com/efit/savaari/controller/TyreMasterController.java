@@ -1,72 +1,96 @@
 package com.efit.savaari.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.TyreMasterDTO;
-import com.efit.savaari.entity.TyreMasterVO;
+import com.efit.savaari.dto.TyreMasterResponseDTO;
 import com.efit.savaari.service.TyreMasterService;
 
 @RestController
-@RequestMapping("/api/type")
+@RequestMapping("/api/tyre")
 public class TyreMasterController extends BaseController {
 
-    @Autowired
-    TyreMasterService typeMasterService;
+	@Autowired
+	TyreMasterService tyreMasterService;
 
-    @PostMapping("/save")
-    public ResponseEntity<ResponseDTO> saveType(@RequestBody TyreMasterDTO dto) {
+	@PutMapping("/createUpdateTyre")
+	public ResponseEntity<ResponseDTO> createUpdateTyre(@RequestBody TyreMasterDTO tyreMasterDTO) {
 
-        String methodName = "saveType()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		String methodName = "createUpdateTyre()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		Map<String, Object> responseMap = new HashMap<>();
 
-        String errorMsg = null;
-        Map<String, Object> map = new HashMap<>();
-        ResponseDTO responseDTO;
+		try {
+			Map<String, Object> tyre = tyreMasterService.createUpdateTyreMaster(tyreMasterDTO);
+			responseMap.put("message", tyre.get("message"));
+			responseMap.put("tyre", tyre.get("tyre"));
 
-        try {
-            TyreMasterVO type = typeMasterService.saveOrUpdateType(dto);
+			ResponseDTO responseDTO = createServiceResponse(responseMap);
+			return ResponseEntity.ok(responseDTO);
+		} catch (Exception e) {
 
-            map.put(CommonConstant.STRING_MESSAGE,
-                    dto.getTyreId() == null ? "Type created successfully" : "Type updated successfully");
-            map.put("type", type);
+			LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
 
-            responseDTO = createServiceResponse(map);
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-            responseDTO = createServiceResponseError(map, "Type save failed", errorMsg);
-        }
+			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+		}
+	}
 
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok(responseDTO);
-    }
+	@GetMapping("/getAllTyreByOrgId")
+	public ResponseEntity<ResponseDTO> getAllTyreByOrgId(@RequestParam Long orgId,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+		String methodName = "getAllTyreByOrgId()";
+		LOGGER.debug("Starting {}", methodName);
 
-    @GetMapping("/byVehicle")
-    public ResponseEntity<ResponseDTO> getByVehicle(@RequestParam Long vehicleId) {
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-        List<TyreMasterVO> list = typeMasterService.getByVehicle(vehicleId);
+		try {
+			Map<String, Object> tyre = tyreMasterService.getAllTyreByOrgId(orgId, page, count);
+			responseMap.put("message", "Tyre Details retrieved successfully");
+			responseMap.put("tyre", tyre);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("typeList", list);
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
-        return ResponseEntity.ok(createServiceResponse(map));
-    }
+	@GetMapping("/getTyreById")
+	public ResponseEntity<ResponseDTO> getTyreById(@RequestParam Long id) {
+		String methodName = "getTyreById()";
+		LOGGER.debug("Starting {}", methodName);
 
-    @PutMapping("/delete")
-    public ResponseEntity<ResponseDTO> delete(@RequestParam Long typeId) {
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-        typeMasterService.deleteType(typeId);
+		try {
+			TyreMasterResponseDTO tyre = tyreMasterService.getTyreById(id);
+			responseMap.put("message", "Tyre Details retrieved successfully");
+			responseMap.put("tyre", tyre);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
 
-        return ResponseEntity.ok(createServiceResponse(new HashMap<>()));
-    }
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 }

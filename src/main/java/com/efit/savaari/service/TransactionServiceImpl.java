@@ -1645,6 +1645,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setType(vehicle.getType());
 		dto.setModel(vehicle.getModel());
 		dto.setCapacity(vehicle.getCapacity());
+		dto.setRegistrationType(vehicle.getRegistrationType());
 
 		if (vehicle.getUser() != null) {
 			dto.setUser(vehicle.getUser().getId());
@@ -1805,6 +1806,7 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setEngineNumber(dto.getEngineNumber());
 		vo.setPermitType(dto.getPermitType());
 		vo.setOwnerName(dto.getOwnerName());
+		vo.setRegistrationType(dto.getRegistrationType());
 
 		vo.setActive(dto.isActive());
 		vo.setOrgId(dto.getOrgId());
