@@ -1044,7 +1044,7 @@ public class TransactionController extends BaseController {
 
 	@GetMapping("/getTvehiclesByOrgId")
 	public ResponseEntity<ResponseDTO> getTvehiclesByOrgId(@RequestParam(required = false) String branchCode,
-			@RequestParam Long userId, @RequestParam(defaultValue = "") String search,
+			@RequestParam Long orgId, @RequestParam(defaultValue = "") String search,
 			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
 		String methodName = "getTvehiclesByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
@@ -1053,7 +1053,7 @@ public class TransactionController extends BaseController {
 		ResponseDTO responseDTO;
 
 		try {
-			Map<String, Object> tvehiclesVO = transactionService.getTvehiclesByOrgId(branchCode, userId, search, page,
+			Map<String, Object> tvehiclesVO = transactionService.getTvehiclesByOrgId(branchCode, orgId, search, page,
 					count);
 			responseMap.put("message", "Tvehicles retrieved successfully");
 			responseMap.put("tvehiclesVO", tvehiclesVO);
@@ -1145,7 +1145,7 @@ public class TransactionController extends BaseController {
 
 	@GetMapping("/getTdriverByOrgId")
 	public ResponseEntity<ResponseDTO> getTdriverByOrgId(@RequestParam(required = false) String branchCode,
-			@RequestParam Long userId, @RequestParam(defaultValue = "") String search,
+			@RequestParam Long orgId, @RequestParam(defaultValue = "") String search,
 			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
 		String methodName = "getTdriverByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
@@ -1154,7 +1154,7 @@ public class TransactionController extends BaseController {
 		ResponseDTO responseDTO;
 
 		try {
-			Map<String, Object> tdriverVO = transactionService.getTdriverByOrgId(branchCode, userId, search, page,
+			Map<String, Object> tdriverVO = transactionService.getTdriverByOrgId(branchCode, orgId, search, page,
 					count);
 			responseMap.put("message", "Tdriver retrieved successfully");
 			responseMap.put("tdriverVO", tdriverVO);

@@ -9,27 +9,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "maintenance_parts")
+@Table(name = "maintenanceparts")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MaintenancePartVO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "maintenancepartgen")
-    @SequenceGenerator(
-        name = "maintenancepartgen",
-        sequenceName = "maintenancepartseq",
-        initialValue = 1000000001,
-        allocationSize = 1
-    )
-    private Long partId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "maintenancepartgen")
+	@SequenceGenerator(name = "maintenancepartgen", sequenceName = "maintenancepartseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "maintenancepartsid")
+	private Long id;
+	@Column(name = "name")
+	private String name;
+	@Column(name = "quantity")
+	private Integer quantity;
+	@Column(name = "cost")
+	private BigDecimal cost;
 
-    private String name;
-    private Integer quantity;
-    private BigDecimal cost;
-
-    @ManyToOne
-    @JoinColumn(name = "maintenanceid")
-    private MaintenanceVO maintenanceVO;
+	@ManyToOne
+	@JoinColumn(name = "maintenanceid")
+	private MaintenanceVO maintenanceVO;
 }

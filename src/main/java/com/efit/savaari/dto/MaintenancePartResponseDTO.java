@@ -7,10 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class MaintenancePartDTO {
-	private String name;
-	private Integer quantity;
-	private BigDecimal cost;
+@AllArgsConstructor
+public class MaintenancePartResponseDTO {
+	
+	private Long id;
+    private String name;
+    private Integer quantity;
+    private BigDecimal cost;
+
 }

@@ -1826,7 +1826,7 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public Map<String, Object> getTvehiclesByOrgId(String branchCode, Long userId, String search, int page, int count) {
+	public Map<String, Object> getTvehiclesByOrgId(String branchCode, Long orgId, String search, int page, int count) {
 
 		if (search != null) {
 			search = search.trim();
@@ -1836,7 +1836,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("vehiclenumber").ascending());
-		Page<TvehicleVO> TvehiclePage = tvehicleRepo.getTvehiclesByOrgId(branchCode, userId, search, pageable);
+		Page<TvehicleVO> TvehiclePage = tvehicleRepo.getTvehiclesByOrgId(branchCode, orgId, search, pageable);
 
 		Page<TvehicleResponseDTO> dtoPage = TvehiclePage.map(this::mapToResponseDTO);
 
@@ -2102,7 +2102,7 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public Map<String, Object> getTdriverByOrgId(String branchCode, Long userId, String search, int page, int count) {
+	public Map<String, Object> getTdriverByOrgId(String branchCode, Long orgId, String search, int page, int count) {
 
 		if (search != null) {
 			search = search.trim();
@@ -2112,7 +2112,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("name").ascending());
-		Page<TdriverVO> quotePage = tdriverRepo.getTdriverByOrgId(branchCode, userId, search, pageable);
+		Page<TdriverVO> quotePage = tdriverRepo.getTdriverByOrgId(branchCode, orgId, search, pageable);
 
 		Page<TdriverResponseDTO> dtoPage = quotePage.map(this::mapToDriverResponseDTO);
 		// return paginated response

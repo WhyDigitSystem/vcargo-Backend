@@ -17,40 +17,74 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MaintenanceVO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "maintenancegen")
-    @SequenceGenerator(
-        name = "maintenancegen",
-        sequenceName = "maintenanceseq",
-        initialValue = 1000000001,
-        allocationSize = 1
-    )
-    @Column(name = "maintenanceid")
-    private Long maintenanceId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "maintenancegen")
+	@SequenceGenerator(name = "maintenancegen", sequenceName = "maintenanceseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "maintenanceid")
+	private Long id;
 
-    private String title;
-    private Long vehicleId;
+	@Column(name="title")
+	private String title;
+	@Column(name="type")
+	private String type; // preventive / corrective
+	@Column(name="status")
+	private String status; // pending / completed
+	@Column(name="priority")
+	private String priority; // low / medium / high
 
-    private String type;        // preventive / corrective
-    private String status;      // pending / completed
-    private String priority;    // low / medium / high
+	@Column(name="scheduleddate")
+	private LocalDate scheduledDate;
+	@Column(name="completeddate")
+	private LocalDate completedDate;
+	@Column(name="odometerreading")
+	private BigDecimal odometerReading;
+	@Column(name="totalcost")
+	private BigDecimal totalCost;
+	@Column(name="totalqty")
+	private BigDecimal totalqty;
+	@Column(name="estimatedcost")
+	private BigDecimal estimatedCost;
+	@Column(name="servicecenter")
+	private String serviceCenter;
+	@Column(name="mechanic")
+	private String mechanic;
 
-    private LocalDate scheduledDate;
-    private LocalDate completedDate;
+	@Column(name="description")
+	private String description;
 
-    private BigDecimal odometerReading;
-    private BigDecimal cost;
-    private BigDecimal estimatedCost;
+	@Column(name="notes")
+	private String notes;
+	
+	@Column(name = "active")
+	private boolean active = true;
 
-    private String serviceCenter;
-    private String mechanic;
 
-    @Column(length = 1000)
-    private String description;
+	@Column(name = "createdby")
+	private String createdBy;
 
-    @Column(length = 1000)
-    private String notes;
+	@Column(name = "modifiedby")
+	private String updatedBy;
 
-    @OneToMany(mappedBy = "maintenanceVO", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MaintenancePartVO> parts;
+	@Column(name = "cancel")
+	private boolean cancel=false;
+
+	@Column(name = "branchcode")
+	private String branchCode;
+
+	@Column(name = "branchname")
+	private String branchName;
+	
+	@Column(name = "orgid")
+	private Long orgId;
+	
+	@ManyToOne
+	@JoinColumn(name = "userid")
+    private UserVO user;
+
+	@ManyToOne
+	@JoinColumn(name = "vehicle")
+	private TvehicleVO vehicle;
+
+	@OneToMany(mappedBy = "maintenanceVO", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<MaintenancePartVO> parts;
 }
