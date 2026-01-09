@@ -1,18 +1,19 @@
 package com.efit.savaari.service;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.MaintenanceDTO;
-import com.efit.savaari.entity.MaintenanceVO;
+import com.efit.savaari.dto.MaintenanceResponseDTO;
+import com.efit.savaari.exception.ApplicationException;
 
 @Service
 public interface MaintenanceService {
 
-    MaintenanceVO saveOrUpdate(MaintenanceDTO dto);
+	Map<String, Object> getAllMaintenanceByOrgId(Long orgId, int page, int count);
 
-    List<MaintenanceVO> getByVehicle(Long vehicleId);
+	Map<String, Object> createUpdateMaintenance(MaintenanceDTO dto) throws ApplicationException;
 
-    void delete(Long maintenanceId);
+	MaintenanceResponseDTO getMaintenanceById(Long id);
 }

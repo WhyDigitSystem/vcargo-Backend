@@ -4,21 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.MaintenanceDTO;
+import com.efit.savaari.dto.MaintenanceResponseDTO;
 import com.efit.savaari.dto.ResponseDTO;
-import com.efit.savaari.entity.MaintenanceVO;
 import com.efit.savaari.service.MaintenanceService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 
 @RestController
 @RequestMapping("/api/maintenance")
@@ -27,36 +28,72 @@ public class MaintenanceController extends BaseController {
     @Autowired
     private MaintenanceService maintenanceService;
 
-    @PostMapping("/save")
-    public ResponseEntity<ResponseDTO> save(@RequestBody MaintenanceDTO dto) {
+    @PutMapping("/createUpdateMaintenance")
+	public ResponseEntity<ResponseDTO> createUpdateMaintenance(@RequestBody MaintenanceDTO maintenanceDTO) {
 
-        Map<String, Object> map = new HashMap<>();
+		String methodName = "createUpdateMaintenance()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		Map<String, Object> responseMap = new HashMap<>();
 
-        MaintenanceVO m = maintenanceService.saveOrUpdate(dto);
+		try {
+			Map<String, Object> maintenance = maintenanceService.createUpdateMaintenance(maintenanceDTO);
+			responseMap.put("message", maintenance.get("message"));
+			responseMap.put("maintenance", maintenance.get("maintenance"));
 
-        map.put(CommonConstant.STRING_MESSAGE,
-                dto.getMaintenanceId() == null
-                    ? "Maintenance created successfully"
-                    : "Maintenance updated successfully");
-        map.put("maintenance", m);
+			ResponseDTO responseDTO = createServiceResponse(responseMap);
+			return ResponseEntity.ok(responseDTO);
+		} catch (Exception e) {
 
-        return ResponseEntity.ok(createServiceResponse(map));
-    }
+			LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
 
-    @GetMapping("/byVehicle")
-    public ResponseEntity<ResponseDTO> getByVehicle(@RequestParam Long vehicleId) {
+			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+		}
+	}
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("maintenanceList", maintenanceService.getByVehicle(vehicleId));
+    @GetMapping("/getAllMaintenanceByOrgId")
+	public ResponseEntity<ResponseDTO> getAllMaintenanceByOrgId(@RequestParam Long orgId,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+		String methodName = "getAllMaintenanceByOrgId()";
+		LOGGER.debug("Starting {}", methodName);
 
-        return ResponseEntity.ok(createServiceResponse(map));
-    }
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-    @PutMapping("/delete")
-    public ResponseEntity<ResponseDTO> delete(@RequestParam Long maintenanceId) {
+		try {
+			Map<String, Object> maintenance = maintenanceService.getAllMaintenanceByOrgId(orgId, page, count);
+			responseMap.put("message", "Maintenance Details retrieved successfully");
+			responseMap.put("maintenance", maintenance);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
 
-        maintenanceService.delete(maintenanceId);
-        return ResponseEntity.ok(createServiceResponse(new HashMap<>()));
-    }
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	@GetMapping("/getMaintenanceById")
+	public ResponseEntity<ResponseDTO> getMaintenanceById(@RequestParam Long id) {
+		String methodName = "getMaintenanceById()";
+		LOGGER.debug("Starting {}", methodName);
+
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			MaintenanceResponseDTO maintenance = maintenanceService.getMaintenanceById(id);
+			responseMap.put("message", "Maintenance Details retrieved successfully");
+			responseMap.put("maintenance", maintenance);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
+
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 }
 
