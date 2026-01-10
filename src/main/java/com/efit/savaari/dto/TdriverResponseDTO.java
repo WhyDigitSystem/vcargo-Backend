@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TdriverDTO {
-
+public class TdriverResponseDTO {
+	
 	private Long id;
 	private String name;
 	private String phone;
@@ -36,4 +36,7 @@ public class TdriverDTO {
 	private Long orgId;
 	private String branchCode;
 	private String branchName;
+	
+	private List<TdriverDocumentResponseDTO> documents;
+
 }

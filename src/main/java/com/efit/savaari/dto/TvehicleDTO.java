@@ -36,5 +36,6 @@ public class TvehicleDTO {
 	private Long orgId;
 	private String branchCode;
 	private String branchName;
+	private String registrationType;
 
 }

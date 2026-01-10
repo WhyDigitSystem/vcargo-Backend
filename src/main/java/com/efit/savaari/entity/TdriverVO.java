@@ -1,12 +1,14 @@
 package com.efit.savaari.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -111,10 +113,9 @@ public class TdriverVO {
 
     @Column(name = "branchname")
     private String branchName;
-//
-//    @OneToMany(mappedBy = "tdriverVO", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonManagedReference
-//    private List<TdriverDocumentsVO> tdriverDocumentsVO;
+
+    @OneToMany(mappedBy = "tdriverVO", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<TdriverDocumentsVO> tdriverDocumentsVO;
 
     @Embedded
     private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();

@@ -94,6 +94,9 @@ public class TvehicleVO {
 
 	@Column(name = "ownername", length = 100)
 	private String ownerName;
+	
+	@Column(name = "registrationtype", length = 100)
+	private String registrationType;
 
 	@Column(name = "active")
 	private boolean active;
