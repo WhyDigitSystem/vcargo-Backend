@@ -30,195 +30,184 @@ import com.efit.savaari.responseDTO.TripWaypointResponseDTO;
 @Service
 public class TripServiceImpl implements TripService {
 
-    @Autowired
-    private TripRepo tripRepo;
-    
-    @Autowired
-    UserRepo userRepo;
-    
-    @Autowired
-    PaginationService paginationService;
-    
-    @Autowired
-    TvehicleRepo vehicleRepo;
-    
-    @Autowired
-    TdriverRepo driverRepo;
+	@Autowired
+	private TripRepo tripRepo;
 
-    @Transactional
-    @Override
-    public Map<String, Object> createUpdateTrip(TripDTO dto) {
+	@Autowired
+	UserRepo userRepo;
 
-        TripVO trip;
-        String message;
+	@Autowired
+	PaginationService paginationService;
 
-        if (dto.getId() != null) {
-            trip = tripRepo.findById(dto.getId())
-                    .orElseThrow(() -> new RuntimeException("Invalid Trip ID"));
-            trip.setUpdatedBy(dto.getCreatedBy());
-            message = "Trip Updated Successfully";
-        } else {
-            trip = new TripVO();
-            trip.setCreatedBy(dto.getCreatedBy());
-            trip.setUpdatedBy(dto.getCreatedBy());
-            message = "Trip Created Successfully";
-        }
+	@Autowired
+	TvehicleRepo vehicleRepo;
 
-        mapTripDTOtoVO(dto, trip);
+	@Autowired
+	TdriverRepo driverRepo;
 
-        if (dto.getUser() != null) {
-            UserVO user = userRepo.findById(dto.getUser())
-                    .orElseThrow(() -> new RuntimeException("Invalid User"));
-            trip.setUser(user);
-        }
+	@Transactional
+	@Override
+	public Map<String, Object> createUpdateTrip(TripDTO dto) {
 
-        if (dto.getVehicle() != null) {
-            TvehicleVO vehicle = vehicleRepo.findById(Long.parseLong(dto.getVehicle()))
-                    .orElseThrow(() -> new RuntimeException("Invalid Vehicle"));
-            trip.setVehicle(vehicle);
-        }
+		TripVO trip;
+		String message;
 
-        if (dto.getDriver() != null) {
-            TdriverVO driver = driverRepo.findById(Long.parseLong(dto.getDriver()))
-                    .orElseThrow(() -> new RuntimeException("Invalid Driver"));
-            trip.setDriver(driver);
-        }
+		if (dto.getId() != null) {
+			trip = tripRepo.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Invalid Trip ID"));
+			trip.setUpdatedBy(dto.getCreatedBy());
+			message = "Trip Updated Successfully";
+		} else {
+			trip = new TripVO();
+			trip.setCreatedBy(dto.getCreatedBy());
+			trip.setUpdatedBy(dto.getCreatedBy());
+			message = "Trip Created Successfully";
+		}
 
-        trip.getWaypoints().clear();
+		mapTripDTOtoVO(dto, trip);
 
-        if (dto.getWaypoints() != null) {
-            for (TripWaypointDTO wpDTO : dto.getWaypoints()) {
-                TripWaypointVO wp = new TripWaypointVO();
-                wp.setLocation(wpDTO.getLocation());
-                wp.setSequenceNo(wpDTO.getSequenceNo());
-                wp.setTripVO(trip);   // 🔥 VERY IMPORTANT
-                trip.getWaypoints().add(wp);
-            }
-        }
+		if (dto.getUser() != null) {
+			UserVO user = userRepo.findById(dto.getUser()).orElseThrow(() -> new RuntimeException("Invalid User"));
+			trip.setUser(user);
+		}
 
-        trip = tripRepo.save(trip);
+		if (dto.getVehicle() != null) {
+			TvehicleVO vehicle = vehicleRepo.findById(Long.parseLong(dto.getVehicle()))
+					.orElseThrow(() -> new RuntimeException("Invalid Vehicle"));
+			trip.setVehicle(vehicle);
+		}
 
-        TripResponseDTO responseDTO = mapToTripResponseDTO(trip);
+		if (dto.getDriver() != null) {
+			TdriverVO driver = driverRepo.findById(Long.parseLong(dto.getDriver()))
+					.orElseThrow(() -> new RuntimeException("Invalid Driver"));
+			trip.setDriver(driver);
+		}
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("trip", responseDTO);
-        response.put("message", message);
+		if (trip.getWaypoints() != null) {
+			trip.getWaypoints().clear();
+		}
 
-        return response;
-    }
+		if (dto.getWaypoints() != null) {
+			for (TripWaypointDTO wpDTO : dto.getWaypoints()) {
+				TripWaypointVO wp = new TripWaypointVO();
+				wp.setLocation(wpDTO.getLocation());
+				wp.setSequenceNo(wpDTO.getSequenceNo());
+				wp.setTripVO(trip); // 🔥 VERY IMPORTANT
+				trip.getWaypoints().add(wp);
+			}
+		}
 
-    private void mapTripDTOtoVO(TripDTO dto, TripVO trip) {
+		trip = tripRepo.save(trip);
 
-        trip.setSource(dto.getSource());
-        trip.setDestination(dto.getDestination());
-        trip.setCustomer(dto.getCustomer());
-        trip.setDistance(dto.getDistance());
-        trip.setEstimatedDuration(dto.getEstimatedDuration());
+		TripResponseDTO responseDTO = mapToTripResponseDTO(trip);
 
-        trip.setStartDate(dto.getStartDate());
-        trip.setStartTime(dto.getStartTime());
-        trip.setEndDate(dto.getEndDate());
-        trip.setEndTime(dto.getEndTime());
+		Map<String, Object> response = new HashMap<>();
+		response.put("trip", responseDTO);
+		response.put("message", message);
 
-        trip.setStatus(dto.getStatus());
-        trip.setTripType(dto.getTripType());
-        trip.setGoodsType(dto.getGoodsType());
+		return response;
+	}
 
-        trip.setGoodsWeight(dto.getGoodsWeight());
-        trip.setGoodsValue(dto.getGoodsValue());
-        trip.setTripCost(dto.getTripCost());
-        trip.setRevenue(dto.getRevenue());
-        trip.setProfit(dto.getProfit());
+	private void mapTripDTOtoVO(TripDTO dto, TripVO trip) {
 
-        trip.setFuelCost(dto.getFuelCost());
-        trip.setTollCharges(dto.getTollCharges());
-        trip.setOtherExpenses(dto.getOtherExpenses());
+		trip.setSource(dto.getSource());
+		trip.setDestination(dto.getDestination());
+		trip.setCustomer(dto.getCustomer());
+		trip.setDistance(dto.getDistance());
+		trip.setEstimatedDuration(dto.getEstimatedDuration());
 
-        trip.setNotes(dto.getNotes());
-        trip.setBranchCode(dto.getBranchCode());
-        trip.setBranchName(dto.getBranchName());
-        trip.setOrgId(dto.getOrgId());
-    }
+		trip.setStartDate(dto.getStartDate());
+		trip.setStartTime(dto.getStartTime());
+		trip.setEndDate(dto.getEndDate());
+		trip.setEndTime(dto.getEndTime());
 
+		trip.setStatus(dto.getStatus());
+		trip.setTripType(dto.getTripType());
+		trip.setGoodsType(dto.getGoodsType());
 
-    private TripResponseDTO mapToTripResponseDTO(TripVO trip) {
+		trip.setGoodsWeight(dto.getGoodsWeight());
+		trip.setGoodsValue(dto.getGoodsValue());
+		trip.setTripCost(dto.getTripCost());
+		trip.setRevenue(dto.getRevenue());
+		trip.setProfit(dto.getProfit());
 
-        TripResponseDTO dto = new TripResponseDTO();
+		trip.setFuelCost(dto.getFuelCost());
+		trip.setTollCharges(dto.getTollCharges());
+		trip.setOtherExpenses(dto.getOtherExpenses());
 
-        dto.setId(trip.getId());
-        dto.setSource(trip.getSource());
-        dto.setDestination(trip.getDestination());
-        dto.setCustomer(trip.getCustomer());
-        dto.setDistance(trip.getDistance());
-        dto.setEstimatedDuration(trip.getEstimatedDuration());
+		trip.setNotes(dto.getNotes());
+		trip.setBranchCode(dto.getBranchCode());
+		trip.setBranchName(dto.getBranchName());
+		trip.setOrgId(dto.getOrgId());
+	}
 
-        dto.setStartDate(trip.getStartDate());
-        dto.setStartTime(trip.getStartTime());
-        dto.setEndDate(trip.getEndDate());
-        dto.setEndTime(trip.getEndTime());
+	private TripResponseDTO mapToTripResponseDTO(TripVO trip) {
 
-        dto.setStatus(trip.getStatus());
-        dto.setTripType(trip.getTripType());
-        dto.setGoodsType(trip.getGoodsType());
+		TripResponseDTO dto = new TripResponseDTO();
 
-        dto.setGoodsWeight(trip.getGoodsWeight());
-        dto.setGoodsValue(trip.getGoodsValue());
-        dto.setTripCost(trip.getTripCost());
-        dto.setRevenue(trip.getRevenue());
-        dto.setProfit(trip.getProfit());
+		dto.setId(trip.getId());
+		dto.setSource(trip.getSource());
+		dto.setDestination(trip.getDestination());
+		dto.setCustomer(trip.getCustomer());
+		dto.setDistance(trip.getDistance());
+		dto.setEstimatedDuration(trip.getEstimatedDuration());
 
-        dto.setFuelCost(trip.getFuelCost());
-        dto.setTollCharges(trip.getTollCharges());
-        dto.setOtherExpenses(trip.getOtherExpenses());
+		dto.setStartDate(trip.getStartDate());
+		dto.setStartTime(trip.getStartTime());
+		dto.setEndDate(trip.getEndDate());
+		dto.setEndTime(trip.getEndTime());
 
-        dto.setNotes(trip.getNotes());
-        dto.setActive(trip.isActive());
-        dto.setCreatedBy(trip.getCreatedBy());
-        dto.setBranchCode(trip.getBranchCode());
-        dto.setBranchName(trip.getBranchName());
-        dto.setOrgId(trip.getOrgId());
+		dto.setStatus(trip.getStatus());
+		dto.setTripType(trip.getTripType());
+		dto.setGoodsType(trip.getGoodsType());
 
-        if (trip.getUser() != null)
-            dto.setUser(trip.getUser().getId());
+		dto.setGoodsWeight(trip.getGoodsWeight());
+		dto.setGoodsValue(trip.getGoodsValue());
+		dto.setTripCost(trip.getTripCost());
+		dto.setRevenue(trip.getRevenue());
+		dto.setProfit(trip.getProfit());
 
-        if (trip.getVehicle() != null)
-            dto.setVehicleId(trip.getVehicle().getId());
-        	dto.setVehicle(trip.getVehicle().getVehicleNumber());
+		dto.setFuelCost(trip.getFuelCost());
+		dto.setTollCharges(trip.getTollCharges());
+		dto.setOtherExpenses(trip.getOtherExpenses());
 
-        if (trip.getDriver() != null)
-            dto.setDriverId(trip.getDriver().getId());
-        	dto.setDriver(trip.getDriver().getName());
+		dto.setNotes(trip.getNotes());
+		dto.setActive(trip.isActive());
+		dto.setCreatedBy(trip.getCreatedBy());
+		dto.setBranchCode(trip.getBranchCode());
+		dto.setBranchName(trip.getBranchName());
+		dto.setOrgId(trip.getOrgId());
 
-        dto.setWaypoints(
-            trip.getWaypoints().stream()
-                .map(w -> new TripWaypointResponseDTO(
-                        w.getId(),
-                        w.getLocation(),
-                        w.getSequenceNo()
-                ))
-                .toList()
-        );
+		if (trip.getUser() != null)
+			dto.setUser(trip.getUser().getId());
 
-        return dto;
-    }
+		if (trip.getVehicle() != null)
+			dto.setVehicleId(trip.getVehicle().getId());
+		dto.setVehicle(trip.getVehicle().getVehicleNumber());
+
+		if (trip.getDriver() != null)
+			dto.setDriverId(trip.getDriver().getId());
+		dto.setDriver(trip.getDriver().getName());
+
+		dto.setWaypoints(trip.getWaypoints().stream()
+				.map(w -> new TripWaypointResponseDTO(w.getId(), w.getLocation(), w.getSequenceNo())).toList());
+
+		return dto;
+	}
 
 	@Override
 	public Map<String, Object> getAllTripByOrgId(Long orgId, int page, int count) {
 		Pageable pageable = PageRequest.of(page - 1, count);
-		Page<TripVO> quotePage = tripRepo.getTripByOrgId(orgId,  pageable);
-		
+		Page<TripVO> quotePage = tripRepo.getTripByOrgId(orgId, pageable);
+
 		Page<TripResponseDTO> dtoPage = quotePage.map(this::mapToTripResponseDTO);
-		return  paginationService.buildResponse(dtoPage);
+		return paginationService.buildResponse(dtoPage);
 	}
 
 	@Override
 	public TripResponseDTO getTripById(Long id) {
-		TripVO tripVO=tripRepo.findById(id).orElseThrow();
-		TripResponseDTO tripResponseDTO= mapToTripResponseDTO(tripVO);
+		TripVO tripVO = tripRepo.findById(id).orElseThrow();
+		TripResponseDTO tripResponseDTO = mapToTripResponseDTO(tripVO);
 		return tripResponseDTO;
 	}
 
-
-
-   
 }
