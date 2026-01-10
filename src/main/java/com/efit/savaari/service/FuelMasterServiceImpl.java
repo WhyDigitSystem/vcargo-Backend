@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.FuelMasterDTO;
-import com.efit.savaari.dto.FuelResponseDTO;
 import com.efit.savaari.entity.DriverVO;
 import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.entity.TdriverVO;
@@ -30,6 +29,7 @@ import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.repo.VehicleRepo;
+import com.efit.savaari.responseDTO.FuelResponseDTO;
 
 @Service
 public class FuelMasterServiceImpl implements FuelMasterService {

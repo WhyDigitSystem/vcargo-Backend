@@ -22,10 +22,10 @@ import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.DocTypeDTO;
 import com.efit.savaari.dto.DocTypeMappingDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.entity.DocTypeMappingVO;
 import com.efit.savaari.entity.DocTypeVO;
 import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.DocumentTypeService;
 
 @CrossOrigin

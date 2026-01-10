@@ -59,15 +59,11 @@ import com.efit.savaari.dto.QuoteDTO;
 import com.efit.savaari.dto.RequestforQuotesDTO;
 import com.efit.savaari.dto.TaggingDTO;
 import com.efit.savaari.dto.TdriverDTO;
-import com.efit.savaari.dto.TdriverDocumentResponseDTO;
-import com.efit.savaari.dto.TdriverResponseDTO;
 import com.efit.savaari.dto.TripAlertsDTO;
 import com.efit.savaari.dto.TripGeofenceAlertsDTO;
 import com.efit.savaari.dto.TripReportMisDTO;
 import com.efit.savaari.dto.TripsDTO;
 import com.efit.savaari.dto.TvehicleDTO;
-import com.efit.savaari.dto.TvehicleDocumentResponseDTO;
-import com.efit.savaari.dto.TvehicleResponseDTO;
 import com.efit.savaari.dto.VendorInvoiceChargesDTO;
 import com.efit.savaari.dto.VendorInvoiceDTO;
 import com.efit.savaari.dto.VendorInvoiceTripsDetailsDTO;
@@ -139,6 +135,10 @@ import com.efit.savaari.repo.VendorInvoiceRepo;
 import com.efit.savaari.repo.VendorInvoiceTripsDetailsRepo;
 import com.efit.savaari.repo.VendorInvoiceTripsDocumentRepo;
 import com.efit.savaari.repo.VendorRepo;
+import com.efit.savaari.responseDTO.TdriverDocumentResponseDTO;
+import com.efit.savaari.responseDTO.TdriverResponseDTO;
+import com.efit.savaari.responseDTO.TvehicleDocumentResponseDTO;
+import com.efit.savaari.responseDTO.TvehicleResponseDTO;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {

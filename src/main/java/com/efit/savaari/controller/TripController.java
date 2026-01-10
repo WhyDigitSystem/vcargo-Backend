@@ -4,21 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.TripDTO;
-import com.efit.savaari.entity.TripVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
+import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.service.TripService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 
 @RestController
 @RequestMapping("/api/trip")
@@ -27,45 +28,72 @@ public class TripController extends BaseController {
     @Autowired
     private TripService tripService;
 
-    @PostMapping("/save")
-    public ResponseEntity<ResponseDTO> save(@RequestBody TripDTO dto) {
+    @PutMapping("/createUpdateTrip")
+	public ResponseEntity<ResponseDTO> createUpdateTrip(@RequestBody TripDTO tripDTO) {
 
-        Map<String, Object> map = new HashMap<>();
+		String methodName = "createUpdateTrip()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		Map<String, Object> responseMap = new HashMap<>();
 
-        TripVO trip = tripService.saveOrUpdate(dto);
+		try {
+			Map<String, Object> trip = tripService.createUpdateTrip(tripDTO);
+			responseMap.put("message", trip.get("message"));
+			responseMap.put("trip", trip.get("trip"));
 
-        map.put(CommonConstant.STRING_MESSAGE,
-                dto.getTripId() == null
-                        ? "Trip created successfully"
-                        : "Trip updated successfully");
-        map.put("trip", trip);
+			ResponseDTO responseDTO = createServiceResponse(responseMap);
+			return ResponseEntity.ok(responseDTO);
+		} catch (Exception e) {
 
-        return ResponseEntity.ok(createServiceResponse(map));
-    }
+			LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
 
-    @GetMapping("/byVehicle")
-    public ResponseEntity<ResponseDTO> byVehicle(@RequestParam Long vehicleId) {
+			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+		}
+	}
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("tripList", tripService.getByVehicle(vehicleId));
+    @GetMapping("/getAllTripByOrgId")
+	public ResponseEntity<ResponseDTO> getAllTripByOrgId(@RequestParam Long orgId,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+		String methodName = "getAllTripByOrgId()";
+		LOGGER.debug("Starting {}", methodName);
 
-        return ResponseEntity.ok(createServiceResponse(map));
-    }
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-    @GetMapping("/byDriver")
-    public ResponseEntity<ResponseDTO> byDriver(@RequestParam Long driverId) {
+		try {
+			Map<String, Object> trip = tripService.getAllTripByOrgId(orgId, page, count);
+			responseMap.put("message", "Trip Details retrieved successfully");
+			responseMap.put("trip", trip);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("tripList", tripService.getByDriver(driverId));
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
-        return ResponseEntity.ok(createServiceResponse(map));
-    }
+	@GetMapping("/getTripById")
+	public ResponseEntity<ResponseDTO> getTripById(@RequestParam Long id) {
+		String methodName = "getTripById()";
+		LOGGER.debug("Starting {}", methodName);
 
-    @PutMapping("/delete")
-    public ResponseEntity<ResponseDTO> delete(@RequestParam Long tripId) {
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-        tripService.delete(tripId);
-        return ResponseEntity.ok(createServiceResponse(new HashMap<>()));
-    }
+		try {
+			TripResponseDTO trip = tripService.getTripById(id);
+			responseMap.put("message", "Trip Details retrieved successfully");
+			responseMap.put("trip", trip);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
+
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 }
 

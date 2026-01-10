@@ -24,9 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.IndustryDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.entity.IndustryVO;
 import com.efit.savaari.entity.VendorVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.IndustryService;
 
 @CrossOrigin

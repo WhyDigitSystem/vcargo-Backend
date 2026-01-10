@@ -35,7 +35,6 @@ import com.efit.savaari.dto.DesignationDTO;
 import com.efit.savaari.dto.FinScreenDTO;
 import com.efit.savaari.dto.FinancialYearDTO;
 import com.efit.savaari.dto.RegionDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.RolesDTO;
 import com.efit.savaari.dto.ScreenNamesDTO;
 import com.efit.savaari.dto.StateDTO;
@@ -50,6 +49,7 @@ import com.efit.savaari.entity.RegionVO;
 import com.efit.savaari.entity.RolesVO;
 import com.efit.savaari.entity.ScreenNamesVO;
 import com.efit.savaari.entity.StateVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.CommonMasterService;
 
 @CrossOrigin

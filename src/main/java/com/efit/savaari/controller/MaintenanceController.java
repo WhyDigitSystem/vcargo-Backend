@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.MaintenanceDTO;
-import com.efit.savaari.dto.MaintenanceResponseDTO;
-import com.efit.savaari.dto.ResponseDTO;
+import com.efit.savaari.responseDTO.MaintenanceResponseDTO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MaintenanceService;
 
 

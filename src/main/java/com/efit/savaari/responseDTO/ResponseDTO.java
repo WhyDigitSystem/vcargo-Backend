@@ -1,10 +1,11 @@
-package com.efit.savaari.dto;
+package com.efit.savaari.responseDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.efit.savaari.dto.ResponseErrors;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Data;

@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.BranchDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.entity.BranchVO;
 import com.efit.savaari.entity.NotificationVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.NotificationService;
 
 @RestController

@@ -34,7 +34,6 @@ import com.efit.savaari.dto.LoginFormDTO;
 import com.efit.savaari.dto.RefreshTokenDTO;
 import com.efit.savaari.dto.ResetPasswordDTO;
 import com.efit.savaari.dto.ResetPasswordFormDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.ResponsibilityDTO;
 import com.efit.savaari.dto.RolesDTO;
 import com.efit.savaari.dto.RolesResponsibilityDTO;
@@ -66,6 +65,7 @@ import com.efit.savaari.repo.UserBranchAccessRepo;
 import com.efit.savaari.repo.UserLoginRolesRepo;
 import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.repo.VendorRepo;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.security.TokenProvider;
 import com.efit.savaari.util.CryptoUtils;
 

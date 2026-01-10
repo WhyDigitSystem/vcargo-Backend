@@ -33,7 +33,6 @@ import com.efit.savaari.dto.CustomerRateDTO;
 import com.efit.savaari.dto.IndentsDTO;
 import com.efit.savaari.dto.ListOfValuesDTO;
 import com.efit.savaari.dto.PlaceDetailsDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.RoutesDTO;
 import com.efit.savaari.dto.VendorRateDTO;
 import com.efit.savaari.entity.BranchVO;
@@ -46,6 +45,7 @@ import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.VendorRateVO;
 import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MasterService;
 
 @CrossOrigin
