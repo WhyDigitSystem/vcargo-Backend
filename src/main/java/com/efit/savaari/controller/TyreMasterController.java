@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.TyreMasterDTO;
-import com.efit.savaari.dto.TyreMasterResponseDTO;
+import com.efit.savaari.responseDTO.ResponseDTO;
+import com.efit.savaari.responseDTO.TyreMasterResponseDTO;
 import com.efit.savaari.service.TyreMasterService;
 
 @RestController

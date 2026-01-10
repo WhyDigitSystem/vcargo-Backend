@@ -5,24 +5,23 @@ import javax.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "trip_waypoints")
+@Table(name = "tripwaypoints")
 @Data
 public class TripWaypointVO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tripwaypointgen")
-    @SequenceGenerator(
-        name = "tripwaypointgen",
-        sequenceName = "tripwaypointseq",
-        initialValue = 1000000001,
-        allocationSize = 1
-    )
-    private Long waypointId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tripwaypointgen")
+	@SequenceGenerator(name = "tripwaypointgen", sequenceName = "tripwaypointseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "waypointId")
+	private Long id;
 
-    private String location;
-    private Integer sequenceNo;
+	@Column(name = "location")
+	private String location;
+	
+	@Column(name = "sequenceno")
+	private Integer sequenceNo;
 
-    @ManyToOne
-    @JoinColumn(name = "tripid")
-    private TripVO tripVO;
+	@ManyToOne
+	@JoinColumn(name = "tripid")
+	private TripVO tripVO;
 }

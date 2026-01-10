@@ -1,21 +1,18 @@
 package com.efit.savaari.service;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TripDTO;
-import com.efit.savaari.entity.TripVO;
+import com.efit.savaari.responseDTO.TripResponseDTO;
 
 @Service
 public interface TripService {
 
-    TripVO saveOrUpdate(TripDTO dto);
+	Map<String, Object> createUpdateTrip(TripDTO dto);
 
-    List<TripVO> getByVehicle(Long vehicleId);
+	Map<String, Object> getAllTripByOrgId(Long orgId, int page, int count);
 
-    List<TripVO> getByDriver(Long driverId);
-
-    void delete(Long tripId);
+	TripResponseDTO getTripById(Long id);
 }
-
