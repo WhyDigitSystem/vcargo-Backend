@@ -8,7 +8,7 @@ import com.efit.savaari.entity.TripInvoiceVO;
 public interface TripInvoiceService {
 
     /** Create or Update Invoice */
-    TripInvoiceVO saveOrUpdate(TripInvoiceDTO dto);
+	TripInvoiceVO saveOrUpdate(TripInvoiceDTO dto);
 
     /** Get Invoice by ID */
     TripInvoiceVO getById(Long invoiceId);

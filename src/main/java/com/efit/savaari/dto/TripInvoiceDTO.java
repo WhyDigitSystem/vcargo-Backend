@@ -9,10 +9,11 @@ import lombok.Data;
 public class TripInvoiceDTO {
 
     private Long invoiceId;
+    private Long orgId;
 
     private Long customerId;
-    private Long vehicleId;
-    private Long driverId;
+    private String vehicleNumber;
+    private String driverNumber;
     private Long tripId;
 
     private String tripDetails;
@@ -34,4 +35,3 @@ public class TripInvoiceDTO {
     private String notes;
     private List<TripInvoiceItemDTO> items;
 }
-
