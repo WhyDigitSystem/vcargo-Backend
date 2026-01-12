@@ -97,9 +97,9 @@ public class TvehicleVO {
 	
 	@Column(name = "registrationtype", length = 100)
 	private String registrationType;
-
+	
 	@Column(name = "active")
-	private boolean active;
+	private String active;
 
 	@Column(name = "createdby")
 	private String createdBy;
