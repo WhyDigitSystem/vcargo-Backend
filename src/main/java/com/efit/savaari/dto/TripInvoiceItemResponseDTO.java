@@ -5,7 +5,8 @@ import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
-public class TripInvoiceItemDTO {
+public class TripInvoiceItemResponseDTO {
+
 	private String id;
 	private String description;
 	private Integer quantity;

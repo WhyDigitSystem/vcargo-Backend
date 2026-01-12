@@ -54,4 +54,7 @@ public interface VehicleRepo extends JpaRepository<VehicleVO, Long>{
 	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'ACTIVE'", nativeQuery = true)
 	Long getActiveVehicleCount(Long orgId);
 
+	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'MAINTENANCE'", nativeQuery = true)
+	Number getMaintenanceVehicleCount(Long orgId);
+
 }

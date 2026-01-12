@@ -72,7 +72,7 @@ public class DashBoardController extends BaseController  {
 	
 	
 
-	  @GetMapping("/getAllDashBoardDetails")
+	  @GetMapping("/getAllDashBoardStatsDetails")
 	    public ResponseEntity<ResponseDTO> getAllDashBoardDetails(
 	            @RequestParam Long orgId) {
 

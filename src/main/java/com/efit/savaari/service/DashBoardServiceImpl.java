@@ -208,6 +208,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 	        // ✅ Vehicle Count
 	        Number vehicleCount = vehiclesRepo.getActiveVehicleCount(orgId);
 	        dashboard.put("activeVechicle", vehicleCount == null ? 0L : vehicleCount.longValue());
+	        
+	        Number maintenanceVehicleCount = vehiclesRepo.getMaintenanceVehicleCount(orgId);
+	        dashboard.put("maintenanceVehicleCount", maintenanceVehicleCount == null ? 0L : maintenanceVehicleCount.longValue());
 
 	        // ✅ Total Fuel Cost
 	        BigDecimal totalFuel = fuelRepo.getTotalFuel(orgId);
