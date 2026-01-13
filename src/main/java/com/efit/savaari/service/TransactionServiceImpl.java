@@ -1669,7 +1669,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setLastService(vehicle.getLastService());
 		dto.setNextService(vehicle.getNextService());
 
-		dto.setActive(vehicle.isActive());
+		dto.setActive(vehicle.getActive());
 		dto.setCancel(vehicle.isCancel());
 
 		dto.setOrgId(vehicle.getOrgId());
@@ -1808,7 +1808,7 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setOwnerName(dto.getOwnerName());
 		vo.setRegistrationType(dto.getRegistrationType());
 
-		vo.setActive(dto.isActive());
+		vo.setActive(dto.getActive());
 		vo.setOrgId(dto.getOrgId());
 		vo.setBranchCode(dto.getBranchCode());
 		vo.setBranchName(dto.getBranchName());
@@ -2162,7 +2162,7 @@ public class TransactionServiceImpl implements TransactionService {
 			dto.setEngineNumber(getString(row, 15));
 			dto.setPermitType(getString(row, 16));
 			dto.setOwnerName(getString(row, 17));
-			dto.setActive(getBoolean(row, 18));
+			dto.setActive(getString(row, 18));
 			dto.setCreatedBy(createdBy);
 			dto.setOrgId(orgId);
 			dto.setBranchCode(getString(row, 19));
@@ -2203,7 +2203,7 @@ public class TransactionServiceImpl implements TransactionService {
 			vo.setEngineNumber(dto.getEngineNumber());
 			vo.setPermitType(dto.getPermitType());
 			vo.setOwnerName(dto.getOwnerName());
-			vo.setActive(dto.isActive());
+			vo.setActive(dto.getActive());
 			vo.setCreatedBy(dto.getCreatedBy());
 			vo.setUpdatedBy(dto.getCreatedBy());
 			vo.setOrgId(dto.getOrgId());

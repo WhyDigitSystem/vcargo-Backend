@@ -1,5 +1,6 @@
 package com.efit.savaari.repo;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -24,4 +25,10 @@ public interface FuelRepo extends JpaRepository<FuelVO, Long> {
     @Query(nativeQuery = true, value = "select a.* from fuel a where   a.orgid=:orgId",
     		countQuery = "select a.* from fuel a where   a.orgid=:orgId")
 	Page<FuelVO> getFuelByOrgId(Long orgId, Pageable pageable);
+	
+	 @Query(nativeQuery = true, value = "select * from fuel a where a.orgid=?1  ORDER BY a.fuelid DESC LIMIT 5")
+	 List<FuelVO> findByOrgId(Long orgId);
+
+	 @Query(value = "SELECT SUM(quantity) FROM fuel WHERE orgid = ?1 and active=1", nativeQuery = true)
+	 BigDecimal getTotalFuel(Long orgId);
 }

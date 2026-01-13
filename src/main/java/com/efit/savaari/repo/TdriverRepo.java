@@ -13,8 +13,8 @@ import com.efit.savaari.entity.TdriverVO;
 public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 
 	@Query(value = "SELECT t.* FROM tdriver t "
-			+ "WHERE (:branchCode IS NULL OR :branchCode = '' OR t.branchcode = :branchCode) And"
-			+ " t.orgid = :orgId " + "AND ( " + "   :search IS NULL OR :search = '' OR "
+			+ "WHERE (:branchCode IS NULL OR :branchCode = '' OR t.branchcode = :branchCode) And" + " t.orgid = :orgId "
+			+ "AND ( " + "   :search IS NULL OR :search = '' OR "
 			+ "   LOWER(t.name) LIKE LOWER(CONCAT('%', :search, '%')) OR "
 			+ "   LOWER(t.phone) LIKE LOWER(CONCAT('%', :search, '%')) OR "
 			+ "   LOWER(t.email) LIKE LOWER(CONCAT('%', :search, '%')) OR "
@@ -62,5 +62,15 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 					+ "   LOWER(t.branchname) LIKE LOWER(CONCAT('%', :search, '%')) " + ")", nativeQuery = true)
 	Page<TdriverVO> getTdriverByOrgId(@Param("branchCode") String branchCode, @Param("orgId") Long orgId,
 			@Param("search") String search, Pageable pageable);
+	 
+	@Query(value = """
+		    SELECT
+		      SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END)   AS activeCount,
+		      SUM(CASE WHEN status = 'INACTIVE' THEN 1 ELSE 0 END) AS inactiveCount,
+		      SUM(CASE WHEN status = 'leave' THEN 1 ELSE 0 END)    AS leaveCount
+		    FROM tdriver
+		    WHERE orgid = ?1 AND active = 1
+		""", nativeQuery = true)
+		DriverStatusCountProjection getDriverStatusCounts(Long orgId);
 
 }

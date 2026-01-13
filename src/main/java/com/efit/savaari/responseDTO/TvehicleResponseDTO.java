@@ -39,7 +39,7 @@ public class TvehicleResponseDTO {
     private String registrationType;
 
     // Status
-    private boolean active;
+    private String active;
     private boolean cancel;
 
     // Organization info
