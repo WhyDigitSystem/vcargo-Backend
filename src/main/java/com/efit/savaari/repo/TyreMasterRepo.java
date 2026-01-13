@@ -20,5 +20,8 @@ public interface TyreMasterRepo extends JpaRepository<TyreMasterVO, Long> {
 
     @Query(nativeQuery = true,   value = "SELECT * FROM tyremaster a WHERE a.orgid = ?1 ORDER BY a.tyreid DESC LIMIT 5")
 	 List<TyreMasterVO> findByOrgId(Long orgId);
+
+    @Query(nativeQuery = true,   value = "select count(*) from tyremaster where orgid=?1 ")
+	Number getTyresPurchased(Long orgId);
     
 }

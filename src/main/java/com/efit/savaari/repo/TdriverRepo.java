@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.efit.savaari.entity.TdriverVO;
+import com.efit.savaari.entity.TripInvoiceVO;
 
 @Repository
 public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
@@ -75,6 +76,10 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 		""", nativeQuery = true)
 		DriverStatusCountProjection getDriverStatusCounts(Long orgId);
 
-	Optional<TdriverVO> findByOrgIdAndPhone(Long orgId, String driverNumber);
+//	Optional<TdriverVO> findByOrgIdAndPhone(Long orgId, String driverNumber);
+
+
+
+	Optional<TdriverVO> findByOrgIdAndId(Long orgId, String driverId);
 
 }
