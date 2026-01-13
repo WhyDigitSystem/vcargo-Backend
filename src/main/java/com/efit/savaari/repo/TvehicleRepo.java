@@ -48,6 +48,13 @@ public interface TvehicleRepo extends JpaRepository<TvehicleVO, Long> {
 	Page<TvehicleVO> getTvehiclesByOrgId(@Param("branchCode") String branchCode, @Param("orgId") Long orgId,
 			@Param("search") String search, Pageable pageable);
 
-	Optional<TvehicleVO> findByOrgIdAndVehicleNumber(Long orgId, String vehicleNumber);
+//	Optional<TvehicleVO> findByOrgIdAndVehicleNumber(Long orgId, String vehicleNumber);
+
+//	Optional<TvehicleVO> findByOrgIdAndVehicleId(Long orgId, String vehicleId);
+
+
+//	Optional<TvehicleVO> findByOrgIdAndTvehicleId(Long orgId, String vehicleId);
+
+	Optional<TripInvoiceVO> findByOrgIdAndId(Long orgId, String vehicleId);
 
 }

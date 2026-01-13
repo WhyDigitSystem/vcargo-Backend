@@ -1,5 +1,6 @@
 package com.efit.savaari.repo;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -56,5 +57,11 @@ public interface VehicleRepo extends JpaRepository<VehicleVO, Long>{
 
 	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'MAINTENANCE'", nativeQuery = true)
 	Number getMaintenanceVehicleCount(Long orgId);
+
+	@Query(value = "select Count(*) from maintenance where completeddate > current_date() and orgid=?1", nativeQuery = true)
+	Number getUpcomingMaintenanceVehicle(Long orgId);
+
+	@Query(value = "select sum(estimatedcost) from maintenance where completeddate < current_date() and orgid=?1", nativeQuery = true)
+	BigDecimal getmaintenanceCost(Long orgId);
 
 }

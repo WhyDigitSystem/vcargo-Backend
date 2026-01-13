@@ -13,9 +13,9 @@ public class TripInvoiceDTO {
     private Long orgId;
 
     private String customer;
-    private String vehicleNumber;
-    private String driverNumber;
-    private Long tripId;
+    private String vehicleId;
+    private String driverId;
+    private String tripId;
 
     private String tripDetails;
     private LocalDate issueDate;

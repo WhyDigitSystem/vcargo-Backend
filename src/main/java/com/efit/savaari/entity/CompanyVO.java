@@ -137,7 +137,6 @@ public class CompanyVO {
 	private List<CompanyWeekOffVO>companyWeekOffVO;
 	
 	
-
 	@JsonGetter("active")
 	public String getActive() {
 		return active ? "Active" : "In-Active";

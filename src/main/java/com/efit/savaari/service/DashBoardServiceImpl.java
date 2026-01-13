@@ -61,141 +61,141 @@ public class DashBoardServiceImpl implements DashBoardService {
 
 
 
-	 @Override
-	 public Map<String, Object> getDashboardData(Long orgId) {
-
-	     Map<String, Object> map = new HashMap<>();
-
-	     map.put("trips", getTrips(orgId));
-	     map.put("maintenance", getMaintenance(orgId));
-	     map.put("fuel", getFuel(orgId));
-	     map.put("tyres", getTyres(orgId));
-
-	     return map;
-	 }
-
-	 private List<TripDashboardDTO> getTrips(Long orgId) {
-
-		    return tripRepo.findByOrgId(orgId).stream().map(t -> {
-		        TripDashboardDTO d = new TripDashboardDTO();
-		        d.setId(t.getId());
-		        
-		        if (t.getVehicle() != null) {
-		            d.setVehicleNo(t.getVehicle().getVehicleNumber());
-		        } else {
-		            d.setVehicleNo("");
-		        }
-		        
-		        if (t.getDriver() != null) {
-		            d.setDriverName(t.getDriver().getName());
-		        } else {
-		            d.setDriverName("");
-		        }
-		        
-		        d.setRoute(t.getSource());
-		        d.setStatus(t.getStatus());
-		        return d;
-		    }).collect(java.util.stream.Collectors.toList());
-		}
-
-	 private List<MaintenanceDashboardDTO> getMaintenance(Long orgId) {
-
-		    return maintenanceRepo.findByOrgId(orgId).stream().map(m -> {
-		        MaintenanceDashboardDTO d = new MaintenanceDashboardDTO();
-		        d.setId(m.getId());
-		        if (m.getVehicle() != null) {
-		            d.setVehicleNo(m.getVehicle().getVehicleNumber());
-		        } else {
-		            d.setVehicleNo("");
-		        }
-		        d.setDescription(m.getDescription());
-		        d.setCompletedDate(m.getCompletedDate());
-		        d.setTotalCost(m.getTotalCost());
-		        d.setPriority(m.getPriority());
-
-		        d.setType(m.getType());
-		        d.setStatus(m.getStatus());
-		        return d;
-		    }).collect(java.util.stream.Collectors.toList());
-		}
-
-	 
-	 private List<FuelDashboardDTO> getFuel(Long orgId) {
-
-		    return fuelRepo.findByOrgId(orgId).stream().map(f -> {
-
-		        FuelDashboardDTO d = new FuelDashboardDTO();
-
-		        // ID
-		        d.setId(String.valueOf(f.getId()));
-
-		        // Vehicle Number
-		        if (f.getVehicle() != null) {
-		            d.setVehicle(f.getVehicle().getVehicleNumber());
-		        } else {
-		            d.setVehicle("");
-		        }
-
-		        // Station
-		        d.setStation(f.getStation());
-
-		        // Quantity
-		        if (f.getQuantity() != null) {
-		            d.setQuantity(f.getQuantity());
-		        }
-
-		        // Cost
-		        if (f.getCost() != null) {
-		            d.setTotal(f.getCost());
-		        }
-
-		        
-		        if (f.getCost() != null) {
-		        	BigDecimal rate = f.getCost().divide(f.getQuantity());
-		        	d.setRate(rate);		        }
-		        // Date
-		        if (f.getDate() != null) {
-		            d.setDate(f.getDate().toString()); // later you can format
-		        }
-
-		        // Driver Name
-		        if (f.getDriver() != null) {
-		            d.setDriver(f.getDriver().getName());
-		        } else {
-		            d.setDriver("");
-		        }
-
-		        return d;
-
-		    }).collect(java.util.stream.Collectors.toList());
-		}
-
-
-	 
-	 private List<TyreDashboardDTO> getTyres(Long orgId) {
-
-		    return tyreRepo.findByOrgId(orgId).stream().map(t -> {
-		        TyreDashboardDTO d = new TyreDashboardDTO();
-		        d.setId(t.getId());
-		        if (t.getVehicle() != null) {
-		            d.setVehicle(t.getVehicle().getVehicleNumber());
-		        } else {
-		            d.setVehicle("");
-		        }
-		        d.setBrand(t.getBrand());
-		        d.setPosition(t.getPosition());
-		        d.setStatus(t.getStatus());
-		        d.setDepth(t.getTreadDepth());
-		        d.setInstalledDate(t.getPurchaseDate());
-
-
-		        if (t.getVehicle() != null) {
-		            d.setVehicleNumber(t.getVehicle().getVehicleNumber());
-		        }
-		        return d;
-		    }).collect(java.util.stream.Collectors.toList());
-		}
-
+//	 @Override
+//	 public Map<String, Object> getDashboardData(Long orgId) {
+//
+//	     Map<String, Object> map = new HashMap<>();
+//
+//	     map.put("trips", getTrips(orgId));
+//	     map.put("maintenance", getMaintenance(orgId));
+//	     map.put("fuel", getFuel(orgId));
+//	     map.put("tyres", getTyres(orgId));
+//
+//	     return map;
+//	 }
+//
+//	 private List<TripDashboardDTO> getTrips(Long orgId) {
+//
+//		    return tripRepo.findByOrgId(orgId).stream().map(t -> {
+//		        TripDashboardDTO d = new TripDashboardDTO();
+//		        d.setId(t.getId());
+//		        
+//		        if (t.getVehicle() != null) {
+//		            d.setVehicleNo(t.getVehicle().getVehicleNumber());
+//		        } else {
+//		            d.setVehicleNo("");
+//		        }
+//		        
+//		        if (t.getDriver() != null) {
+//		            d.setDriverName(t.getDriver().getName());
+//		        } else {
+//		            d.setDriverName("");
+//		        }
+//		        
+//		        d.setRoute(t.getSource());
+//		        d.setStatus(t.getStatus());
+//		        return d;
+//		    }).collect(java.util.stream.Collectors.toList());
+//		}
+//
+//	 private List<MaintenanceDashboardDTO> getMaintenance(Long orgId) {
+//
+//		    return maintenanceRepo.findByOrgId(orgId).stream().map(m -> {
+//		        MaintenanceDashboardDTO d = new MaintenanceDashboardDTO();
+//		        d.setId(m.getId());
+//		        if (m.getVehicle() != null) {
+//		            d.setVehicleNo(m.getVehicle().getVehicleNumber());
+//		        } else {
+//		            d.setVehicleNo("");
+//		        }
+//		        d.setDescription(m.getDescription());
+//		        d.setCompletedDate(m.getCompletedDate());
+//		        d.setTotalCost(m.getTotalCost());
+//		        d.setPriority(m.getPriority());
+//
+//		        d.setType(m.getType());
+//		        d.setStatus(m.getStatus());
+//		        return d;
+//		    }).collect(java.util.stream.Collectors.toList());
+//		}
+//
+//	 
+//	 private List<FuelDashboardDTO> getFuel(Long orgId) {
+//
+//		    return fuelRepo.findByOrgId(orgId).stream().map(f -> {
+//
+//		        FuelDashboardDTO d = new FuelDashboardDTO();
+//
+//		        // ID
+//		        d.setId(String.valueOf(f.getId()));
+//
+//		        // Vehicle Number
+//		        if (f.getVehicle() != null) {
+//		            d.setVehicle(f.getVehicle().getVehicleNumber());
+//		        } else {
+//		            d.setVehicle("");
+//		        }
+//
+//		        // Station
+//		        d.setStation(f.getStation());
+//
+//		        // Quantity
+//		        if (f.getQuantity() != null) {
+//		            d.setQuantity(f.getQuantity());
+//		        }
+//
+//		        // Cost
+//		        if (f.getCost() != null) {
+//		            d.setTotal(f.getCost());
+//		        }
+//
+//		        
+//		        if (f.getCost() != null) {
+//		        	BigDecimal rate = f.getCost().divide(f.getQuantity());
+//		        	d.setRate(rate);		        }
+//		        // Date
+//		        if (f.getDate() != null) {
+//		            d.setDate(f.getDate().toString()); // later you can format
+//		        }
+//
+//		        // Driver Name
+//		        if (f.getDriver() != null) {
+//		            d.setDriver(f.getDriver().getName());
+//		        } else {
+//		            d.setDriver("");
+//		        }
+//
+//		        return d;
+//
+//		    }).collect(java.util.stream.Collectors.toList());
+//		}
+//
+//
+//	 
+//	 private List<TyreDashboardDTO> getTyres(Long orgId) {
+//
+//		    return tyreRepo.findByOrgId(orgId).stream().map(t -> {
+//		        TyreDashboardDTO d = new TyreDashboardDTO();
+//		        d.setId(t.getId());
+//		        if (t.getVehicle() != null) {
+//		            d.setVehicle(t.getVehicle().getVehicleNumber());
+//		        } else {
+//		            d.setVehicle("");
+//		        }
+//		        d.setBrand(t.getBrand());
+//		        d.setPosition(t.getPosition());
+//		        d.setStatus(t.getStatus());
+//		        d.setDepth(t.getTreadDepth());
+//		        d.setInstalledDate(t.getPurchaseDate());
+//
+//
+//		        if (t.getVehicle() != null) {
+//		            d.setVehicleNumber(t.getVehicle().getVehicleNumber());
+//		        }
+//		        return d;
+//		    }).collect(java.util.stream.Collectors.toList());
+//		}
+//
 
 	 
 	 //Trips , driver DashBoard
@@ -212,6 +212,16 @@ public class DashBoardServiceImpl implements DashBoardService {
 	        Number maintenanceVehicleCount = vehiclesRepo.getMaintenanceVehicleCount(orgId);
 	        dashboard.put("maintenanceVehicleCount", maintenanceVehicleCount == null ? 0L : maintenanceVehicleCount.longValue());
 
+	        Number upcomingMaintenanceVehicle = vehiclesRepo.getUpcomingMaintenanceVehicle(orgId);
+	        dashboard.put("upcomingMaintenanceVehicle", upcomingMaintenanceVehicle == null ? 0L : upcomingMaintenanceVehicle.longValue());
+	        
+	        BigDecimal maintenanceCost = vehiclesRepo.getmaintenanceCost(orgId);
+	        dashboard.put("maintenanceCost", maintenanceCost == null ? 0L : maintenanceCost.longValue());
+	        
+	        
+	        Number totalTyresPurchased = tyreRepo.getTyresPurchased(orgId);
+	        dashboard.put("totalTyresPurchased", totalTyresPurchased == null ? 0L : totalTyresPurchased.longValue());
+	        
 	        // ✅ Total Fuel Cost
 	        BigDecimal totalFuel = fuelRepo.getTotalFuel(orgId);
 	        dashboard.put("totalFuel", totalFuel == null ? BigDecimal.ZERO : totalFuel);

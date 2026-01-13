@@ -2,6 +2,7 @@ package com.efit.savaari.service;
 
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -340,24 +341,34 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 //	    }
 
 	    /* ===== VEHICLE ===== */
-	    if (dto.getVehicleNumber() != null && dto.getOrgId() != null) {
-	        TvehicleVO vehicle = tVehicleRepo
-	                .findByOrgIdAndVehicleNumber(dto.getOrgId(), dto.getVehicleNumber())
-	                .orElseThrow(() -> new RuntimeException("Invalid Vehicle Number"));
+	    /* ===== VEHICLE ===== */
+	    if (dto.getVehicleId() != null && !dto.getVehicleId().isEmpty()) {
+
+	        Long vehicleId = Long.parseLong(dto.getVehicleId()); // ✅ convert
+
+	        TvehicleVO vehicle = tVehicleRepo.findById(vehicleId)
+	                .orElseThrow(() -> new RuntimeException("Invalid Vehicle ID"));
+
 	        invoice.setVehicle(vehicle);
 	    }
 
 	    /* ===== DRIVER ===== */
-	    if (dto.getDriverNumber() != null && dto.getOrgId() != null) {
-	        TdriverVO driver = tDriverRepo
-	                .findByOrgIdAndPhone(dto.getOrgId(), dto.getDriverNumber())
-	                .orElseThrow(() -> new RuntimeException("Invalid Driver Number"));
+	    if (dto.getDriverId() != null && !dto.getDriverId().isEmpty()) {
+
+	        Long driverId = Long.parseLong(dto.getDriverId()); // ✅ convert
+
+	        TdriverVO driver = tDriverRepo.findById(driverId)
+	                .orElseThrow(() -> new RuntimeException("Invalid Driver ID"));
+
 	        invoice.setDriver(driver);
 	    }
 
+
 	    /* ===== TRIP ===== */
 	    if (dto.getTripId() != null) {
-	        invoice.setTrip(tripRepo.findById(dto.getTripId())
+	        Long tripId = Long.parseLong(dto.getTripId()); // ✅ convert
+
+	        invoice.setTrip(tripRepo.findById(tripId)
 	                .orElseThrow(() -> new RuntimeException("Invalid Trip")));
 	    }
 
@@ -395,7 +406,12 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 	    invoice.setOrgId(dto.getOrgId());
 
 	    // ✅ IMPORTANT — do not replace list
-	    invoice.getItems().clear();
+	 // ✅ If list is null, create it
+	    if (invoice.getItems() == null) {
+	        invoice.setItems(new ArrayList<>());
+	    } else {
+	        invoice.getItems().clear(); // safe now
+	    }
 
 	    dto.getItems().forEach(i -> {
 	        TripInvoiceItemVO item = new TripInvoiceItemVO();
