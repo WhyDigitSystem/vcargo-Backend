@@ -2,6 +2,7 @@ package com.efit.savaari.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +96,12 @@ public class TripVO {
 
 	@Column(length = 1000)
 	private String notes;
+	
+	@Column(name = "tripstarttime")
+	private LocalDateTime tripStartTime;
+	
+	@Column(name = "tripendtime")
+	private LocalDateTime tripEndTime;
 	
 	@Column(name = "active")
 	private boolean active = true;
