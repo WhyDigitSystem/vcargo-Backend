@@ -7,15 +7,16 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class TripInvoiceDTO {
+public class TripInvoiceResponseDTO {
 
     private Long Id;
     private Long orgId;
 
     private String customer;
-    private String vehicleId;
-    private String driverId;
-    private String tripId;
+    private String vehicleNumber;
+    private String driverNumber;
+    private Long tripId;
+    private String trip;
 
     private String tripDetails;
     private LocalDate issueDate;
@@ -35,5 +36,7 @@ public class TripInvoiceDTO {
 
     private String createdBy;
     private String notes;
-    private List<TripInvoiceItemDTO> items;
+    
+    private List<TripInvoiceItemResponseDTO> items;
+
 }

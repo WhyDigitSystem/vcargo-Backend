@@ -42,7 +42,6 @@ import com.efit.savaari.dto.DocumentDTO;
 import com.efit.savaari.dto.PayoutsDTO;
 import com.efit.savaari.dto.QuoteDTO;
 import com.efit.savaari.dto.RequestforQuotesDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.TaggingDTO;
 import com.efit.savaari.dto.TdriverDTO;
 import com.efit.savaari.dto.TripAlertsDTO;
@@ -65,6 +64,7 @@ import com.efit.savaari.entity.TripReportMisVO;
 import com.efit.savaari.entity.TripsVO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.VendorInvoiceVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.TransactionService;
 
 @CrossOrigin

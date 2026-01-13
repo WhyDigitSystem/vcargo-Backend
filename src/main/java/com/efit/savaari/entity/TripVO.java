@@ -3,9 +3,20 @@ package com.efit.savaari.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,53 +29,112 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TripVO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tripgen")
-    @SequenceGenerator(
-        name = "tripgen",
-        sequenceName = "tripseq",
-        initialValue = 1000000001,
-        allocationSize = 1
-    )
-    @Column(name = "tripid")
-    private Long tripId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tripgen")
+	@SequenceGenerator(name = "tripgen", sequenceName = "tripseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "tripid")
+	private Long id;
 
-    private Long customerId;
-    private Long vehicleId;
-    private Long driverId;
+	@Column(name = "source")
+	private String source;
+	
+	@Column(name = "destination")
+	private String destination;
+	
+	@Column(name = "customer")
+	private String customer;
 
-    private String source;
-    private String destination;
+	@Column(name = "distance")
+	private double distance;
+	
+	@Column(name = "estimatedduration")
+	private String estimatedDuration;
 
-    private BigDecimal distance;
-    private String estimatedDuration;
+	@Column(name = "startdate")
+	private LocalDate startDate;
+	
+	@Column(name = "starttime")
+	private LocalTime startTime;
+	@Column(name = "enddate")
+	private LocalDate endDate;
+	@Column(name = "endtime")
+	private LocalTime endTime;
 
-    private LocalDate startDate;
-    private LocalTime startTime;
-    private LocalDate endDate;
-    private LocalTime endTime;
+	@Column(name = "status")
+	private String status;
+	
+	@Column(name = "triptype")
+	private String tripType;
+	
+	@Column(name = "goodstype")
+	private String goodsType;
+	
+	@Column(name = "goodsweight")
+	private BigDecimal goodsWeight;
+	
+	@Column(name = "goodsvalue")
+	private BigDecimal goodsValue;
 
-    private String status;
-    private String tripType;
+	@Column(name = "tripcost")
+	private BigDecimal tripCost;
+	
+	@Column(name = "revenue")
+	private BigDecimal revenue;
+	
+	@Column(name = "profit")
+	private BigDecimal profit;
 
-    private String goodsType;
-    private BigDecimal goodsWeight;
-    private BigDecimal goodsValue;
+	@Column(name = "fuelcost")
+	private BigDecimal fuelCost;
+	
+	@Column(name = "tollcharges")
+	private BigDecimal tollCharges;
+	
+	@Column(name = "otherexpenses")
+	private BigDecimal otherExpenses;
 
-    private BigDecimal tripCost;
-    private BigDecimal revenue;
-    private BigDecimal profit;
+	@Column(length = 1000)
+	private String notes;
+	
+	@Column(name = "active")
+	private boolean active = true;
 
-    private BigDecimal fuelCost;
-    private BigDecimal tollCharges;
-    private BigDecimal otherExpenses;
 
-    @Column(length = 1000)
-    private String notes;
+	@Column(name = "createdby")
+	private String createdBy;
 
-    @OneToMany(mappedBy = "tripVO", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TripWaypointVO> waypoints;
+	@Column(name = "modifiedby")
+	private String updatedBy;
 
-    @OneToMany(mappedBy = "tripVO", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TripDocumentVO> documents;
+	@Column(name = "cancel")
+	private boolean cancel=false;
+
+	@Column(name = "branchcode")
+	private String branchCode;
+
+	@Column(name = "branchname")
+	private String branchName;
+	
+	@Column(name = "orgid")
+	private Long orgId;
+	
+	@ManyToOne
+	@JoinColumn(name = "userid")
+    private UserVO user;
+	
+	@ManyToOne
+	@JoinColumn(name = "vehicle")
+	private TvehicleVO vehicle;
+	
+	
+	
+	
+	@ManyToOne
+	@JoinColumn(name = "driver")
+	private TdriverVO driver;
+
+	@OneToMany(mappedBy = "tripVO", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<TripWaypointVO> waypoints = new ArrayList<>();
+
+	
 }

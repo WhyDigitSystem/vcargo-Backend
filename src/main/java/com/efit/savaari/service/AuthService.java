@@ -12,7 +12,6 @@ import com.efit.savaari.dto.LoginFormDTO;
 import com.efit.savaari.dto.RefreshTokenDTO;
 import com.efit.savaari.dto.ResetPasswordDTO;
 import com.efit.savaari.dto.ResetPasswordFormDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.ResponsibilityDTO;
 import com.efit.savaari.dto.RolesDTO;
 import com.efit.savaari.dto.SignUpFormDTO;
@@ -21,6 +20,7 @@ import com.efit.savaari.entity.ResponsibilityVO;
 import com.efit.savaari.entity.RolesVO;
 import com.efit.savaari.entity.UserVO;
 import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.responseDTO.ResponseDTO;
 
 @Service
 public interface AuthService {

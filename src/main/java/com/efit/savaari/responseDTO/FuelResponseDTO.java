@@ -1,4 +1,4 @@
-package com.efit.savaari.dto;
+package com.efit.savaari.responseDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

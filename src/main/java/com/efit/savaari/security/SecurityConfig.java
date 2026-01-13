@@ -45,7 +45,7 @@ public class SecurityConfig {
 						"/api/timesheet/**", "/api/ticketcontroller/**", "/api/managetax/**", "/api/shiftmaster/**",
 						"/api/advance/**", "/api/notification/**", "/api/shiftmaster/**", "/api/checkinout/**",
 						"/api/roles/**", "/api/AttendanceLogController/**", "/email/**", "/auth/forgot-password/**",
-						"/api/vendor/**", "/api/vehicle/**", "/api/industry/*", "/api/fuel/**", "/api/tyre/**","/api/maintenance/**","/api/trip/**")
+						"/api/vendor/**", "/api/vehicle/**", "/api/industry/*", "/api/fuel/**", "/api/tyre/**","/api/maintenance/**","/api/trip/**","/api/dashboard/**","/api/tripinvoice/**")
 				.permitAll().antMatchers("/api/**").hasAnyRole("USER", "GUEST_USER").anyRequest().authenticated();
 		http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 		return http.build();

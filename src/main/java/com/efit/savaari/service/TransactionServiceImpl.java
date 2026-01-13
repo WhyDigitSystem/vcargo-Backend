@@ -59,15 +59,11 @@ import com.efit.savaari.dto.QuoteDTO;
 import com.efit.savaari.dto.RequestforQuotesDTO;
 import com.efit.savaari.dto.TaggingDTO;
 import com.efit.savaari.dto.TdriverDTO;
-import com.efit.savaari.dto.TdriverDocumentResponseDTO;
-import com.efit.savaari.dto.TdriverResponseDTO;
 import com.efit.savaari.dto.TripAlertsDTO;
 import com.efit.savaari.dto.TripGeofenceAlertsDTO;
 import com.efit.savaari.dto.TripReportMisDTO;
 import com.efit.savaari.dto.TripsDTO;
 import com.efit.savaari.dto.TvehicleDTO;
-import com.efit.savaari.dto.TvehicleDocumentResponseDTO;
-import com.efit.savaari.dto.TvehicleResponseDTO;
 import com.efit.savaari.dto.VendorInvoiceChargesDTO;
 import com.efit.savaari.dto.VendorInvoiceDTO;
 import com.efit.savaari.dto.VendorInvoiceTripsDetailsDTO;
@@ -139,6 +135,10 @@ import com.efit.savaari.repo.VendorInvoiceRepo;
 import com.efit.savaari.repo.VendorInvoiceTripsDetailsRepo;
 import com.efit.savaari.repo.VendorInvoiceTripsDocumentRepo;
 import com.efit.savaari.repo.VendorRepo;
+import com.efit.savaari.responseDTO.TdriverDocumentResponseDTO;
+import com.efit.savaari.responseDTO.TdriverResponseDTO;
+import com.efit.savaari.responseDTO.TvehicleDocumentResponseDTO;
+import com.efit.savaari.responseDTO.TvehicleResponseDTO;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -1669,7 +1669,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setLastService(vehicle.getLastService());
 		dto.setNextService(vehicle.getNextService());
 
-		dto.setActive(vehicle.isActive());
+		dto.setActive(vehicle.getActive());
 		dto.setCancel(vehicle.isCancel());
 
 		dto.setOrgId(vehicle.getOrgId());
@@ -1808,7 +1808,7 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setOwnerName(dto.getOwnerName());
 		vo.setRegistrationType(dto.getRegistrationType());
 
-		vo.setActive(dto.isActive());
+		vo.setActive(dto.getActive());
 		vo.setOrgId(dto.getOrgId());
 		vo.setBranchCode(dto.getBranchCode());
 		vo.setBranchName(dto.getBranchName());
@@ -2162,7 +2162,7 @@ public class TransactionServiceImpl implements TransactionService {
 			dto.setEngineNumber(getString(row, 15));
 			dto.setPermitType(getString(row, 16));
 			dto.setOwnerName(getString(row, 17));
-			dto.setActive(getBoolean(row, 18));
+			dto.setActive(getString(row, 18));
 			dto.setCreatedBy(createdBy);
 			dto.setOrgId(orgId);
 			dto.setBranchCode(getString(row, 19));
@@ -2203,7 +2203,7 @@ public class TransactionServiceImpl implements TransactionService {
 			vo.setEngineNumber(dto.getEngineNumber());
 			vo.setPermitType(dto.getPermitType());
 			vo.setOwnerName(dto.getOwnerName());
-			vo.setActive(dto.isActive());
+			vo.setActive(dto.getActive());
 			vo.setCreatedBy(dto.getCreatedBy());
 			vo.setUpdatedBy(dto.getCreatedBy());
 			vo.setOrgId(dto.getOrgId());

@@ -5,8 +5,8 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TyreMasterDTO;
-import com.efit.savaari.dto.TyreMasterResponseDTO;
 import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.responseDTO.TyreMasterResponseDTO;
 
 @Service
 public interface TyreMasterService {

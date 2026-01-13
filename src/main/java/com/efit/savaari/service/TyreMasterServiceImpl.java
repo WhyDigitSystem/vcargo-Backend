@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TyreMasterDTO;
-import com.efit.savaari.dto.TyreMasterResponseDTO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.TyreMasterVO;
 import com.efit.savaari.entity.UserVO;
@@ -21,6 +20,7 @@ import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.TyreMasterRepo;
 import com.efit.savaari.repo.UserRepo;
+import com.efit.savaari.responseDTO.TyreMasterResponseDTO;
 
 @Service
 public class TyreMasterServiceImpl implements TyreMasterService {

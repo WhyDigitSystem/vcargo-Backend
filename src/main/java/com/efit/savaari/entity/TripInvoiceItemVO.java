@@ -2,6 +2,7 @@ package com.efit.savaari.entity;
 
 import java.math.BigDecimal;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,7 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "trip_invoice_item")
+@Table(name = "tripinvoiceitem")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,13 +31,20 @@ public class TripInvoiceItemVO {
         initialValue = 1000000001,
         allocationSize = 1
     )
-    private Long itemId;
+    @Column(name = "invoiceitemid")
+    private Long id;
 
+    @Column(name = "itemcode")
     private String itemCode;
+    @Column(name = "description")
     private String description;
+    @Column(name = "quantity")
     private Integer quantity;
+    @Column(name = "unit")
     private String unit;
+    @Column(name = "rate")
     private BigDecimal rate;
+    @Column(name = "amount")
     private BigDecimal amount;
 
     @ManyToOne

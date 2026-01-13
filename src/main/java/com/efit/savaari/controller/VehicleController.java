@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.DriverDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.VehicleDTO;
 import com.efit.savaari.dto.VehicleTypeDTO;
 import com.efit.savaari.entity.DriverVO;
 import com.efit.savaari.entity.VehicleTypeVO;
 import com.efit.savaari.entity.VehicleVO;
 import com.efit.savaari.repo.DriverRepo;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.VehicleService;
 
 @RestController

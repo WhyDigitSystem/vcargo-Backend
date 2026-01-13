@@ -21,7 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "trip_invoice")
+@Table(name = "tripinvoice")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,17 +40,16 @@ public class TripInvoiceVO {
 
     /* ================= RELATIONS ================= */
 
-    @ManyToOne
-    @JoinColumn(name = "customerid")
-    private CustomerVO customer;
+    @Column(name = "customer")
+    private String customer;
 
     @ManyToOne
-    @JoinColumn(name = "vehicleid")
-    private VehicleVO vehicle;
+    @JoinColumn(name = "tvehicleid")
+    private TvehicleVO vehicle;
 
     @ManyToOne
-    @JoinColumn(name = "driverid")
-    private DriverVO driver;
+    @JoinColumn(name = "tdriverid")
+    private TdriverVO driver;
 
     @ManyToOne
     @JoinColumn(name = "tripid")
@@ -58,24 +57,72 @@ public class TripInvoiceVO {
 
     /* ================= INVOICE DETAILS ================= */
 
+    @Column(name = "tripdetails")
     private String tripDetails;
+
+    @Column(name = "issuedate")
     private LocalDate issueDate;
+
+    @Column(name = "duedate")
     private LocalDate dueDate;
 
+    @Column(name = "status")
     private String status;
+
+    @Column(name = "paymentmethod")
     private String paymentMethod;
+
+    @Column(name = "paymentdate")
     private LocalDate paymentDate;
 
+    @Column(name = "subtotal")
     private BigDecimal subtotal;
+
+    @Column(name = "taxrate")
     private BigDecimal taxRate;
+
+    @Column(name = "taxamount")
     private BigDecimal taxAmount;
+
+    @Column(name = "discount")
     private BigDecimal discount;
+
+    @Column(name = "totalamount")
     private BigDecimal totalAmount;
+
+    @Column(name = "amountpaid")
     private BigDecimal amountPaid;
+
+    @Column(name = "balancedue")
     private BigDecimal balanceDue;
 
-    @Column(length = 1000)
+    @Column(name = "notes", length = 1000)
     private String notes;
+
+    /* ================= AUDIT FIELDS ================= */
+
+    @Column(name = "createdby")
+    private String createdBy;
+
+    @Column(name = "updatedby")
+    private String updatedBy;
+
+    @Column(name = "orgid")
+    private Long orgId;
+
+    @Column(name = "branchcode")
+    private String branchCode;
+
+    @Column(name = "branchname")
+    private String branchName;
+
+    @Column(name = "active")
+    private Boolean active = true;
+
+    @Column(name = "cancel")
+    private Boolean cancel = false;
+
+    /* ================= INVOICE ITEMS ================= */
 
     @OneToMany(
         mappedBy = "invoice",
