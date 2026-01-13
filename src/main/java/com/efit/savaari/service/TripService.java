@@ -1,5 +1,6 @@
 package com.efit.savaari.service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -15,4 +16,9 @@ public interface TripService {
 	Map<String, Object> getAllTripByOrgId(Long orgId, int page, int count);
 
 	TripResponseDTO getTripById(Long id);
+	
+
+	String updateTripStartEnd(Long id, String status);
+	
+	
 }
