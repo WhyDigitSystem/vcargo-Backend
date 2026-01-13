@@ -382,6 +382,7 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 	    invoice.setStatus(dto.getStatus());
 	    invoice.setPaymentMethod(dto.getPaymentMethod());
 	    invoice.setPaymentDate(dto.getPaymentDate());
+	    invoice.setCustomer(dto.getCustomer());
 
 	    invoice.setSubtotal(dto.getSubtotal());
 	    invoice.setTaxRate(dto.getTaxRate());
@@ -416,6 +417,8 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 
 	    dto.setId(invoice.getInvoiceId());
 	    dto.setOrgId(invoice.getOrgId());
+	    dto.setCustomer(invoice.getCustomer());
+
 
 //	    if (invoice.getCustomer() != null)
 //	        dto.setCustomer(invoice.getCustomer().getCustomerName());
