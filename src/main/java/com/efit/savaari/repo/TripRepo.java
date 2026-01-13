@@ -23,6 +23,7 @@ public interface TripRepo extends JpaRepository<TripVO, Long> {
 	@Query(nativeQuery = true, value = "select * from trip a where a.orgid=?1  ORDER BY a.tripid DESC LIMIT 5")
     List<TripVO> findByOrgId(Long orgId);
 
+
 	@Modifying
     @Transactional
     @Query("UPDATE TripVO t SET t.tripStartTime = CURRENT_TIMESTAMP, t.status = 'STARTED' WHERE t.id = :id")
@@ -32,4 +33,8 @@ public interface TripRepo extends JpaRepository<TripVO, Long> {
     @Transactional
     @Query("UPDATE TripVO t SET t.tripEndTime = CURRENT_TIMESTAMP, t.status = 'COMPLETED' WHERE t.id = :id")
     int updateTripEnd(@Param("id") Long id);
+
+	@Query(nativeQuery = true, value = "select count(*) from trip where orgid=?1 and active=1")
+	Number getTotalCount(Long orgId);
+
 }
