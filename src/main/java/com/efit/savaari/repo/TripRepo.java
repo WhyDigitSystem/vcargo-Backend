@@ -21,4 +21,7 @@ public interface TripRepo extends JpaRepository<TripVO, Long> {
 	@Query(nativeQuery = true, value = "select * from trip a where a.orgid=?1  ORDER BY a.tripid DESC LIMIT 5")
     List<TripVO> findByOrgId(Long orgId);
 
+	@Query(nativeQuery = true, value = "select count(*) from trip where orgid=?1 and active=1")
+	Number getTotalCount(Long orgId);
+
 }
