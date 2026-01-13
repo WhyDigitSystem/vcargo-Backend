@@ -2,10 +2,10 @@ package com.efit.savaari.service;
 
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -18,25 +18,23 @@ import org.springframework.stereotype.Service;
 import com.efit.savaari.dto.TripInvoiceDTO;
 import com.efit.savaari.dto.TripInvoiceItemResponseDTO;
 import com.efit.savaari.dto.TripInvoiceResponseDTO;
-import com.efit.savaari.entity.DriverVO;
+import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripInvoiceItemVO;
 import com.efit.savaari.entity.TripInvoiceVO;
-import com.efit.savaari.entity.TripVO;
-import com.efit.savaari.entity.VehicleVO;
+import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.repo.CustomerRepo;
-import com.efit.savaari.repo.DriverRepo;
+import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripInvoiceRepo;
 import com.efit.savaari.repo.TripRepo;
-import com.efit.savaari.repo.VehicleRepo;
-import com.efit.savaari.responseDTO.TripResponseDTO;
+import com.efit.savaari.repo.TvehicleRepo;
 
 @Service
 @Transactional
 public class TripInvoiceServiceImpl implements TripInvoiceService {
 
     @Autowired private TripInvoiceRepo invoiceRepo;
-    @Autowired private VehicleRepo vehicleRepo;
-    @Autowired private DriverRepo driverRepo;
+    @Autowired private TvehicleRepo tVehicleRepo;
+    @Autowired private TdriverRepo tDriverRepo;
     @Autowired private TripRepo tripRepo;
     @Autowired private CustomerRepo customerRepo;
 	@Autowired
@@ -132,188 +130,344 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 //        });
 //    }
     
-    
-    @Override
-    public Map<String, Object> createUpdateTripInvoice(TripInvoiceDTO dto) {
+//    
+//    @Override
+//    public Map<String, Object> createUpdateTripInvoice(TripInvoiceDTO dto) {
+//
+//        TripInvoiceVO invoice;
+//   		String message;
+//
+//		if (dto.getId() != null) {
+//			invoice = invoiceRepo.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Invalid TripInvoice ID"));
+//			invoice.setUpdatedBy(dto.getCreatedBy());
+//			message = "TripInvoice Updated Successfully";
+//		} else {
+//			invoice = new TripInvoiceVO();
+//			invoice.setCreatedBy(dto.getCreatedBy());
+//			invoice.setUpdatedBy(dto.getCreatedBy());
+//			message = "TripInvoice Created Successfully";
+//		}
+//
+////        /* ===== CUSTOMER ===== */
+////        if (dto.getCustomerId() != null) {
+////            invoice.setCustomer(
+////                customerRepo.findById(dto.getCustomerId())
+////                    .orElseThrow(() -> new RuntimeException("Invalid Customer"))
+////            );
+////        }
+//
+//        /* ===== VEHICLE ===== */
+//        if (dto.getVehicleNumber() != null && dto.getOrgId() != null) {
+//            TvehicleVO vehicle = tVehicleRepo
+//                    .findByOrgIdAndVehicleNumber(dto.getOrgId(), dto.getVehicleNumber())
+//                    .orElseThrow(() -> new RuntimeException("Invalid TVehicle Number"));
+//            invoice.setVehicle(vehicle);
+//        }
+//
+//        /* ===== DRIVER ===== */
+//        if (dto.getDriverNumber() != null && dto.getOrgId() != null) {
+//            TdriverVO driver = tDriverRepo.findAll().stream()
+//                    .filter(d ->
+//                        d.getPhone().equals(dto.getDriverNumber()) &&
+//                        d.getOrgId().equals(dto.getOrgId()))
+//                    .findFirst()
+//                    .orElseThrow(() -> new RuntimeException("Invalid Driver Number"));
+//            invoice.setDriver(driver);
+//        }
+//
+//        /* ===== TRIP ===== */
+//        if (dto.getTripId() != null) {
+//            invoice.setTrip(
+//                tripRepo.findById(dto.getTripId())
+//                    .orElseThrow(() -> new RuntimeException("Invalid Trip"))
+//            );
+//        }
+//
+//        mapInvoiceDTOtoVO(dto, invoice);
+//
+//         invoiceRepo.save(invoice);
+//        
+//
+//		TripInvoiceResponseDTO responseDTO = mapToTripInvoiceResponseDTO(invoice);
+//
+//		Map<String, Object> response = new HashMap<>();
+//		response.put("tripInvoice", responseDTO);
+//		response.put("message", message);
+//
+//		return response;
+//    }
+//
+//    /* ================= DTO → VO ================= */
+//    private void mapInvoiceDTOtoVO(TripInvoiceDTO dto, TripInvoiceVO invoice) {
+//
+//        invoice.setTripDetails(dto.getTripDetails());
+//        invoice.setIssueDate(dto.getIssueDate());
+//        invoice.setDueDate(dto.getDueDate());
+//        invoice.setStatus(dto.getStatus());
+//        invoice.setPaymentMethod(dto.getPaymentMethod());
+//
+//        if (dto.getPaymentDate() != null) {
+//            invoice.setPaymentDate(dto.getPaymentDate());
+//        }
+//
+//        invoice.setSubtotal(dto.getSubtotal());
+//        invoice.setTaxRate(dto.getTaxRate());
+//        invoice.setTaxAmount(dto.getTaxAmount());
+//        invoice.setDiscount(dto.getDiscount());
+//        invoice.setTotalAmount(dto.getTotalAmount());
+//        invoice.setAmountPaid(dto.getAmountPaid());
+//        invoice.setBalanceDue(dto.getBalanceDue());
+//        invoice.setNotes(dto.getNotes());
+//        invoice.setOrgId(dto.getOrgId());
+//
+//
+//        // ✅ SAFE ITEM RESET
+//        invoice.setItems(new ArrayList<>());
+//
+//        dto.getItems().forEach(i -> {
+//            TripInvoiceItemVO item = new TripInvoiceItemVO();
+//            item.setItemCode(i.getId());
+//            item.setDescription(i.getDescription());
+//            item.setQuantity(i.getQuantity());
+//            item.setUnit(i.getUnit());
+//            item.setRate(i.getRate());
+//            item.setAmount(i.getAmount());
+//            item.setInvoice(invoice);
+//            invoice.getItems().add(item);
+//        });
+//    }
+//
+//    
+//    private TripInvoiceResponseDTO mapToTripInvoiceResponseDTO(TripInvoiceVO invoice) {
+//
+//        TripInvoiceResponseDTO dto = new TripInvoiceResponseDTO();
+//
+//        dto.setId(invoice.getInvoiceId());
+//        dto.setOrgId(invoice.getOrgId());
+//
+//        /* ===== CUSTOMER ===== */
+//            dto.setCustomer(invoice.getCustomer());
+//        
+//
+//        /* ===== VEHICLE ===== */
+//        if (invoice.getVehicle() != null) {
+//            dto.setVehicleNumber(invoice.getVehicle().getVehicleNumber());
+//        }
+//
+//        /* ===== DRIVER ===== */
+//        if (invoice.getDriver() != null) {
+//            dto.setDriverNumber(invoice.getDriver().getPhone());
+//        }
+//
+//        /* ===== TRIP ===== */
+//        if (invoice.getTrip() != null) {
+//            dto.setTripId(invoice.getTrip().getId());
+//            dto.setTrip(
+//                invoice.getTrip().getSource() + " → " + invoice.getTrip().getDestination()
+//            );
+//        }
+//
+//        /* ===== INVOICE DETAILS ===== */
+//        dto.setTripDetails(invoice.getTripDetails());
+//        dto.setIssueDate(invoice.getIssueDate());
+//        dto.setDueDate( invoice.getDueDate());
+//
+//        dto.setStatus(invoice.getStatus());
+//        dto.setPaymentMethod(invoice.getPaymentMethod());
+//        dto.setPaymentDate( invoice.getPaymentDate());
+//
+//        dto.setSubtotal(invoice.getSubtotal());
+//        dto.setTaxRate(invoice.getTaxRate());
+//        dto.setTaxAmount(invoice.getTaxAmount());
+//        dto.setDiscount(invoice.getDiscount());
+//        dto.setTotalAmount(invoice.getTotalAmount());
+//        dto.setAmountPaid(invoice.getAmountPaid());
+//        dto.setBalanceDue(invoice.getBalanceDue());
+//
+//        dto.setCreatedBy(invoice.getCreatedBy());
+//        dto.setNotes(invoice.getNotes());
+//
+//        /* ===== ITEMS ===== */
+//        if (invoice.getItems() != null && !invoice.getItems().isEmpty()) {
+//
+//            List<TripInvoiceItemResponseDTO> itemList =
+//                    invoice.getItems().stream().map(i -> {
+//
+//                        TripInvoiceItemResponseDTO itemDto =
+//                                new TripInvoiceItemResponseDTO();
+//
+//                        itemDto.setItemCode(i.getItemCode());
+//                        itemDto.setDescription(i.getDescription());
+//                        itemDto.setQuantity(i.getQuantity());
+//                        itemDto.setUnit(i.getUnit());
+//                        itemDto.setRate(i.getRate());
+//                        itemDto.setAmount(i.getAmount());
+//
+//                        return itemDto;
+//
+//                    }).collect(java.util.stream.Collectors.toList());
+//
+//            dto.setItems(itemList);
+//        }
+//
+//        return dto;
+//    }
 
-        TripInvoiceVO invoice;
-   		String message;
+	
+	@Override
+	public Map<String, Object> createUpdateTripInvoice(TripInvoiceDTO dto) {
 
-		if (dto.getId() != null) {
-			invoice = invoiceRepo.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Invalid TripInvoice ID"));
-			invoice.setUpdatedBy(dto.getCreatedBy());
-			message = "TripInvoice Updated Successfully";
-		} else {
-			invoice = new TripInvoiceVO();
-			invoice.setCreatedBy(dto.getCreatedBy());
-			invoice.setUpdatedBy(dto.getCreatedBy());
-			message = "TripInvoice Created Successfully";
-		}
+	    TripInvoiceVO invoice;
+	    String message;
 
-        /* ===== CUSTOMER ===== */
-        if (dto.getCustomerId() != null) {
-            invoice.setCustomer(
-                customerRepo.findById(dto.getCustomerId())
-                    .orElseThrow(() -> new RuntimeException("Invalid Customer"))
-            );
-        }
+	    if (dto.getId() != null) {
+	        invoice = invoiceRepo.findById(dto.getId())
+	                .orElseThrow(() -> new RuntimeException("Invalid TripInvoice ID"));
+	        invoice.setUpdatedBy(dto.getCreatedBy());
+	        message = "TripInvoice Updated Successfully";
+	    } else {
+	        invoice = new TripInvoiceVO();
+	        invoice.setCreatedBy(dto.getCreatedBy());
+	        invoice.setUpdatedBy(dto.getCreatedBy());
+	        message = "TripInvoice Created Successfully";
+	    }
 
-        /* ===== VEHICLE ===== */
-        if (dto.getVehicleNumber() != null && dto.getOrgId() != null) {
-            VehicleVO vehicle = vehicleRepo
-                    .findByOrgIdAndVehicleNumber(dto.getOrgId(), dto.getVehicleNumber())
-                    .orElseThrow(() -> new RuntimeException("Invalid Vehicle Number"));
-            invoice.setVehicle(vehicle);
-        }
+	    /* ===== CUSTOMER ===== */
+//	    if (dto.getCustomerId() != null) {
+//	        CustomerVO customer = customerRepo.findById(dto.getCustomerId())
+//	                .orElseThrow(() -> new RuntimeException("Invalid Customer"));
+//	        invoice.setCustomer(customer);
+//	    }
 
-        /* ===== DRIVER ===== */
-        if (dto.getDriverNumber() != null && dto.getOrgId() != null) {
-            DriverVO driver = driverRepo.findAll().stream()
-                    .filter(d ->
-                        d.getDriverNumber().equals(dto.getDriverNumber()) &&
-                        d.getOrgId().equals(dto.getOrgId()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Invalid Driver Number"));
-            invoice.setDriver(driver);
-        }
+	    /* ===== VEHICLE ===== */
+	    if (dto.getVehicleNumber() != null && dto.getOrgId() != null) {
+	        TvehicleVO vehicle = tVehicleRepo
+	                .findByOrgIdAndVehicleNumber(dto.getOrgId(), dto.getVehicleNumber())
+	                .orElseThrow(() -> new RuntimeException("Invalid Vehicle Number"));
+	        invoice.setVehicle(vehicle);
+	    }
 
-        /* ===== TRIP ===== */
-        if (dto.getTripId() != null) {
-            invoice.setTrip(
-                tripRepo.findById(dto.getTripId())
-                    .orElseThrow(() -> new RuntimeException("Invalid Trip"))
-            );
-        }
+	    /* ===== DRIVER ===== */
+	    if (dto.getDriverNumber() != null && dto.getOrgId() != null) {
+	        TdriverVO driver = tDriverRepo
+	                .findByOrgIdAndPhone(dto.getOrgId(), dto.getDriverNumber())
+	                .orElseThrow(() -> new RuntimeException("Invalid Driver Number"));
+	        invoice.setDriver(driver);
+	    }
 
-        mapInvoiceDTOtoVO(dto, invoice);
+	    /* ===== TRIP ===== */
+	    if (dto.getTripId() != null) {
+	        invoice.setTrip(tripRepo.findById(dto.getTripId())
+	                .orElseThrow(() -> new RuntimeException("Invalid Trip")));
+	    }
 
-         invoiceRepo.save(invoice);
-        
+	    mapInvoiceDTOtoVO(dto, invoice);
 
-		TripInvoiceResponseDTO responseDTO = mapToTripInvoiceResponseDTO(invoice);
+	    invoiceRepo.save(invoice);
 
-		Map<String, Object> response = new HashMap<>();
-		response.put("trip", responseDTO);
-		response.put("message", message);
+	    TripInvoiceResponseDTO responseDTO = mapToTripInvoiceResponseDTO(invoice);
 
-		return response;
-    }
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("tripInvoice", responseDTO);
+	    response.put("message", message);
 
-    /* ================= DTO → VO ================= */
-    private void mapInvoiceDTOtoVO(TripInvoiceDTO dto, TripInvoiceVO invoice) {
+	    return response;
+	}
 
-        invoice.setTripDetails(dto.getTripDetails());
-        invoice.setIssueDate(dto.getIssueDate());
-        invoice.setDueDate(dto.getDueDate());
-        invoice.setStatus(dto.getStatus());
-        invoice.setPaymentMethod(dto.getPaymentMethod());
+	private void mapInvoiceDTOtoVO(TripInvoiceDTO dto, TripInvoiceVO invoice) {
 
-        if (dto.getPaymentDate() != null) {
-            invoice.setPaymentDate(dto.getPaymentDate());
-        }
+	    invoice.setTripDetails(dto.getTripDetails());
+	    invoice.setIssueDate(dto.getIssueDate());
+	    invoice.setDueDate(dto.getDueDate());
+	    invoice.setStatus(dto.getStatus());
+	    invoice.setPaymentMethod(dto.getPaymentMethod());
+	    invoice.setPaymentDate(dto.getPaymentDate());
 
-        invoice.setSubtotal(dto.getSubtotal());
-        invoice.setTaxRate(dto.getTaxRate());
-        invoice.setTaxAmount(dto.getTaxAmount());
-        invoice.setDiscount(dto.getDiscount());
-        invoice.setTotalAmount(dto.getTotalAmount());
-        invoice.setAmountPaid(dto.getAmountPaid());
-        invoice.setBalanceDue(dto.getBalanceDue());
-        invoice.setNotes(dto.getNotes());
+	    invoice.setSubtotal(dto.getSubtotal());
+	    invoice.setTaxRate(dto.getTaxRate());
+	    invoice.setTaxAmount(dto.getTaxAmount());
+	    invoice.setDiscount(dto.getDiscount());
+	    invoice.setTotalAmount(dto.getTotalAmount());
+	    invoice.setAmountPaid(dto.getAmountPaid());
+	    invoice.setBalanceDue(dto.getBalanceDue());
+	    invoice.setNotes(dto.getNotes());
+	    invoice.setOrgId(dto.getOrgId());
 
-        // ✅ SAFE ITEM RESET
-        invoice.setItems(new ArrayList<>());
+	    // ✅ IMPORTANT — do not replace list
+	    invoice.getItems().clear();
 
-        dto.getItems().forEach(i -> {
-            TripInvoiceItemVO item = new TripInvoiceItemVO();
-            item.setItemCode(i.getId());
-            item.setDescription(i.getDescription());
-            item.setQuantity(i.getQuantity());
-            item.setUnit(i.getUnit());
-            item.setRate(i.getRate());
-            item.setAmount(i.getAmount());
-            item.setInvoice(invoice);
-            invoice.getItems().add(item);
-        });
-    }
+	    dto.getItems().forEach(i -> {
+	        TripInvoiceItemVO item = new TripInvoiceItemVO();
+	        item.setItemCode(i.getId());
+	        item.setDescription(i.getDescription());
+	        item.setQuantity(i.getQuantity());
+	        item.setUnit(i.getUnit());
+	        item.setRate(i.getRate());
+	        item.setAmount(i.getAmount());
+	        item.setInvoice(invoice);
+	        invoice.getItems().add(item);
+	    });
+	}
 
-    
-    private TripInvoiceResponseDTO mapToTripInvoiceResponseDTO(TripInvoiceVO invoice) {
+	
+	private TripInvoiceResponseDTO mapToTripInvoiceResponseDTO(TripInvoiceVO invoice) {
 
-        TripInvoiceResponseDTO dto = new TripInvoiceResponseDTO();
+	    TripInvoiceResponseDTO dto = new TripInvoiceResponseDTO();
 
-        dto.setId(invoice.getInvoiceId());
-        dto.setOrgId(invoice.getOrgId());
+	    dto.setId(invoice.getInvoiceId());
+	    dto.setOrgId(invoice.getOrgId());
 
-        /* ===== CUSTOMER ===== */
-        if (invoice.getCustomer() != null) {
-            dto.setCustomerId(invoice.getCustomer().getId());
-            dto.setCustomer(invoice.getCustomer().getCustomerName());
-        }
+//	    if (invoice.getCustomer() != null)
+//	        dto.setCustomer(invoice.getCustomer().getCustomerName());
 
-        /* ===== VEHICLE ===== */
-        if (invoice.getVehicle() != null) {
-            dto.setVehicleNumber(invoice.getVehicle().getVehicleNumber());
-        }
+	    if (invoice.getVehicle() != null)
+	        dto.setVehicleNumber(invoice.getVehicle().getVehicleNumber());
 
-        /* ===== DRIVER ===== */
-        if (invoice.getDriver() != null) {
-            dto.setDriverNumber(invoice.getDriver().getDriverNumber());
-        }
+	    if (invoice.getDriver() != null)
+	        dto.setDriverNumber(invoice.getDriver().getPhone());
 
-        /* ===== TRIP ===== */
-        if (invoice.getTrip() != null) {
-            dto.setTripId(invoice.getTrip().getId());
-            dto.setTrip(
-                invoice.getTrip().getSource() + " → " + invoice.getTrip().getDestination()
-            );
-        }
+	    if (invoice.getTrip() != null) {
+	        dto.setTripId(invoice.getTrip().getId());
+	        dto.setTrip(invoice.getTrip().getSource() + " → " + invoice.getTrip().getDestination());
+	    }
 
-        /* ===== INVOICE DETAILS ===== */
-        dto.setTripDetails(invoice.getTripDetails());
-        dto.setIssueDate(invoice.getIssueDate());
-        dto.setDueDate( invoice.getDueDate());
+	    dto.setTripDetails(invoice.getTripDetails());
+	    dto.setIssueDate(invoice.getIssueDate());
+	    dto.setDueDate(invoice.getDueDate());
+	    dto.setStatus(invoice.getStatus());
+	    dto.setPaymentMethod(invoice.getPaymentMethod());
+	    dto.setPaymentDate(invoice.getPaymentDate());
 
-        dto.setStatus(invoice.getStatus());
-        dto.setPaymentMethod(invoice.getPaymentMethod());
-        dto.setPaymentDate( invoice.getPaymentDate());
+	    dto.setSubtotal(invoice.getSubtotal());
+	    dto.setTaxRate(invoice.getTaxRate());
+	    dto.setTaxAmount(invoice.getTaxAmount());
+	    dto.setDiscount(invoice.getDiscount());
+	    dto.setTotalAmount(invoice.getTotalAmount());
+	    dto.setAmountPaid(invoice.getAmountPaid());
+	    dto.setBalanceDue(invoice.getBalanceDue());
 
-        dto.setSubtotal(invoice.getSubtotal());
-        dto.setTaxRate(invoice.getTaxRate());
-        dto.setTaxAmount(invoice.getTaxAmount());
-        dto.setDiscount(invoice.getDiscount());
-        dto.setTotalAmount(invoice.getTotalAmount());
-        dto.setAmountPaid(invoice.getAmountPaid());
-        dto.setBalanceDue(invoice.getBalanceDue());
+	    dto.setCreatedBy(invoice.getCreatedBy());
+	    dto.setNotes(invoice.getNotes());
 
-        dto.setCreatedBy(invoice.getCreatedBy());
-        dto.setNotes(invoice.getNotes());
+	    List<TripInvoiceItemResponseDTO> items =
+	            invoice.getItems().stream().map(i -> {
 
-        /* ===== ITEMS ===== */
-        if (invoice.getItems() != null && !invoice.getItems().isEmpty()) {
+	                TripInvoiceItemResponseDTO itemDto = new TripInvoiceItemResponseDTO();
+	                itemDto.setId(i.getId());                 // ✅ DB ID
+	                itemDto.setItemCode(i.getItemCode());
+	                itemDto.setDescription(i.getDescription());
+	                itemDto.setQuantity(i.getQuantity());
+	                itemDto.setUnit(i.getUnit());
+	                itemDto.setRate(i.getRate());
+	                itemDto.setAmount(i.getAmount());
+	                return itemDto;
 
-            List<TripInvoiceItemResponseDTO> itemList =
-                    invoice.getItems().stream().map(i -> {
+	            }).collect(Collectors.toList());
 
-                        TripInvoiceItemResponseDTO itemDto =
-                                new TripInvoiceItemResponseDTO();
+	    dto.setItems(items);
 
-                        itemDto.setId(i.getItemCode());
-                        itemDto.setDescription(i.getDescription());
-                        itemDto.setQuantity(i.getQuantity());
-                        itemDto.setUnit(i.getUnit());
-                        itemDto.setRate(i.getRate());
-                        itemDto.setAmount(i.getAmount());
-
-                        return itemDto;
-
-                    }).collect(java.util.stream.Collectors.toList());
-
-            dto.setItems(itemList);
-        }
-
-        return dto;
-    }
+	    return dto;
+	}
 
    
     @Override

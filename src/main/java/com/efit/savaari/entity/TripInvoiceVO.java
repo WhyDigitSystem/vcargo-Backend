@@ -21,7 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "trip_invoice")
+@Table(name = "tripinvoice")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,17 +40,16 @@ public class TripInvoiceVO {
 
     /* ================= RELATIONS ================= */
 
-    @ManyToOne
-    @JoinColumn(name = "customerid")
-    private CustomerVO customer;
+    @Column(name = "customer")
+    private String customer;
 
     @ManyToOne
-    @JoinColumn(name = "vehicleid")
-    private VehicleVO vehicle;
+    @JoinColumn(name = "tvehicleid")
+    private TvehicleVO vehicle;
 
     @ManyToOne
-    @JoinColumn(name = "driverid")
-    private DriverVO driver;
+    @JoinColumn(name = "tdriverid")
+    private TdriverVO driver;
 
     @ManyToOne
     @JoinColumn(name = "tripid")
