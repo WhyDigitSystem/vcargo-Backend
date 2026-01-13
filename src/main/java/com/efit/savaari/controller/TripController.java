@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,16 +20,14 @@ import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.service.TripService;
 
-
-
 @RestController
 @RequestMapping("/api/trip")
 public class TripController extends BaseController {
 
-    @Autowired
-    private TripService tripService;
+	@Autowired
+	private TripService tripService;
 
-    @PutMapping("/createUpdateTrip")
+	@PutMapping("/createUpdateTrip")
 	public ResponseEntity<ResponseDTO> createUpdateTrip(@RequestBody TripDTO tripDTO) {
 
 		String methodName = "createUpdateTrip()";
@@ -51,7 +50,7 @@ public class TripController extends BaseController {
 		}
 	}
 
-    @GetMapping("/getAllTripByOrgId")
+	@GetMapping("/getAllTripByOrgId")
 	public ResponseEntity<ResponseDTO> getAllTripByOrgId(@RequestParam Long orgId,
 			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
 		String methodName = "getAllTripByOrgId()";
@@ -95,5 +94,25 @@ public class TripController extends BaseController {
 		LOGGER.debug("Ending {}", methodName);
 		return ResponseEntity.ok(responseDTO);
 	}
-}
 
+	@PutMapping("/trip/{id}/status")
+	public ResponseEntity<ResponseDTO> createTripStartEnd(@PathVariable Long id, @RequestParam String status) {
+		String methodName = "createTripStartEnd()";
+		LOGGER.debug("Starting {}", methodName);
+
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			String message = tripService.updateTripStartEnd(id, status);
+			responseMap.put("message", message);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
+
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+}

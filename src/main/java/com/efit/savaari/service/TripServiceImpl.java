@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.dto.TripWaypointDTO;
-import com.efit.savaari.entity.MaintenanceVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripVO;
 import com.efit.savaari.entity.TripWaypointVO;
@@ -23,7 +22,6 @@ import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripRepo;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
-import com.efit.savaari.responseDTO.MaintenanceResponseDTO;
 import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.responseDTO.TripWaypointResponseDTO;
 
@@ -209,5 +207,30 @@ public class TripServiceImpl implements TripService {
 		TripResponseDTO tripResponseDTO = mapToTripResponseDTO(tripVO);
 		return tripResponseDTO;
 	}
+
+	@Override
+	public String updateTripStartEnd(Long id, String status) {
+
+	    if ("START".equalsIgnoreCase(status)) {
+
+	        int updated = tripRepo.updateTripStart(id);
+	        if (updated == 0) {
+	            throw new RuntimeException("Trip not found");
+	        }
+	        return "Trip Started Successfully";
+
+	    } else if ("END".equalsIgnoreCase(status)) {
+
+	        int updated = tripRepo.updateTripEnd(id);
+	        if (updated == 0) {
+	            throw new RuntimeException("Trip not found");
+	        }
+	        return "Trip Completed Successfully";
+
+	    } else {
+	        throw new IllegalArgumentException("Invalid status value");
+	    }
+	}
+
 
 }
