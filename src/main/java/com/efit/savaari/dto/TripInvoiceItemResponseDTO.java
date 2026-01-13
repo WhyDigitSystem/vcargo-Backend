@@ -7,7 +7,8 @@ import lombok.Data;
 @Data
 public class TripInvoiceItemResponseDTO {
 
-	private String id;
+	private Long id;
+	private String itemCode;
 	private String description;
 	private Integer quantity;
 	private String unit;

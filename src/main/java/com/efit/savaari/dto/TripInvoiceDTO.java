@@ -12,7 +12,7 @@ public class TripInvoiceDTO {
     private Long Id;
     private Long orgId;
 
-    private Long customerId;
+    private String customer;
     private String vehicleNumber;
     private String driverNumber;
     private Long tripId;

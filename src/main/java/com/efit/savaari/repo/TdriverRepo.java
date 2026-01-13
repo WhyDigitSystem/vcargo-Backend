@@ -1,5 +1,7 @@
 package com.efit.savaari.repo;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -72,5 +74,7 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 		    WHERE orgid = ?1 AND active = 1
 		""", nativeQuery = true)
 		DriverStatusCountProjection getDriverStatusCounts(Long orgId);
+
+	Optional<TdriverVO> findByOrgIdAndPhone(Long orgId, String driverNumber);
 
 }
