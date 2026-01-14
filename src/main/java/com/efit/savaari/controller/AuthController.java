@@ -37,7 +37,6 @@ import com.efit.savaari.dto.UserResponseDTO;
 import com.efit.savaari.entity.ResponsibilityVO;
 import com.efit.savaari.entity.RolesVO;
 import com.efit.savaari.entity.UserVO;
-import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.AuthService;
 import com.efit.savaari.service.OtpService;

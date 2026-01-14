@@ -16,19 +16,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.FuelMasterDTO;
-import com.efit.savaari.entity.DriverVO;
 import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.UserVO;
-import com.efit.savaari.entity.VehicleVO;
 import com.efit.savaari.exception.ApplicationException;
-import com.efit.savaari.repo.DriverRepo;
 import com.efit.savaari.repo.FuelRepo;
 import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
-import com.efit.savaari.repo.VehicleRepo;
 import com.efit.savaari.responseDTO.FuelResponseDTO;
 
 @Service

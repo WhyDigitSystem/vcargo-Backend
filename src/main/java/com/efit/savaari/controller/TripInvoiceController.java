@@ -1,7 +1,6 @@
 package com.efit.savaari.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.TripInvoiceDTO;
 import com.efit.savaari.dto.TripInvoiceResponseDTO;
-import com.efit.savaari.entity.TripInvoiceVO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.TripInvoiceService;
 

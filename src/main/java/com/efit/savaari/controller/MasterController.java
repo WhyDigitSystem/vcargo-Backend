@@ -44,7 +44,6 @@ import com.efit.savaari.entity.ListOfValuesVO;
 import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.VendorRateVO;
-import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MasterService;
 

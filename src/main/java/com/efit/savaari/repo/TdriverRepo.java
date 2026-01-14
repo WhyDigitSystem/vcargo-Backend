@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.efit.savaari.entity.TdriverVO;
-import com.efit.savaari.entity.TripInvoiceVO;
 
 @Repository
 public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {

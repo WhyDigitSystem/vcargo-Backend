@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import com.efit.savaari.entity.TdriverDocumentsVO;
 import com.efit.savaari.entity.TdriverVO;
-import com.efit.savaari.entity.TvehicleDocumentsVO;
-import com.efit.savaari.entity.TvehicleVO;
 
 @Repository
 public interface TdriverDocumentsRepo extends JpaRepository<TdriverDocumentsVO, Long>{

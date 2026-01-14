@@ -2,7 +2,6 @@ package com.efit.savaari.service;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 

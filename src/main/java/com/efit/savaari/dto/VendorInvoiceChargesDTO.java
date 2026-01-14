@@ -2,11 +2,6 @@ package com.efit.savaari.dto;
 
 import java.math.BigDecimal;
 
-import javax.persistence.Column;
-
-import com.efit.savaari.entity.VendorInvoiceChargesVO;
-import com.efit.savaari.entity.VendorInvoiceVO;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
