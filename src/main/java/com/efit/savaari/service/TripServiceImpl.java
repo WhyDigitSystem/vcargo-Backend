@@ -2,6 +2,7 @@ package com.efit.savaari.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -208,15 +209,28 @@ public class TripServiceImpl implements TripService {
 		return tripResponseDTO;
 	}
 
+	@Transactional
 	@Override
 	public String updateTripStartEnd(Long id, String status) {
 
-	    if ("START".equalsIgnoreCase(status)) {
+		  TripVO trip = tripRepo.findById(id)
+		            .orElseThrow(() -> new RuntimeException("Trip not found"));
 
+		    TdriverVO driver = trip.getDriver();
+
+		    if (driver == null) {
+		        throw new RuntimeException("Driver not assigned to trip");
+		    }
+		
+	    if ("START".equalsIgnoreCase(status)) {
+	    	
 	        int updated = tripRepo.updateTripStart(id);
 	        if (updated == 0) {
 	            throw new RuntimeException("Trip not found");
 	        }
+	        
+	        driverRepo.updateDriverStatus(driver.getId(), "ONTRIP");
+
 	        return "Trip Started Successfully";
 
 	    } else if ("END".equalsIgnoreCase(status)) {
@@ -225,6 +239,9 @@ public class TripServiceImpl implements TripService {
 	        if (updated == 0) {
 	            throw new RuntimeException("Trip not found");
 	        }
+	        
+	        driverRepo.updateDriverStatus(driver.getId(), "ACTIVE");
+
 	        return "Trip Completed Successfully";
 
 	    } else {

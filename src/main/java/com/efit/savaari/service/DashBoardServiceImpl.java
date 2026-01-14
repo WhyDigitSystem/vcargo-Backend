@@ -228,6 +228,8 @@ public class DashBoardServiceImpl implements DashBoardService {
 	        BigDecimal totalFuelAmount = fuelRepo.gettotalFuelAmount(orgId);
 	        dashboard.put("totalFuelAmount", totalFuelAmount == null ? 0L : totalFuelAmount.longValue());
 	        
+	        Number onTripDriverCount = tripRepo.getOnTripDriverCount(orgId);
+	        dashboard.put("onTripDriverCount", onTripDriverCount == null ? 0L : onTripDriverCount.longValue());
 	        
 	        // ✅ Total Fuel Cost
 	        BigDecimal totalFuel = fuelRepo.getTotalFuel(orgId);
