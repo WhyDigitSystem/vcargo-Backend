@@ -222,8 +222,8 @@ public class DashBoardServiceImpl implements DashBoardService {
 	        Number totalTyresPurchased = tyreRepo.getTyresPurchased(orgId);
 	        dashboard.put("totalTyresPurchased", totalTyresPurchased == null ? 0L : totalTyresPurchased.longValue());
 	        
-//	        Number totalTripCount = tripRepo.getTyresPurchased(orgId);
-//	        dashboard.put("totalTyresPurchased", totalTyresPurchased == null ? 0L : totalTyresPurchased.longValue());
+	        Number totalTripCount = tripRepo.getTotalCount(orgId);
+	        dashboard.put("totalTripCount", totalTripCount == null ? 0L : totalTripCount.longValue());
 	        
 	        
 	        
