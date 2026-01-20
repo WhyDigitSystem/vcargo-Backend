@@ -1,7 +1,5 @@
 package com.efit.savaari.entity;
 
-import java.time.LocalDate;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,22 +17,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "companyaddress")
+@Table(name = "companybankdetails")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyAddressVO {
+public class CompanyBankDetailsVO {
+
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "companyaddressgen")
-	@SequenceGenerator(name = "companyaddressgen", sequenceName = "companyaddressseq", initialValue = 1000000001, allocationSize = 1)
-	@Column(name = "companyaddressid")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "companybankdetailsgen")
+	@SequenceGenerator(name = "companybankdetailsgen", sequenceName = "companybankdetailsseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "companybankdetailsid")
 	private Long id;
 	
-	@Column(name = "shippingaddress")
-	private String shippingAddress;
-	@Column(name = "billingaddress")
-	private String billingAddress;
+
+	@Column(name = "accountholdername")
+	private String accountHolderName;
+	@Column(name = "accountnumber")
+	private String accountNumber;
+	@Column(name = "bankname")
+	private String bankName;
+	@Column(name = "ifsccode ")
+	private String ifscCode;
+	@Column(name = "branch")
+	private String branch;
+	@Column(name = "branchcode")
+	private String branchCode;
 	@Column(name = "primarys")
 	private boolean primary;
 	
@@ -42,5 +50,4 @@ public class CompanyAddressVO {
 	@JoinColumn(name = "companyprofileid")
 	@JsonBackReference
 	private CompanyProfileVO companyProfileVO;
-
 }

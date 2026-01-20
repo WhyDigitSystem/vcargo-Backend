@@ -5,12 +5,12 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.efit.savaari.entity.CompanyAddressVO;
+import com.efit.savaari.entity.CompanyBankDetailsVO;
 import com.efit.savaari.entity.CompanyProfileVO;
 
 @Repository
-public interface CompanyAddressRepo extends JpaRepository<CompanyAddressVO, Long>{
+public interface CompanyBankDetailsRepo extends JpaRepository< CompanyBankDetailsVO, Long> {
 
-	List<CompanyAddressVO> findByCompanyProfileVO(CompanyProfileVO vo);
+	List<CompanyBankDetailsVO> findByCompanyProfileVO(CompanyProfileVO vo);
 
 }

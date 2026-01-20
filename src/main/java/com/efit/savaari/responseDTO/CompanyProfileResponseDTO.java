@@ -1,4 +1,4 @@
-package com.efit.savaari.dto;
+package com.efit.savaari.responseDTO;
 
 import java.util.List;
 
@@ -21,10 +21,10 @@ public class CompanyProfileResponseDTO {
 	private String phoneNo;
 	private String gstNo;
 	private String panNo;
-	private String accountHolderName;
-	private String accountNumber;
-	private String bankName;
-	private String ifscCode;
+//	private String accountHolderName;
+//	private String accountNumber;
+//	private String bankName;
+//	private String ifscCode;
 	private String website;
 	private String establishedYear;
 	private String termsAndConditions;
@@ -36,6 +36,7 @@ public class CompanyProfileResponseDTO {
 	private byte[] companyLogo;
 	
     private List<CompanyAddressResponseDTO> companyAddresses;
+    private List<CompanyBankDetailsResponseDTO> companyBankDetailsResponseDTO;
 
 	
 }

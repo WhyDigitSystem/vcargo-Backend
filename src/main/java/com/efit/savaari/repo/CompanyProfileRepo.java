@@ -15,4 +15,5 @@ public interface CompanyProfileRepo extends JpaRepository<CompanyProfileVO, Long
 	Page<CompanyProfileVO> getAllCompanyProfileByOrgId(Long orgId, Pageable pageable);
 
 
+
 }

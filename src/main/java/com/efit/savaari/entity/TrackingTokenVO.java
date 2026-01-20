@@ -1,29 +1,26 @@
 package com.efit.savaari.entity;
 
-import java.time.LocalDate;
-
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.efit.savaari.dto.CreatedUpdatedDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "companyaddress")
+@Table(name = "trackingtoken")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyAddressVO {
+public class TrackingTokenVO {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "companyaddressgen")
@@ -31,16 +28,15 @@ public class CompanyAddressVO {
 	@Column(name = "companyaddressid")
 	private Long id;
 	
-	@Column(name = "shippingaddress")
-	private String shippingAddress;
-	@Column(name = "billingaddress")
-	private String billingAddress;
-	@Column(name = "primarys")
-	private boolean primary;
-	
-	@ManyToOne
-	@JoinColumn(name = "companyprofileid")
-	@JsonBackReference
-	private CompanyProfileVO companyProfileVO;
+	@Column(length = 2000)
+    private String token;
+
+    @Column(name = "refresh_token", length = 2000)
+    private String refreshToken;
+    
+    
+    
+	@Embedded
+	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 
 }

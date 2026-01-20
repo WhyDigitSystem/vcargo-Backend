@@ -1,6 +1,5 @@
 package com.efit.savaari.entity;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -51,14 +50,7 @@ public class CompanyProfileVO {
 	private String gstNo;
 	@Column(name = "panno")
 	private String panNo;
-	@Column(name = "accountholdername")
-	private String accountHolderName;
-	@Column(name = "accountnumber")
-	private String accountNumber;
-	@Column(name = "bankname")
-	private String bankName;
-	@Column(name = "ifsccode ")
-	private String ifscCode;
+	
 	@Column(name = "website")
 	private String website;
 	@Column(name = "establishedyear")
@@ -102,6 +94,11 @@ public class CompanyProfileVO {
 	@JsonManagedReference
 	private List<CompanyAddressVO> companyAddressVO;
 	
+	
+	
+	@OneToMany(mappedBy = "companyProfileVO", cascade = CascadeType.ALL)
+	@JsonManagedReference
+	private List<CompanyBankDetailsVO> companyBankDetailsVO;
 	
 	@Embedded
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();

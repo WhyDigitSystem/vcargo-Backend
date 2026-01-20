@@ -30,7 +30,6 @@ import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.BranchDTO;
 import com.efit.savaari.dto.ChargeTypeDTO;
 import com.efit.savaari.dto.CompanyProfileDTO;
-import com.efit.savaari.dto.CompanyProfileResponseDTO;
 import com.efit.savaari.dto.CustomerDTO;
 import com.efit.savaari.dto.CustomerRateDTO;
 import com.efit.savaari.dto.IndentsDTO;
@@ -47,6 +46,7 @@ import com.efit.savaari.entity.ListOfValuesVO;
 import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.VendorRateVO;
+import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MasterService;
 
@@ -1078,10 +1078,12 @@ public class MasterController extends BaseController {
 //		
 		@PutMapping(
 			    value = "/createUpdateCompanyProfile",
-			    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-			)
-			public ResponseEntity<ResponseDTO> createUpdateCompanyProfile(
-			        @RequestPart("companyProfileDTO") CompanyProfileDTO companyProfileDTO,
+				    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+				)
+				public ResponseEntity<ResponseDTO> createUpdateCompanyProfile(
+				        @RequestPart("companyProfileDTO") CompanyProfileDTO companyProfileDTO,
+//				        @RequestBody CompanyProfileDTO companyProfileDTO,
+
 			        @RequestPart(value = "image", required = false) MultipartFile image) {
 
 		    String methodName = "createUpdateCompanyProfile()";

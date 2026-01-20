@@ -1,5 +1,4 @@
-package com.efit.savaari.dto;
-
+package com.efit.savaari.responseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,4 +12,6 @@ public class CompanyAddressResponseDTO {
 	private Long id;
 	private String shippingAddress;
 	private String billingAddress;
+	private boolean primary;
+
 }

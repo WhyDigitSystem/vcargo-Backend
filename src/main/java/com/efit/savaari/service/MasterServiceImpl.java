@@ -25,9 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.dto.BranchDTO;
 import com.efit.savaari.dto.ChargeTypeDTO;
-import com.efit.savaari.dto.CompanyAddressResponseDTO;
 import com.efit.savaari.dto.CompanyProfileDTO;
-import com.efit.savaari.dto.CompanyProfileResponseDTO;
 import com.efit.savaari.dto.CustomerAddressDTO;
 import com.efit.savaari.dto.CustomerDTO;
 import com.efit.savaari.dto.CustomerRateDTO;
@@ -43,6 +41,7 @@ import com.efit.savaari.dto.VendorRateDTO;
 import com.efit.savaari.entity.BranchVO;
 import com.efit.savaari.entity.ChargeTypeVO;
 import com.efit.savaari.entity.CompanyAddressVO;
+import com.efit.savaari.entity.CompanyBankDetailsVO;
 import com.efit.savaari.entity.CompanyProfileVO;
 import com.efit.savaari.entity.CustomerAddressVO;
 import com.efit.savaari.entity.CustomerRateVO;
@@ -58,7 +57,6 @@ import com.efit.savaari.entity.RoutesPetrolPumpsVO;
 import com.efit.savaari.entity.RoutesPitstopVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.TimeLineVO;
-import com.efit.savaari.entity.TripVO;
 import com.efit.savaari.entity.TripsDocumentsVO;
 import com.efit.savaari.entity.TripsLinkedVO;
 import com.efit.savaari.entity.VendorRateVO;
@@ -66,6 +64,8 @@ import com.efit.savaari.entity.VendorResponseVO;
 import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.repo.BranchRepo;
 import com.efit.savaari.repo.ChargeTypeRepo;
+import com.efit.savaari.repo.CompanyAddressRepo;
+import com.efit.savaari.repo.CompanyBankDetailsRepo;
 import com.efit.savaari.repo.CompanyProfileRepo;
 import com.efit.savaari.repo.CustomerAddressRepo;
 import com.efit.savaari.repo.CustomerRateRepo;
@@ -92,7 +92,9 @@ import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.repo.VehicleTypeRepo;
 import com.efit.savaari.repo.VendorRateRepo;
 import com.efit.savaari.repo.VendorResponseRepo;
-import com.efit.savaari.responseDTO.TripResponseDTO;
+import com.efit.savaari.responseDTO.CompanyAddressResponseDTO;
+import com.efit.savaari.responseDTO.CompanyBankDetailsResponseDTO;
+import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
 
 @Service
 public class MasterServiceImpl implements MasterService {
@@ -187,7 +189,13 @@ public class MasterServiceImpl implements MasterService {
 	
 	@Autowired
 	CompanyProfileRepo companyProfileRepo;
+	
+	@Autowired
+	CompanyAddressRepo companyAddressRepo;
 
+	@Autowired
+	CompanyBankDetailsRepo companyBankDetailsRepo;
+	
 	MasterServiceImpl(OtpAsyncService otpAsyncService) {
 		this.otpAsyncService = otpAsyncService;
 	}
@@ -1391,6 +1399,12 @@ public class MasterServiceImpl implements MasterService {
 		            vo = companyProfileRepo.findById(dto.getId())
 		                    .orElseThrow(() -> new RuntimeException("Invalid CompanyProfile ID"));
 		            vo.setUpdatedBy(dto.getCreatedBy());
+		            List<CompanyAddressVO> companyAddressVO = companyAddressRepo.findByCompanyProfileVO(vo);
+		            companyAddressRepo.deleteAll(companyAddressVO);
+		            
+		            List<CompanyBankDetailsVO> companyBankDetailsVO = companyBankDetailsRepo.findByCompanyProfileVO(vo);
+		            companyBankDetailsRepo.deleteAll(companyBankDetailsVO);
+
 		            message = "Company Profile Updated Successfully";
 		        } else {
 		            vo = new CompanyProfileVO();
@@ -1436,10 +1450,10 @@ public class MasterServiceImpl implements MasterService {
 		        vo.setPhoneNo(dto.getPhoneNo());
 		        vo.setGstNo(dto.getGstNo());
 		        vo.setPanNo(dto.getPanNo());
-		        vo.setAccountHolderName(dto.getAccountHolderName());
-		        vo.setAccountNumber(dto.getAccountNumber());
-		        vo.setBankName(dto.getBankName());
-		        vo.setIfscCode(dto.getIfscCode());
+//		        vo.setAccountHolderName(dto.getAccountHolderName());
+//		        vo.setAccountNumber(dto.getAccountNumber());
+//		        vo.setBankName(dto.getBankName());
+//		        vo.setIfscCode(dto.getIfscCode());
 		        vo.setWebsite(dto.getWebsite());
 		        vo.setEstablishedYear(dto.getEstablishedYear());
 		        vo.setBranch(dto.getBranch());
@@ -1447,12 +1461,7 @@ public class MasterServiceImpl implements MasterService {
 		        vo.setTermsAndConditions(dto.getTermsAndConditions());
 		        vo.setOrgId(dto.getOrgId());
 
-		        // ===== CHILD TABLE (CompanyAddress) =====
-		        if (vo.getCompanyAddressVO() == null) {
-		            vo.setCompanyAddressVO(new ArrayList<>());
-		        } else {
-		            vo.getCompanyAddressVO().clear(); // important for update
-		        }
+		        vo.setCompanyAddressVO(new ArrayList<>());
 
 		        if (dto.getCompanyAddressDTO() != null && !dto.getCompanyAddressDTO().isEmpty()) {
 
@@ -1461,9 +1470,32 @@ public class MasterServiceImpl implements MasterService {
 		                CompanyAddressVO addr = new CompanyAddressVO();
 		                addr.setShippingAddress(a.getShippingAddress());
 		                addr.setBillingAddress(a.getBillingAddress());
-		                addr.setCompanyProfileVO(vo); // 🔥 link parent
+		                addr.setPrimary(a.isPrimary());
+		                addr.setCompanyProfileVO(vo); // link parent
 
 		                vo.getCompanyAddressVO().add(addr);
+		            });
+		        }
+		        
+		        
+		     // ===== BANK DETAILS LIST =====
+		        vo.setCompanyBankDetailsVO(new ArrayList<>());
+
+		        if (dto.getCompanyBankDetailsDTO() != null && !dto.getCompanyBankDetailsDTO().isEmpty()) {
+
+		            dto.getCompanyBankDetailsDTO().forEach(a -> {
+
+		                CompanyBankDetailsVO bank = new CompanyBankDetailsVO();
+		                bank.setAccountHolderName(a.getAccountHolderName());
+		                bank.setAccountNumber(a.getAccountNumber());
+		                bank.setBankName(a.getBankName());
+		                bank.setIfscCode(a.getIfscCode());
+		                bank.setPrimary(a.isPrimary());
+		                bank.setBranch(a.getBranch());
+		                bank.setBranchCode(a.getBranchCode());
+		                bank.setCompanyProfileVO(vo);
+
+		                vo.getCompanyBankDetailsVO().add(bank);
 		            });
 		        }
 		    }
@@ -1483,10 +1515,10 @@ public class MasterServiceImpl implements MasterService {
 		        dto.setPhoneNo(vo.getPhoneNo());
 		        dto.setGstNo(vo.getGstNo());
 		        dto.setPanNo(vo.getPanNo());
-		        dto.setAccountHolderName(vo.getAccountHolderName());
-		        dto.setAccountNumber(vo.getAccountNumber());
-		        dto.setBankName(vo.getBankName());
-		        dto.setIfscCode(vo.getIfscCode());
+//		        dto.setAccountHolderName(vo.getAccountHolderName());
+//		        dto.setAccountNumber(vo.getAccountNumber());
+//		        dto.setBankName(vo.getBankName());
+//		        dto.setIfscCode(vo.getIfscCode());
 		        dto.setWebsite(vo.getWebsite());
 		        dto.setEstablishedYear(vo.getEstablishedYear());
 		        dto.setCreatedBy(vo.getCreatedBy());
@@ -1507,11 +1539,35 @@ public class MasterServiceImpl implements MasterService {
 		                        adto.setId(a.getId());
 		                        adto.setShippingAddress(a.getShippingAddress());
 		                        adto.setBillingAddress(a.getBillingAddress());
+		                        adto.setPrimary(a.isPrimary());
 		                        return adto;
 
 		                    }).collect(Collectors.toList());
 
 		            dto.setCompanyAddresses(addressList);
+		        }
+		        
+		        
+		        if (vo.getCompanyBankDetailsVO() != null && !vo.getCompanyBankDetailsVO().isEmpty()) {
+
+		            List<CompanyBankDetailsResponseDTO> bankList =
+		                    vo.getCompanyBankDetailsVO().stream().map(a -> {
+
+		                    	CompanyBankDetailsResponseDTO bankto = new CompanyBankDetailsResponseDTO();
+		                    	bankto.setId(a.getId());
+		                    	bankto.setAccountHolderName(a.getAccountHolderName());
+		                    	bankto.setAccountNumber(a.getAccountNumber());
+		                    	bankto.setBankName(a.getBankName());
+		                    	bankto.setIfscCode(a.getIfscCode());
+		                    	bankto.setBranch(a.getBranch());
+		                    	bankto.setBranchCode(a.getBranchCode());
+		                    	bankto.setPrimary(a.isPrimary());
+
+		                        return bankto;
+
+		                    }).collect(Collectors.toList());
+
+		            dto.setCompanyBankDetailsResponseDTO(bankList);
 		        }
 
 		        return dto;

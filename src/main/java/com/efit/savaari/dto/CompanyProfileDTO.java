@@ -20,10 +20,10 @@ public class CompanyProfileDTO {
 	private String phoneNo;
 	private String gstNo;
 	private String panNo;
-	private String accountHolderName;
-	private String accountNumber;
-	private String bankName;
-	private String ifscCode;
+//	private String accountHolderName;
+//	private String accountNumber;
+//	private String bankName;
+//	private String ifscCode;
 	private String website;
 	private String establishedYear;
 	private String termsAndConditions;
@@ -36,4 +36,6 @@ public class CompanyProfileDTO {
 //	private byte[] companyLogo;
 	
 	private List<CompanyAddressDTO> companyAddressDTO;
+	private List<CompanyBankDetailsDTO> companyBankDetailsDTO;
+
 }

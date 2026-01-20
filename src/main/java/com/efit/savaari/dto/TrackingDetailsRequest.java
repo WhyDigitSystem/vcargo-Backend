@@ -5,12 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class CompanyAddressDTO {
-	
-	private String shippingAddress;
-	private String billingAddress;
-	private boolean primary;
+@NoArgsConstructor
+public class TrackingDetailsRequest {
 
+    private String username;
+    private String password;
+    
+	
+
+    // getters & setters
 }
