@@ -1,5 +1,7 @@
 package com.efit.savaari.entity;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -23,19 +25,24 @@ import lombok.NoArgsConstructor;
 public class TrackingTokenVO {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "companyaddressgen")
-	@SequenceGenerator(name = "companyaddressgen", sequenceName = "companyaddressseq", initialValue = 1000000001, allocationSize = 1)
-	@Column(name = "companyaddressid")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trackingtokengen")
+	@SequenceGenerator(name = "trackingtokengen", sequenceName = "trackingtokenseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "trackingtokenid")
 	private Long id;
-	
-	@Column(length = 2000)
-    private String token;
 
-    @Column(name = "refresh_token", length = 2000)
-    private String refreshToken;
-    
-    
-    
+	private String username;
+
+	private String password;
+
+	@Column(length = 2000)
+	private String token;
+
+	@Column(name = "refresh_token", length = 2000)
+	private String refreshToken;
+
+	@Column(name = "token_expiry")
+	private LocalDateTime tokenExpiry;
+
 	@Embedded
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 

@@ -10,4 +10,5 @@ public interface TrackingTokenRepo extends JpaRepository<TrackingTokenVO, Long> 
 
     TrackingTokenVO findTopByOrderByIdDesc();   // get latest token
 
+
 }

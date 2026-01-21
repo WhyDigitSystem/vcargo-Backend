@@ -1,9 +1,16 @@
 package com.efit.savaari.service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -19,160 +26,148 @@ import com.efit.savaari.entity.TrackingTokenVO;
 import com.efit.savaari.repo.TrackingTokenRepo;
 import com.efit.savaari.responseDTO.TrackingTokenResponse;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class TrackingTokenServiceImpl  implements TrackingTokenService{
+	
+	private static final Logger LOGGER =
+	        LoggerFactory.getLogger(TrackingTokenServiceImpl.class);
+
 
 	@Autowired
 	private TrackingTokenRepo trackingTokenRepo;
 	
-//	@Override
-//	public TrackingTokenResponse getTokenFromMasters() {
-//
-//	    RestTemplate restTemplate = new RestTemplate();
-//
-//	    String url = "https://api-platform.mastersindia.co/api/v2/token-auth/";
-//
-//	    HttpHeaders headers = new HttpHeaders();
-//	    headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//	    TrackingDetailsRequest request = new TrackingDetailsRequest();
-//	    request.setUsername("info@whydigit.com");
-//	    request.setPassword("Masters@12345");
-//
-//	    HttpEntity<TrackingDetailsRequest> entity =
-//	            new HttpEntity<>(request, headers);
-//
-//	    ResponseEntity<TrackingTokenResponse> response =
-//	            restTemplate.postForEntity(url, entity, TrackingTokenResponse.class);
-//
-//	    TrackingTokenResponse res = response.getBody();
-//
-//	    // ✅ SAVE INTO trackingtoken TABLE
-//	    TrackingTokenVO vo = new TrackingTokenVO();
-//	    vo.setToken(res.getToken());
-//	    vo.setRefreshToken(res.getRefresh_token());
-//	    // commonDate will auto set if you set in constructor / listener
-//
-//	    trackingTokenRepo.save(vo);
-//
-//	    return res;
-//	}
-//
-//	
-//	@Override
-//	public Map<String, Object> getToken() {
-//
-//	    TrackingTokenVO tokenVO = trackingTokenRepo.findTopByOrderByIdDesc();
-//
-//	    Map<String, Object> map = new HashMap<>();
-//	    map.put("token", tokenVO.getToken());
-//	    map.put("refreshToken", tokenVO.getRefreshToken());
-//
-//	    return map;
-//	}
-	
-	@Override
-	public Map<String, Object> getToken() {
+	 @Autowired
+	 private RestTemplate restTemplate;
 
-	    // ✅ 1. Check latest token from DB
-	    TrackingTokenVO tokenVO = trackingTokenRepo.findTopByOrderByIdDesc();
+	    // ================= TOKEN API =================
 
-	    if (tokenVO != null && tokenVO.getToken() != null) {
+	    @Override
+	    public Map<String, Object> getToken() {
+
+	        TrackingTokenVO tokenVO =
+	                trackingTokenRepo.findTopByOrderByIdDesc();
+
+	        // ✅ if exists and not expired → use DB
+	        if (tokenVO != null && !isTokenExpired(tokenVO.getTokenExpiry())) {
+
+	            Map<String, Object> map = new HashMap<>();
+	            map.put("token", tokenVO.getToken());
+	            map.put("refreshToken", tokenVO.getRefreshToken());
+	            map.put("expiry", tokenVO.getTokenExpiry());
+	            map.put("source", "DB");
+	            return map;
+	        }
+
+	        // ❗ expired or not exists → create new
+	        return createAndSaveNewToken();
+	    }
+
+	    
+	    @Override
+	    public void autoRefreshIfExpired() {
+
+	        TrackingTokenVO latest =
+	                trackingTokenRepo.findTopByOrderByIdDesc();
+
+	        if (latest == null) {
+	            LOGGER.info("No token found, creating new token");
+	            createAndSaveNewToken();
+	            return;
+	        }
+
+	        if (isTokenExpired(latest.getTokenExpiry())) {
+	            LOGGER.info("Token expired / near expiry, refreshing...");
+	            createAndSaveNewToken();
+	        } else {
+	            LOGGER.info("Token still valid till {}", latest.getTokenExpiry());
+	        }
+	    }
+
+	    private Map<String, Object> createAndSaveNewToken() {
+
+	    	 TrackingTokenVO cred =
+	    	            trackingTokenRepo.findTopByOrderByIdDesc();
+	    	 
+	    	  if (cred == null || cred.getUsername() == null) {
+	    	        throw new RuntimeException("Credentials not found in trackingtoken table");
+	    	    }
+	    	  
+	        String url =
+	            "https://api-platform.mastersindia.co/api/v2/token-auth/";
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        TrackingDetailsRequest request = new TrackingDetailsRequest();
+//	        request.setUsername("info@whydigit.com");
+//	        request.setPassword("Masters@12345");
+	        request.setUsername(cred.getUsername());
+	        request.setPassword(cred.getPassword());
+
+	        HttpEntity<TrackingDetailsRequest> entity =
+	                new HttpEntity<>(request, headers);
+
+	        ResponseEntity<TrackingTokenResponse> response =
+	                restTemplate.postForEntity(url, entity,
+	                        TrackingTokenResponse.class);
+
+	        TrackingTokenResponse res = response.getBody();
+
+	        if (res == null || res.getToken() == null) {
+	            throw new RuntimeException("Token API failed");
+	        }
+
+	        // ✅ extract expiry
+	        Long exp = getExpiryFromToken(res.getToken());
+	        LocalDateTime expiryTime = convertToDate(exp);
+
+	        // ✅ save DB
+	        TrackingTokenVO vo = new TrackingTokenVO();
+	        vo.setUsername(cred.getUsername());
+	        vo.setPassword(cred.getPassword());
+	        vo.setToken(res.getToken());
+	        vo.setRefreshToken(res.getRefresh_token());
+	        vo.setTokenExpiry(expiryTime);
+
+	        trackingTokenRepo.save(vo);
 
 	        Map<String, Object> map = new HashMap<>();
-	        map.put("token", tokenVO.getToken());
-	        map.put("refreshToken", tokenVO.getRefreshToken());
-	        map.put("source", "DB");
+	        map.put("token", res.getToken());
+	        map.put("refreshToken", res.getRefresh_token());
+	        map.put("expiry", expiryTime);
+	        map.put("source", "API");
 
 	        return map;
 	    }
 
-	    // ✅ 2. If not found → call MastersIndia API
-	    RestTemplate restTemplate = new RestTemplate();
+	    // ================= FASTAG API =================
 
-	    String url = "https://api-platform.mastersindia.co/api/v2/token-auth/";
-
-	    HttpHeaders headers = new HttpHeaders();
-	    headers.setContentType(MediaType.APPLICATION_JSON);
-
-	    TrackingDetailsRequest request = new TrackingDetailsRequest();
-	    request.setUsername("info@whydigit.com");
-	    request.setPassword("Masters@12345");
-
-	    HttpEntity<TrackingDetailsRequest> entity =
-	            new HttpEntity<>(request, headers);
-
-	    ResponseEntity<TrackingTokenResponse> response =
-	            restTemplate.postForEntity(url, entity, TrackingTokenResponse.class);
-
-	    TrackingTokenResponse res = response.getBody();
-
-	    if (res == null || res.getToken() == null) {
-	        throw new RuntimeException("MastersIndia token API failed");
-	    }
-
-	    // ✅ 3. Save into DB
-	    TrackingTokenVO vo = new TrackingTokenVO();
-	    vo.setToken(res.getToken());
-	    vo.setRefreshToken(res.getRefresh_token());
-
-	    trackingTokenRepo.save(vo);
-
-	    // ✅ 4. Return response
-	    Map<String, Object> map = new HashMap<>();
-	    map.put("token", res.getToken());
-	    map.put("refreshToken", res.getRefresh_token());
-	    map.put("source", "API");
-
-	    return map;
-	}
-
-	
-	 @Override
+	    @Override
 	    public Map<String, Object> callFastagApi(FastagRequestDTO dto) {
 
-	        String token;
+	        // ✅ always get valid token automatically
+	        Map<String, Object> tokenMap = getToken();
+	        String token = (String) tokenMap.get("token");
 
-	        // ✅ 1. Token from DTO or DB
-	        if (dto.getToken() != null && !dto.getToken().isEmpty()) {
-	            token = dto.getToken();
-	        } else {
-	            TrackingTokenVO latest =
-	                    trackingTokenRepo.findTopByOrderByIdDesc();
-
-	            if (latest == null) {
-	                throw new RuntimeException(
-	                        "Token not found. Please generate token first.");
-	            }
-	            token = latest.getToken();
-	        }
-
-	        // ✅ 2. FASTAG API URL
 	        String url =
-	          "https://api-platform.mastersindia.co/api/v2/sbt/FASTAG/";
+	            "https://api-platform.mastersindia.co/api/v2/sbt/FASTAG/";
 
-	        // ✅ 3. Headers
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.APPLICATION_JSON);
 
 	        headers.set("Subid", dto.getSubid());
 	        headers.set("Productid", dto.getProductid());
 	        headers.set("Mode", dto.getMode());
-
-	        // MastersIndia expects JWT
 	        headers.set("Authorization", "JWT " + token);
 
-	        // ✅ 4. Body
 	        Map<String, String> body = new HashMap<>();
 	        body.put("vehiclenumber", dto.getVehiclenumber());
 
 	        HttpEntity<Map<String, String>> entity =
 	                new HttpEntity<>(body, headers);
 
-	        RestTemplate restTemplate = new RestTemplate();
-
-	        // ✅ 5. Call API
 	        ResponseEntity<JsonNode> response =
 	                restTemplate.postForEntity(url, entity, JsonNode.class);
 
@@ -182,7 +177,8 @@ public class TrackingTokenServiceImpl  implements TrackingTokenService{
 	            throw new RuntimeException("Empty FASTAG response");
 	        }
 
-	        // ✅ 6. FLATTEN RESPONSE
+	        // ===== flatten response =====
+
 	        Map<String, Object> finalResponse = new HashMap<>();
 
 	        JsonNode responseArr =
@@ -192,38 +188,35 @@ public class TrackingTokenServiceImpl  implements TrackingTokenService{
 
 	            JsonNode mainResp = responseArr.get(0).path("response");
 
-	            String result = mainResp.path("result").asText();
-	            finalResponse.put("status", result);
+	            finalResponse.put("status",
+	                    mainResp.path("result").asText());
 
-	            JsonNode vehicleNode = mainResp.path("vehicle");
-	            JsonNode txnList = vehicleNode.path("vehltxnList");
+	            JsonNode txnList =
+	                    mainResp.path("vehicle").path("vehltxnList");
 
-	            if (!txnList.isMissingNode() && !txnList.isNull()) {
+	            if (!txnList.isNull()) {
 
 	                finalResponse.put("totalTransactions",
 	                        txnList.path("totalTagsInMsg").asInt());
 
-	                JsonNode txns = txnList.path("txn");
+	                List<Map<String, Object>> txnArray =
+	                        new ArrayList<>();
 
-	                List<Map<String, Object>> txnArray = new ArrayList<>();
+	                for (JsonNode txn : txnList.path("txn")) {
 
-	                if (txns.isArray()) {
-	                    for (JsonNode txn : txns) {
+	                    Map<String, Object> t = new HashMap<>();
+	                    t.put("readerReadTime",
+	                            txn.path("readerReadTime").asText());
+	                    t.put("tollPlazaName",
+	                            txn.path("tollPlazaName").asText());
+	                    t.put("laneDirection",
+	                            txn.path("laneDirection").asText());
+	                    t.put("vehicleType",
+	                            txn.path("vehicleType").asText());
+	                    t.put("vehicleRegNo",
+	                            txn.path("vehicleRegNo").asText());
 
-	                        Map<String, Object> t = new HashMap<>();
-	                        t.put("readerReadTime",
-	                                txn.path("readerReadTime").asText());
-	                        t.put("tollPlazaName",
-	                                txn.path("tollPlazaName").asText());
-	                        t.put("laneDirection",
-	                                txn.path("laneDirection").asText());
-	                        t.put("vehicleType",
-	                                txn.path("vehicleType").asText());
-	                        t.put("vehicleRegNo",
-	                                txn.path("vehicleRegNo").asText());
-
-	                        txnArray.add(t);
-	                    }
+	                    txnArray.add(t);
 	                }
 
 	                finalResponse.put("transactions", txnArray);
@@ -232,5 +225,51 @@ public class TrackingTokenServiceImpl  implements TrackingTokenService{
 
 	        return finalResponse;
 	    }
+
+	    // ================= JWT UTILS =================
+
+	    private Long getExpiryFromToken(String token) {
+	        try {
+	            String[] parts = token.split("\\.");
+	            String payload = new String(
+	                    Base64.getUrlDecoder().decode(parts[1]));
+	            ObjectMapper mapper = new ObjectMapper();
+	            JsonNode json = mapper.readTree(payload);
+	            return json.get("exp").asLong();
+	        } catch (Exception e) {
+	            throw new RuntimeException("Invalid JWT token");
+	        }
+	    }
+
+	    private LocalDateTime convertToDate(long expSeconds) {
+	        return Instant.ofEpochSecond(expSeconds)
+	                .atZone(ZoneId.systemDefault())
+	                .toLocalDateTime();
+	    }
+
+	    private boolean isTokenExpired(LocalDateTime expiry) {
+	        return expiry == null ||
+	                LocalDateTime.now().isAfter(expiry);
+	    }
+
+
+	    @Override
+	    public Map<String, Object> getTokenDetails() {
+
+	        TrackingTokenVO cred =
+	                trackingTokenRepo.findTopByOrderByIdDesc();
+
+	        if (cred == null) {
+	            throw new RuntimeException("No token found in database");
+	        }
+
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("token", cred.getToken());
+	        map.put("refreshToken", cred.getRefreshToken());
+	        map.put("expiry", cred.getTokenExpiry());
+
+	        return map;   // ✅ IMPORTANT
+	    }
+
 }
 

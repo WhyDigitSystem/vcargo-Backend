@@ -27,7 +27,7 @@ public class TrackingTokenController extends BaseController{
     private TrackingTokenService trackingTokenService;
     
     
-    @PostMapping(value = "/getToken", produces = "application/json")
+    @PostMapping(value = "/getGenerateToken", produces = "application/json")
     public ResponseEntity<ResponseDTO> getOrCreateToken() {
 
         String methodName = "getOrCreateToken()";
@@ -49,6 +49,33 @@ public class TrackingTokenController extends BaseController{
         LOGGER.debug("Ending {}", methodName);
         return ResponseEntity.ok(responseDTO);
     }
+    
+    
+    
+    @PostMapping("/getToken")
+    public ResponseEntity<ResponseDTO> getTokenDetails() {
+
+        String methodName = "getTokenDetails()";
+        LOGGER.debug("Starting {}", methodName);
+
+        Map<String, Object> responseMap = new HashMap<>();
+        ResponseDTO responseDTO;
+
+        try {
+            Map<String, Object> token = trackingTokenService.getTokenDetails();
+            responseMap.put("message", "Token fetched successfully");
+            responseMap.put("token", token);
+            responseDTO = createServiceResponse(responseMap);
+        } catch (Exception e) {
+            LOGGER.error("Error in {}: {}", methodName, e.getMessage(), e);
+            responseDTO = createServiceResponseError(responseMap, "Token fetch failed", e.getMessage());
+        }
+
+        LOGGER.debug("Ending {}", methodName);
+        return ResponseEntity.ok(responseDTO);
+    }
+    
+    
     
     
     @PostMapping(value = "/fastag",
