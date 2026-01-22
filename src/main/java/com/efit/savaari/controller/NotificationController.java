@@ -28,16 +28,16 @@ public class NotificationController extends BaseController {
 	NotificationService notificationService;
 	
 	
-	@GetMapping("/byUserId")
-	public ResponseEntity<ResponseDTO> getNotificationByUserId(@RequestParam Long userId) {
-		String methodName = "getNotificationByUserId()";
+	@GetMapping("/byOrgId")
+	public ResponseEntity<ResponseDTO> getNotificationByOrgId(@RequestParam Long orgId) {
+		String methodName = "getNotificationByOrgId()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;
 		Map<String, Object> responseObjectsMap = new HashMap<>();
 		ResponseDTO responseDTO = null;
 		List<NotificationVO> notificationVO = new ArrayList<>();
 		try {
-			notificationVO = notificationService.getNotifications(userId);
+			notificationVO = notificationService.getNotifications(orgId);
 		} catch (Exception e) {
 			errorMsg = e.getMessage();
 			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
@@ -92,14 +92,14 @@ public class NotificationController extends BaseController {
 	}
 	
 	@PutMapping("/clearAll")
-	public ResponseEntity<ResponseDTO> clearAllNotification(@RequestParam Long userId) {
+	public ResponseEntity<ResponseDTO> clearAllNotification(@RequestParam Long orgId) {
 		String methodName = "clearNotification()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;
 		Map<String, Object> responseObjectsMap = new HashMap<>();
 		ResponseDTO responseDTO = null;
 		try {
-			notificationService.clearAll(userId);
+			notificationService.clearAll(orgId);
 			responseDTO = createServiceResponse(responseObjectsMap);
 		} catch (Exception e) {
 	        errorMsg = e.getMessage();

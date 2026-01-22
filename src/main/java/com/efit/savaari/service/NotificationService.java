@@ -9,15 +9,16 @@ import com.efit.savaari.entity.NotificationVO;
 @Service
 public interface NotificationService {
 	
-	void createNotification(Long userId, Long auctionId, String message,String type);
 
-    List<NotificationVO> getNotifications(Long userId);
+    List<NotificationVO> getNotifications(Long orgId);
 
     void markAsRead(Long notificationId);
 
     void deleteNotification(Long notificationId);
 
-    void clearAll(Long userId);
+    void clearAll(Long orgId);
+
+	void createNotification(Long orgId, String message, String type);
 
 
 }

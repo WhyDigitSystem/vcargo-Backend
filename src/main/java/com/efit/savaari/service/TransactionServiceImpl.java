@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -886,8 +888,6 @@ public class TransactionServiceImpl implements TransactionService {
 				bccEmailIds.append(",");
 			}
 			bccEmailIds.append(vo1.getUserName());
-			n1.setUserid(userId);
-			n1.setAuctionsid(vo.getId());
 			n1.setMessage(vo.getOrganizationName() + " ,Auction ID: " + vo.getId() + " Bid and Win...");
 			n1.setNotificationType("New Auction");
 			n.add(n1);
@@ -1501,8 +1501,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 		UserVO uv = userVO.get();
 		NotificationVO n1 = new NotificationVO();
-		n1.setAuctionsid(auction.getId());
-		n1.setUserid(auction.getUser().getId());
 		n1.setMessage("A new quote has been submitted by " + uv.getOrganizationName() + " for your auction "
 				+ auction.getId() + " . Please review the quote details.");
 		n1.setNotificationType("Quote Received");
@@ -2450,7 +2448,7 @@ public class TransactionServiceImpl implements TransactionService {
 				approvedQuoteRepo.save(approvedQuoteVO);
 
 				String msg = "Your Quote is Accepted";
-				notificationService.createNotification(userVO.getId(), auctionId, msg, "Quote Accepted");
+				notificationService.createNotification(userVO.getId(),  msg, "Quote Accepted");
 
 				List<QuoteVO> quotes = quoteRepo.findAllByAuctionAndUserNot(auctionVO, userVO);
 
@@ -2459,8 +2457,6 @@ public class TransactionServiceImpl implements TransactionService {
 					QuoteVO quo = quoteVO2;
 					UserVO userVO1 = quoteVO2.getUser();
 					NotificationVO n1 = new NotificationVO();
-					n1.setUserid(userVO1.getId());
-					n1.setAuctionsid(auctionId);
 					n1.setMessage("Your Quote is Rejected");
 					n1.setNotificationType("Quote Rejected");
 					n.add(n1);
@@ -2847,5 +2843,44 @@ public class TransactionServiceImpl implements TransactionService {
 		Page<Map<String, Object>> approvedQuotes = approvedQuoteRepo.getApprovedQuotesByOrg(orgId, pageable);
 		return paginationService.buildResponse(approvedQuotes);
 	}
+	
+	
+	@Scheduled(cron = "0 0 5 * * ?")
+    public void notifyVehicleExpiry() {
+
+        List<Object[]> results = vehicleRepo.findVehiclesExpiringWithin30Days();
+
+        for (Object[] row : results) {
+
+            String vehicleNumber = (String) row[0];
+            Long orgId = ((Number) row[1]).longValue();
+
+            LocalDate insurance = toLocalDate(row[2]);
+            LocalDate fitness = toLocalDate(row[3]);
+            LocalDate service = toLocalDate(row[4]);
+
+            processExpiry(orgId, vehicleNumber, insurance, "INSURANCE");
+            processExpiry(orgId, vehicleNumber, fitness, "FITNESS");
+            processExpiry(orgId, vehicleNumber, service, "SERVICE");
+        }
+    }
+
+    private void processExpiry(Long orgId, String vehicleNo,
+                               LocalDate expiryDate, String type) {
+
+        if (expiryDate == null) return;
+
+        long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
+
+        // 🔥 CORE LOGIC
+        if (daysLeft > 0 && daysLeft <= 30 && daysLeft % 5 == 0) {
+
+            String message =
+                "Vehicle " + vehicleNo + " " + type +
+                " expires in " + daysLeft + " days";
+
+            notificationService.createNotification(orgId, message, type);
+        }
+    }
 
 }
