@@ -229,7 +229,7 @@ public class TripServiceImpl implements TripService {
 	            throw new RuntimeException("Trip not found");
 	        }
 	        
-	        driverRepo.updateDriverStatus(driver.getId(), "ONTRIP");
+	        driverRepo.updateDriverStatus(driver.getId(), "Ontrip");
 
 	        return "Trip Started Successfully";
 
@@ -240,7 +240,7 @@ public class TripServiceImpl implements TripService {
 	            throw new RuntimeException("Trip not found");
 	        }
 	        
-	        driverRepo.updateDriverStatus(driver.getId(), "ACTIVE");
+	        driverRepo.updateDriverStatus(driver.getId(), "Active");
 
 	        return "Trip Completed Successfully";
 

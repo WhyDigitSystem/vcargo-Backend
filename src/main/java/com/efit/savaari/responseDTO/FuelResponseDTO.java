@@ -36,4 +36,6 @@ public class FuelResponseDTO {
 	private Long driverId;
 	private String driver;
 	private Long user;
+	private Double efficiency;
+
 }
