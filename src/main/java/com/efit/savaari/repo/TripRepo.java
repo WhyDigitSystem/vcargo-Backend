@@ -37,4 +37,7 @@ public interface TripRepo extends JpaRepository<TripVO, Long> {
 	@Query(nativeQuery = true, value = "select count(*) from trip where orgid=?1 and active=1")
 	Number getTotalCount(Long orgId);
 
+	@Query(nativeQuery = true, value = "select Count(*) from tdriver where orgid=?1 and status='ONTRIP' and active=1")
+	Number getOnTripDriverCount(Long orgId);
+
 }

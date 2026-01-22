@@ -16,7 +16,6 @@ public interface TripService {
 
 	TripResponseDTO getTripById(Long id);
 	
-
 	String updateTripStartEnd(Long id, String status);
 	
 	

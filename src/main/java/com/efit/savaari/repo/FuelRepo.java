@@ -31,4 +31,7 @@ public interface FuelRepo extends JpaRepository<FuelVO, Long> {
 
 	 @Query(value = "SELECT SUM(quantity) FROM fuel WHERE orgid = ?1 and active=1", nativeQuery = true)
 	 BigDecimal getTotalFuel(Long orgId);
+
+	 @Query(value = "select sum(cost) from fuel where orgid=?1 and active=1", nativeQuery = true)
+	 BigDecimal gettotalFuelAmount(Long orgId);
 }

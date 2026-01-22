@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.dto.BranchDTO;
 import com.efit.savaari.dto.ChargeTypeDTO;
+import com.efit.savaari.dto.CompanyProfileDTO;
 import com.efit.savaari.dto.CustomerDTO;
 import com.efit.savaari.dto.CustomerRateDTO;
 import com.efit.savaari.dto.IndentsDTO;
@@ -28,6 +29,7 @@ import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.VendorRateVO;
 import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
 
 @Service
 public interface MasterService {
@@ -102,6 +104,12 @@ public interface MasterService {
 	List<ListOfValuesVO> getListOfValuesById(Long id);
 
 	List<Map<String, Object>> getValueDescriptionByListOfValues(Long orgId, String listDescription);
+
+	Map<String, Object> createUpdateCompanyProfile(CompanyProfileDTO companyProfileDTO, MultipartFile image);
+
+	Map<String, Object> getAllCompanyProfileByOrgId(Long orgId, int page, int count);
+
+	CompanyProfileResponseDTO getCompanyProfileById(Long id);
 
 
 

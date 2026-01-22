@@ -1,5 +1,6 @@
 package com.efit.savaari.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.dto.BranchDTO;
 import com.efit.savaari.dto.ChargeTypeDTO;
+import com.efit.savaari.dto.CompanyProfileDTO;
 import com.efit.savaari.dto.CustomerAddressDTO;
 import com.efit.savaari.dto.CustomerDTO;
 import com.efit.savaari.dto.CustomerRateDTO;
@@ -38,6 +40,9 @@ import com.efit.savaari.dto.RoutesPitstopDTO;
 import com.efit.savaari.dto.VendorRateDTO;
 import com.efit.savaari.entity.BranchVO;
 import com.efit.savaari.entity.ChargeTypeVO;
+import com.efit.savaari.entity.CompanyAddressVO;
+import com.efit.savaari.entity.CompanyBankDetailsVO;
+import com.efit.savaari.entity.CompanyProfileVO;
 import com.efit.savaari.entity.CustomerAddressVO;
 import com.efit.savaari.entity.CustomerRateVO;
 import com.efit.savaari.entity.CustomerVO;
@@ -59,6 +64,9 @@ import com.efit.savaari.entity.VendorResponseVO;
 import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.repo.BranchRepo;
 import com.efit.savaari.repo.ChargeTypeRepo;
+import com.efit.savaari.repo.CompanyAddressRepo;
+import com.efit.savaari.repo.CompanyBankDetailsRepo;
+import com.efit.savaari.repo.CompanyProfileRepo;
 import com.efit.savaari.repo.CustomerAddressRepo;
 import com.efit.savaari.repo.CustomerRateRepo;
 import com.efit.savaari.repo.CustomerRepo;
@@ -84,6 +92,9 @@ import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.repo.VehicleTypeRepo;
 import com.efit.savaari.repo.VendorRateRepo;
 import com.efit.savaari.repo.VendorResponseRepo;
+import com.efit.savaari.responseDTO.CompanyAddressResponseDTO;
+import com.efit.savaari.responseDTO.CompanyBankDetailsResponseDTO;
+import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
 
 @Service
 public class MasterServiceImpl implements MasterService {
@@ -175,7 +186,16 @@ public class MasterServiceImpl implements MasterService {
 	@Autowired
 	CustomerAddressRepo customerAddressRepo;
 
+	
+	@Autowired
+	CompanyProfileRepo companyProfileRepo;
+	
+	@Autowired
+	CompanyAddressRepo companyAddressRepo;
 
+	@Autowired
+	CompanyBankDetailsRepo companyBankDetailsRepo;
+	
 	MasterServiceImpl(OtpAsyncService otpAsyncService) {
 		this.otpAsyncService = otpAsyncService;
 	}
@@ -1365,5 +1385,209 @@ public class MasterServiceImpl implements MasterService {
 
 			return list;
 		}
+
+		
+		 @Override
+		    public Map<String, Object> createUpdateCompanyProfile(CompanyProfileDTO dto, MultipartFile image) {
+
+		        CompanyProfileVO vo;
+		        String message;
+
+		        
+		        // ===== FIND OR CREATE =====
+		        if (dto.getId() != null) {
+		            vo = companyProfileRepo.findById(dto.getId())
+		                    .orElseThrow(() -> new RuntimeException("Invalid CompanyProfile ID"));
+		            vo.setUpdatedBy(dto.getCreatedBy());
+		            List<CompanyAddressVO> companyAddressVO = companyAddressRepo.findByCompanyProfileVO(vo);
+		            companyAddressRepo.deleteAll(companyAddressVO);
+		            
+		            List<CompanyBankDetailsVO> companyBankDetailsVO = companyBankDetailsRepo.findByCompanyProfileVO(vo);
+		            companyBankDetailsRepo.deleteAll(companyBankDetailsVO);
+
+		            message = "Company Profile Updated Successfully";
+		        } else {
+		            vo = new CompanyProfileVO();
+		            vo.setCreatedBy(dto.getCreatedBy());
+		            vo.setUpdatedBy(dto.getCreatedBy());
+		            message = "Company Profile Created Successfully";
+		        }
+
+		        // ===== MAP DTO → VO =====
+		        mapCompanyProfileDTOtoVO(dto, vo);
+
+		        // ===== IMAGE SAVE =====
+		        if (image != null && !image.isEmpty()) {
+		            try {
+		                vo.setCompanyLogo(image.getBytes());
+		            } catch (IOException e) {
+		                throw new RuntimeException("Failed to upload company logo", e);
+		            }
+		        }
+
+		        // ===== SAVE PARENT + CHILD =====
+		        vo = companyProfileRepo.save(vo);
+
+		        // ===== MAP VO → RESPONSE DTO =====
+		        CompanyProfileResponseDTO responseDTO = mapToCompanyProfileResponseDTO(vo);
+
+		        Map<String, Object> response = new HashMap<>();
+		        response.put("companyProfile", responseDTO);
+		        response.put("message", message);
+
+		        return response;
+		    }
+
+		    // =========================================================
+		    // =============== DTO → VO MAPPING =========================
+		    // =========================================================
+		    private void mapCompanyProfileDTOtoVO(CompanyProfileDTO dto, CompanyProfileVO vo) {
+
+		        vo.setCompanyCode(dto.getCompanyCode());
+		        vo.setCompanyName(dto.getCompanyName());
+		        vo.setOwnerName(dto.getOwnerName());
+		        vo.setEmailAddress(dto.getEmailAddress());
+		        vo.setPhoneNo(dto.getPhoneNo());
+		        vo.setGstNo(dto.getGstNo());
+		        vo.setPanNo(dto.getPanNo());
+//		        vo.setAccountHolderName(dto.getAccountHolderName());
+//		        vo.setAccountNumber(dto.getAccountNumber());
+//		        vo.setBankName(dto.getBankName());
+//		        vo.setIfscCode(dto.getIfscCode());
+		        vo.setWebsite(dto.getWebsite());
+		        vo.setEstablishedYear(dto.getEstablishedYear());
+		        vo.setBranch(dto.getBranch());
+		        vo.setBranchcode(dto.getBranchcode());
+		        vo.setTermsAndConditions(dto.getTermsAndConditions());
+		        vo.setOrgId(dto.getOrgId());
+
+		        vo.setCompanyAddressVO(new ArrayList<>());
+
+		        if (dto.getCompanyAddressDTO() != null && !dto.getCompanyAddressDTO().isEmpty()) {
+
+		            dto.getCompanyAddressDTO().forEach(a -> {
+
+		                CompanyAddressVO addr = new CompanyAddressVO();
+		                addr.setShippingAddress(a.getShippingAddress());
+		                addr.setBillingAddress(a.getBillingAddress());
+		                addr.setPrimary(a.isPrimary());
+		                addr.setCompanyProfileVO(vo); // link parent
+
+		                vo.getCompanyAddressVO().add(addr);
+		            });
+		        }
+		        
+		        
+		     // ===== BANK DETAILS LIST =====
+		        vo.setCompanyBankDetailsVO(new ArrayList<>());
+
+		        if (dto.getCompanyBankDetailsDTO() != null && !dto.getCompanyBankDetailsDTO().isEmpty()) {
+
+		            dto.getCompanyBankDetailsDTO().forEach(a -> {
+
+		                CompanyBankDetailsVO bank = new CompanyBankDetailsVO();
+		                bank.setAccountHolderName(a.getAccountHolderName());
+		                bank.setAccountNumber(a.getAccountNumber());
+		                bank.setBankName(a.getBankName());
+		                bank.setIfscCode(a.getIfscCode());
+		                bank.setPrimary(a.isPrimary());
+		                bank.setBranch(a.getBranch());
+		                bank.setBranchCode(a.getBranchCode());
+		                bank.setCompanyProfileVO(vo);
+
+		                vo.getCompanyBankDetailsVO().add(bank);
+		            });
+		        }
+		    }
+
+		    // =========================================================
+		    // =============== VO → RESPONSE DTO ========================
+		    // =========================================================
+		    private CompanyProfileResponseDTO mapToCompanyProfileResponseDTO(CompanyProfileVO vo) {
+
+		        CompanyProfileResponseDTO dto = new CompanyProfileResponseDTO();
+
+		        dto.setId(vo.getId());
+		        dto.setCompanyCode(vo.getCompanyCode());
+		        dto.setCompanyName(vo.getCompanyName());
+		        dto.setOwnerName(vo.getOwnerName());
+		        dto.setEmailAddress(vo.getEmailAddress());
+		        dto.setPhoneNo(vo.getPhoneNo());
+		        dto.setGstNo(vo.getGstNo());
+		        dto.setPanNo(vo.getPanNo());
+//		        dto.setAccountHolderName(vo.getAccountHolderName());
+//		        dto.setAccountNumber(vo.getAccountNumber());
+//		        dto.setBankName(vo.getBankName());
+//		        dto.setIfscCode(vo.getIfscCode());
+		        dto.setWebsite(vo.getWebsite());
+		        dto.setEstablishedYear(vo.getEstablishedYear());
+		        dto.setCreatedBy(vo.getCreatedBy());
+		        dto.setBranch(vo.getBranch());
+		        dto.setBranchcode(vo.getBranchcode());
+		        dto.setCompanyLogo(vo.getCompanyLogo());
+		        dto.setTermsAndConditions(vo.getTermsAndConditions());
+		        dto.setOrgId(vo.getOrgId());
+
+
+		        // ===== CHILD RESPONSE =====
+		        if (vo.getCompanyAddressVO() != null && !vo.getCompanyAddressVO().isEmpty()) {
+
+		            List<CompanyAddressResponseDTO> addressList =
+		                    vo.getCompanyAddressVO().stream().map(a -> {
+
+		                        CompanyAddressResponseDTO adto = new CompanyAddressResponseDTO();
+		                        adto.setId(a.getId());
+		                        adto.setShippingAddress(a.getShippingAddress());
+		                        adto.setBillingAddress(a.getBillingAddress());
+		                        adto.setPrimary(a.isPrimary());
+		                        return adto;
+
+		                    }).collect(Collectors.toList());
+
+		            dto.setCompanyAddresses(addressList);
+		        }
+		        
+		        
+		        if (vo.getCompanyBankDetailsVO() != null && !vo.getCompanyBankDetailsVO().isEmpty()) {
+
+		            List<CompanyBankDetailsResponseDTO> bankList =
+		                    vo.getCompanyBankDetailsVO().stream().map(a -> {
+
+		                    	CompanyBankDetailsResponseDTO bankto = new CompanyBankDetailsResponseDTO();
+		                    	bankto.setId(a.getId());
+		                    	bankto.setAccountHolderName(a.getAccountHolderName());
+		                    	bankto.setAccountNumber(a.getAccountNumber());
+		                    	bankto.setBankName(a.getBankName());
+		                    	bankto.setIfscCode(a.getIfscCode());
+		                    	bankto.setBranch(a.getBranch());
+		                    	bankto.setBranchCode(a.getBranchCode());
+		                    	bankto.setPrimary(a.isPrimary());
+
+		                        return bankto;
+
+		                    }).collect(Collectors.toList());
+
+		            dto.setCompanyBankDetailsResponseDTO(bankList);
+		        }
+
+		        return dto;
+		    }
+		    
+			@Override
+			public Map<String, Object> getAllCompanyProfileByOrgId(Long orgId, int page, int count) {
+				Pageable pageable = PageRequest.of(page - 1, count);
+				Page<CompanyProfileVO> companyPage = companyProfileRepo.getAllCompanyProfileByOrgId(orgId, pageable);
+
+				Page<CompanyProfileResponseDTO> dtoPage = companyPage.map(this::mapToCompanyProfileResponseDTO);
+				return paginationService.buildResponse(dtoPage);
+			}
+
+			@Override
+			public CompanyProfileResponseDTO getCompanyProfileById(Long id) {
+				CompanyProfileVO companyProfileVO = companyProfileRepo.findById(id).orElseThrow();
+				CompanyProfileResponseDTO companyProfileResponseDTO = mapToCompanyProfileResponseDTO(companyProfileVO);
+				return companyProfileResponseDTO;
+			}
+
 
 }
