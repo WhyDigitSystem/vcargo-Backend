@@ -127,6 +127,7 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 		dto.setFuelType(fuel.getFuelType());
 		dto.setQuantity(fuel.getQuantity());
 		dto.setCost(fuel.getCost());
+		fuel.setEfficiency(dto.getEfficiency());
 
 		dto.setPreviousOdometer(fuel.getPreviousOdometer());
 		dto.setOdometerReading(fuel.getOdometerReading());
@@ -154,6 +155,8 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 		fuel.setOdometerReading(dto.getOdometerReading());
 		fuel.setPreviousOdometer(dto.getPreviousOdometer());
 		fuel.setStation(dto.getStation());
+		fuel.setEfficiency(dto.getEfficiency());
+
 
 		if (dto.getDate() != null) {
 			fuel.setDate(LocalDate.parse(dto.getDate()));

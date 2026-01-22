@@ -51,6 +51,9 @@ public class FuelVO {
 
 	@Column(name = "station")
 	private String station;
+	
+	@Column(name = "efficiency")
+	private Double efficiency;
 
 	@Column(name = "fueldate")
 	private LocalDate date;

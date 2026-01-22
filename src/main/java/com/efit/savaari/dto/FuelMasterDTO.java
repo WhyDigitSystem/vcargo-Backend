@@ -30,4 +30,6 @@ public class FuelMasterDTO {
 	private String branchName;
 	private Long orgId;
 	private Long user;
+	private Double efficiency;
+
 }
