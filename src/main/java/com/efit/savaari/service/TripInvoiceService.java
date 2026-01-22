@@ -1,11 +1,9 @@
 package com.efit.savaari.service;
 
-import java.util.List;
 import java.util.Map;
 
 import com.efit.savaari.dto.TripInvoiceDTO;
 import com.efit.savaari.dto.TripInvoiceResponseDTO;
-import com.efit.savaari.entity.TripInvoiceVO;
 
 public interface TripInvoiceService {
 

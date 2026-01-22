@@ -21,14 +21,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.dto.CityDTO;
-import com.efit.savaari.dto.CompanyDTO;
-import com.efit.savaari.dto.CompanyWeekOffDTO;
 import com.efit.savaari.dto.CountryDTO;
 import com.efit.savaari.dto.CurrencyDTO;
 import com.efit.savaari.dto.DepartmentDTO;
@@ -41,7 +38,6 @@ import com.efit.savaari.dto.ScreenNamesDTO;
 import com.efit.savaari.dto.StateDTO;
 import com.efit.savaari.entity.CityVO;
 import com.efit.savaari.entity.CompanyVO;
-import com.efit.savaari.entity.CompanyWeekOffVO;
 import com.efit.savaari.entity.CountryVO;
 import com.efit.savaari.entity.CurrencyVO;
 import com.efit.savaari.entity.DepartmentVO;
@@ -51,7 +47,6 @@ import com.efit.savaari.entity.RegionVO;
 import com.efit.savaari.entity.RolesVO;
 import com.efit.savaari.entity.ScreenNamesVO;
 import com.efit.savaari.entity.StateVO;
-import com.efit.savaari.entity.UserVO;
 import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.repo.CityRepo;
 import com.efit.savaari.repo.CompanyRepo;
@@ -69,7 +64,6 @@ import com.efit.savaari.repo.RolesRepo;
 import com.efit.savaari.repo.ScreenNamesRepo;
 import com.efit.savaari.repo.StateRepo;
 import com.efit.savaari.repo.UserRepo;
-import com.efit.savaari.util.CryptoUtils;
 
 import io.jsonwebtoken.io.IOException;
 

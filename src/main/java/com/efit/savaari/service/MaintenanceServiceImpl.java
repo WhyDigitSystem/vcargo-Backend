@@ -20,7 +20,6 @@ import com.efit.savaari.dto.MaintenancePartDTO;
 import com.efit.savaari.entity.MaintenancePartVO;
 import com.efit.savaari.entity.MaintenanceVO;
 import com.efit.savaari.entity.TvehicleVO;
-import com.efit.savaari.entity.TyreMasterVO;
 import com.efit.savaari.entity.UserVO;
 import com.efit.savaari.exception.ApplicationException;
 import com.efit.savaari.repo.MaintenanceRepo;
@@ -28,7 +27,6 @@ import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.responseDTO.MaintenancePartResponseDTO;
 import com.efit.savaari.responseDTO.MaintenanceResponseDTO;
-import com.efit.savaari.responseDTO.TyreMasterResponseDTO;
 
 @Service
 public class MaintenanceServiceImpl implements MaintenanceService {

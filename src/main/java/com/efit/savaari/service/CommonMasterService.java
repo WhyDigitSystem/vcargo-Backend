@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.dto.CityDTO;
-import com.efit.savaari.dto.CompanyDTO;
 import com.efit.savaari.dto.CountryDTO;
 import com.efit.savaari.dto.CurrencyDTO;
 import com.efit.savaari.dto.DepartmentDTO;

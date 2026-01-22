@@ -1,10 +1,5 @@
 package com.efit.savaari.dto;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.Column;
 import javax.persistence.Embedded;
 
 import com.fasterxml.jackson.annotation.JsonGetter;

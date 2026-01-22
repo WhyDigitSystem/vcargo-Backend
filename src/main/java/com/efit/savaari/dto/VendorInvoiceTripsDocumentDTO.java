@@ -1,11 +1,5 @@
 package com.efit.savaari.dto;
 
-import javax.persistence.Column;
-import javax.persistence.Lob;
-
-import com.efit.savaari.entity.VendorInvoiceTripsDocumentVO;
-import com.efit.savaari.entity.VendorInvoiceVO;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,7 +1,6 @@
 package com.efit.savaari.entity;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
