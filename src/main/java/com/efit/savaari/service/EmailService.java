@@ -44,6 +44,8 @@ public class EmailService {
 		helper.setSubject(subject);
 		helper.setText(html, true); // HTML enabled
 
+		ClassPathResource logo = new ClassPathResource("templates/VCARGO-updated-logo.png");
+	    helper.addInline("vcargoLogo", logo);
 		mailSender.send(message);
 	}
 
