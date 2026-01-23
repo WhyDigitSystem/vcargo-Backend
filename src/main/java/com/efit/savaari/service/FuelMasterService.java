@@ -1,5 +1,6 @@
 package com.efit.savaari.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ public interface FuelMasterService {
 
     FuelVO getFuelById(Long fuelId);
 
-    Map<String, Object> getAllFuelByOrgId(Long orgId, int page, int count);
+    List<FuelVO> getAllFuelByOrgId(Long orgId);
    
 	Map<String, Object> createUpdateFuelMaster(FuelMasterDTO dto) throws ApplicationException;
 

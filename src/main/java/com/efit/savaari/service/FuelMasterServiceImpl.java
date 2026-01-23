@@ -3,6 +3,7 @@ package com.efit.savaari.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.transaction.Transactional;
@@ -190,12 +191,8 @@ public class FuelMasterServiceImpl implements FuelMasterService {
 	}
 
 	@Override
-	public Map<String, Object> getAllFuelByOrgId(Long orgId, int page, int count) {
-		Pageable pageable = PageRequest.of(page - 1, count);
-		Page<FuelVO> quotePage = fuelRepo.getFuelByOrgId(orgId,  pageable);
-		
-		Page<FuelResponseDTO> dtoPage = quotePage.map(this::mapToFuelResponseDTO);
-		return  paginationService.buildResponse(dtoPage);
+	public List<FuelVO> getAllFuelByOrgId(Long orgId) {
+		return fuelRepo.getFuelByOrgId(orgId);
 	}
 
 }

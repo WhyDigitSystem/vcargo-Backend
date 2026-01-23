@@ -1,6 +1,8 @@
 package com.efit.savaari.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.FuelMasterDTO;
+import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.FuelMasterService;
 
@@ -79,16 +82,16 @@ public class FuelMasterController extends BaseController {
 	
 	@GetMapping("/getAllFuelByOrgId")
 	public ResponseEntity<ResponseDTO> getAllFuelByOrgId(
-			@RequestParam Long orgId, @RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "10") int count) {
+			@RequestParam Long orgId) {
 		String methodName = "getAllFuelByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
+		List<FuelVO> fuel = new ArrayList();
 
 		try {
-			Map<String, Object> fuel = fuelMasterService.getAllFuelByOrgId(orgId, page, count);
+			fuel = fuelMasterService.getAllFuelByOrgId(orgId);
 			responseMap.put("message", "Fuel Details retrieved successfully");
 			responseMap.put("fuel", fuel);
 			responseDTO = createServiceResponse(responseMap);

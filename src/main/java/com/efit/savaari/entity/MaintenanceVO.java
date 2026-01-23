@@ -16,6 +16,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -96,5 +98,6 @@ public class MaintenanceVO {
 	private TvehicleVO vehicle;
 
 	@OneToMany(mappedBy = "maintenanceVO", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<MaintenancePartVO> parts;
 }

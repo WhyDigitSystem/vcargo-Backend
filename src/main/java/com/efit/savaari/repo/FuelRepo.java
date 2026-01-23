@@ -22,9 +22,8 @@ public interface FuelRepo extends JpaRepository<FuelVO, Long> {
     		countQuery = "select a.* from fuel a where   a.vehicle=:vehicleId")
 	Page<FuelVO> getFuelByVehicle(Long vehicleId, Pageable pageable);
 
-    @Query(nativeQuery = true, value = "select a.* from fuel a where   a.orgid=:orgId",
-    		countQuery = "select a.* from fuel a where   a.orgid=:orgId")
-	Page<FuelVO> getFuelByOrgId(Long orgId, Pageable pageable);
+    @Query(nativeQuery = true, value = "select a.* from fuel a where   a.orgid=?1 ")
+	List<FuelVO> getFuelByOrgId(Long orgId);
 	
 	 @Query(nativeQuery = true, value = "select * from fuel a where a.orgid=?1  ORDER BY a.fuelid DESC LIMIT 5")
 	 List<FuelVO> findByOrgId(Long orgId);

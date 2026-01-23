@@ -2,14 +2,12 @@ package com.efit.savaari.service;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TyreMasterDTO;
@@ -149,12 +147,9 @@ public class TyreMasterServiceImpl implements TyreMasterService {
 	}
 
 	@Override
-	public Map<String, Object> getAllTyreByOrgId(Long orgId, int page, int count) {
-		Pageable pageable = PageRequest.of(page - 1, count);
-		Page<TyreMasterVO> quotePage = tyreRepo.getTyreByOrgId(orgId,  pageable);
+	public List<TyreMasterVO> getAllTyreByOrgId(Long orgId) {
+		return tyreRepo.getTyreByOrgId(orgId);
 		
-		Page<TyreMasterResponseDTO> dtoPage = quotePage.map(this::mapToTyreResponseDTO);
-		return  paginationService.buildResponse(dtoPage);
 	}
 	
 

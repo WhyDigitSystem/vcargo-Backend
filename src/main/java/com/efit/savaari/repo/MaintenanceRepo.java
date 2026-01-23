@@ -13,13 +13,12 @@ import com.efit.savaari.entity.MaintenanceVO;
 @Repository
 public interface MaintenanceRepo extends JpaRepository<MaintenanceVO, Long> {
 
- 
-
 	
-	 @Query(nativeQuery = true, value = "select a.* from maintenance a where a.orgid=:orgId",countQuery = "select a.* from maintenance a where a.orgid=:orgId")
-	Page<MaintenanceVO> getMaintenanceByOrgId(Long orgId, Pageable pageable);
+	 @Query(nativeQuery = true, value = "select * from maintenance a where a.orgid=?1")
+	List<MaintenanceVO> getMaintenanceByOrgId(Long orgId);
 
 	 
 	 @Query(nativeQuery = true, value = "select * from maintenance a where a.orgid=?1  ORDER BY a.maintenanceid DESC LIMIT 5")
 	 List<MaintenanceVO> findByOrgId(Long orgId);
+	 
 }

@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Data;
 
 @Entity
@@ -31,5 +33,6 @@ public class TripWaypointVO {
 
 	@ManyToOne
 	@JoinColumn(name = "tripid")
+	@JsonBackReference
 	private TripVO tripVO;
 }

@@ -124,12 +124,12 @@ public interface TransactionService {
 
 	TvehicleVO getTvehiclesById(Long id) throws ApplicationException;
 
-	Map<String, Object> getTvehiclesByOrgId(String branchCode,Long userId, String search, int page, int count);
+	List<TvehicleVO> getTvehiclesByOrgId(String branchCode,Long orgId);
 
 
 	TdriverVO getTdriverById(Long id) throws ApplicationException;
 
-	Map<String, Object> getTdriverByOrgId(String branchCode,Long userId, String search, int page, int count);
+	List<TdriverVO> getTdriverByOrgId(String branchCode,Long orgId);
 
 	List<TvehicleVO> uploadTVehicleExcel(MultipartFile file, String createdBy, Long orgId) throws Exception;
 

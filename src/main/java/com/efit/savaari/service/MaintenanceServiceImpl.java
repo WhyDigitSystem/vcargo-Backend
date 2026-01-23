@@ -218,15 +218,20 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
 
 
-	@Override
-	public Map<String, Object> getAllMaintenanceByOrgId(Long orgId, int page, int count) {
-		Pageable pageable = PageRequest.of(page - 1, count);
-		Page<MaintenanceVO> quotePage = maintenanceRepo.getMaintenanceByOrgId(orgId,  pageable);
-		
-		Page<MaintenanceResponseDTO> dtoPage = quotePage.map(this::mapToMaintenanceResponseDTO);
-		return  paginationService.buildResponse(dtoPage);
-	}
+//	@Override
+//	public Map<String, Object> getAllMaintenanceByOrgId(Long orgId) {
+////		Pageable pageable = PageRequest.of(page - 1, count);
+//		List<MaintenanceVO> quotePage = maintenanceRepo.getMaintenanceByOrgId(orgId);
+//		
+////		Page<MaintenanceResponseDTO> dtoPage = quotePage.map(this::mapToMaintenanceResponseDTO);
+//		return  quotePage;
+//	}
 	
+	
+	@Override
+	public List<MaintenanceVO> getAllMaintenanceByOrgId(Long orgId) {
+	    return maintenanceRepo.getMaintenanceByOrgId(orgId);
+	}
 
 	@Override
 	public MaintenanceResponseDTO getMaintenanceById(Long id) {

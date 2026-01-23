@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,5 +52,6 @@ public class TdriverDocumentsVO {
 
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tdriverid", nullable = false)
+	@JsonBackReference
     private TdriverVO tdriverVO;
 }

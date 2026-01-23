@@ -1,6 +1,8 @@
 package com.efit.savaari.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.TripDTO;
+import com.efit.savaari.entity.TripVO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.service.TripService;
@@ -51,16 +54,15 @@ public class TripController extends BaseController {
 	}
 
 	@GetMapping("/getAllTripByOrgId")
-	public ResponseEntity<ResponseDTO> getAllTripByOrgId(@RequestParam Long orgId,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+	public ResponseEntity<ResponseDTO> getAllTripByOrgId(@RequestParam Long orgId) {
 		String methodName = "getAllTripByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
-
+      List<TripVO>  trip = new ArrayList<>();
 		try {
-			Map<String, Object> trip = tripService.getAllTripByOrgId(orgId, page, count);
+			 trip = tripService.getAllTripByOrgId(orgId);
 			responseMap.put("message", "Trip Details retrieved successfully");
 			responseMap.put("trip", trip);
 			responseDTO = createServiceResponse(responseMap);

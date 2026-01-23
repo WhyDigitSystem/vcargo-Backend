@@ -18,6 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.efit.savaari.dto.CreatedUpdatedDate;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -113,6 +114,7 @@ public class TdriverVO {
     private String branchName;
 
     @OneToMany(mappedBy = "tdriverVO", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<TdriverDocumentsVO> tdriverDocumentsVO;
 
     @Embedded

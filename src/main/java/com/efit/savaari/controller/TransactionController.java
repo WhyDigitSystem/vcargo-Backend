@@ -1036,19 +1036,18 @@ public class TransactionController extends BaseController {
 
 	@GetMapping("/getTvehiclesByOrgId")
 	public ResponseEntity<ResponseDTO> getTvehiclesByOrgId(@RequestParam(required = false) String branchCode,
-			@RequestParam Long orgId, @RequestParam(defaultValue = "") String search,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+			@RequestParam Long orgId) {
 		String methodName = "getTvehiclesByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
 
+		List<TvehicleVO> tvehicleVO = new ArrayList<>();
 		try {
-			Map<String, Object> tvehiclesVO = transactionService.getTvehiclesByOrgId(branchCode, orgId, search, page,
-					count);
+			tvehicleVO = transactionService.getTvehiclesByOrgId(branchCode, orgId);
 			responseMap.put("message", "Tvehicles retrieved successfully");
-			responseMap.put("tvehiclesVO", tvehiclesVO);
+			responseMap.put("tvehicleVO", tvehicleVO);
 			responseDTO = createServiceResponse(responseMap);
 		} catch (Exception e) {
 			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
@@ -1137,17 +1136,17 @@ public class TransactionController extends BaseController {
 
 	@GetMapping("/getTdriverByOrgId")
 	public ResponseEntity<ResponseDTO> getTdriverByOrgId(@RequestParam(required = false) String branchCode,
-			@RequestParam Long orgId, @RequestParam(defaultValue = "") String search,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+			@RequestParam Long orgId) {
 		String methodName = "getTdriverByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
+		
+		List<TdriverVO> tdriverVO = new ArrayList<>();
 
 		try {
-			Map<String, Object> tdriverVO = transactionService.getTdriverByOrgId(branchCode, orgId, search, page,
-					count);
+			 tdriverVO = transactionService.getTdriverByOrgId(branchCode, orgId);
 			responseMap.put("message", "Tdriver retrieved successfully");
 			responseMap.put("tdriverVO", tdriverVO);
 			responseDTO = createServiceResponse(responseMap);
