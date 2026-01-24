@@ -1618,6 +1618,21 @@ public class TransactionServiceImpl implements TransactionService {
 		// 2️⃣ Base vehicle folder
 		Path vehicleFolder = Paths.get(uploadBasePath, vehicleNo);
 		createDirectory(vehicleFolder);
+		
+		List<TvehicleDocumentsVO> oldDocs = tvehicleDocumentsRepo.findByTvehicle(vo);
+
+		tvehicleDocumentsRepo.deleteByVehicleId(vo.getId());
+		
+		if (vo.getDocuments() != null) {
+		    vo.getDocuments().clear();
+		} else {
+		    vo.setDocuments(new ArrayList<>());
+		}
+		
+		// 2️⃣ Delete physical files
+		for (TvehicleDocumentsVO doc : oldDocs) {
+			deleteFileSafely(doc.getFilePath());
+		}
 
 		replaceDocuments(vo, "RC", rcFiles, vehicleFolder);
 		replaceDocuments(vo, "INSURANCE", insuranceFiles, vehicleFolder);
@@ -1702,17 +1717,7 @@ public class TransactionServiceImpl implements TransactionService {
 		if (files == null || files.length == 0)
 			return;
 
-		// 1️⃣ Fetch old docs
-		List<TvehicleDocumentsVO> oldDocs = tvehicleDocumentsRepo.findByTvehicleAndDocumentType(vehicle, documentType);
-
-		// 2️⃣ Delete physical files
-		for (TvehicleDocumentsVO doc : oldDocs) {
-			deleteFileSafely(doc.getFilePath());
-		}
-
-		// 3️⃣ Delete DB rows
-		tvehicleDocumentsRepo.deleteAll(oldDocs);
-
+		
 		// 4️⃣ Remove from persistence context
 		if (vehicle.getDocuments() != null) {
 			vehicle.getDocuments().removeIf(d -> documentType.equals(d.getDocumentType()));
@@ -1762,11 +1767,14 @@ public class TransactionServiceImpl implements TransactionService {
 				doc.setFileSize(file.getSize());
 				doc.setUploadedOn(LocalDateTime.now());
 
-				tvehicleDocumentsRepo.save(doc);
+//				tvehicleDocumentsRepo.save(doc);
 				if (vehicle.getDocuments() == null) {
 					vehicle.setDocuments(new ArrayList<>());
 				}
+				doc.setTvehicle(vehicle);
 				vehicle.getDocuments().add(doc);
+				tvehicleRepo.save(vehicle);
+
 			}
 
 		} catch (IOException e) {
@@ -1828,7 +1836,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 		return tvehicleRepo.getTvehiclesByOrgId(branchCode, orgId);
 
-
 	}
 
 	@Value("${driver.file.upload.path}")
@@ -1872,6 +1879,22 @@ public class TransactionServiceImpl implements TransactionService {
 		Path driverFolder = Paths.get(uploadDriverBasePath, licenceNo);
 		createDirectory(driverFolder);
 
+//		List<TdriverDocumentsVO> oldDocs = tdriverDocumentsRepo.findByTdriverVO(vo);
+////		if (oldDocs != null && !oldDocs.isEmpty()) {
+//		    tdriverDocumentsRepo.deleteAll(oldDocs);
+////		}
+
+		
+		List<TdriverDocumentsVO> oldDocs = tdriverDocumentsRepo.findByTdriverVO(vo);
+
+		tdriverDocumentsRepo.deleteByDriverId(vo.getId());
+		
+		
+		// 2️⃣ Delete physical files
+		for (TdriverDocumentsVO doc : oldDocs) {
+			deleteFileSafely(doc.getFilePath());
+		}
+
 		replaceDriverDocuments(vo, "DL", dlFiles, driverFolder);
 		replaceDriverDocuments(vo, "AADHAR", aadharFiles, driverFolder);
 		replaceDriverDocuments(vo, "PAN", panFiles, driverFolder);
@@ -1892,35 +1915,35 @@ public class TransactionServiceImpl implements TransactionService {
 		TdriverResponseDTO dto = new TdriverResponseDTO();
 
 		dto.setId(driver.getId());
-	    dto.setName(driver.getName());
-	    dto.setPhone(driver.getPhone());
-	    dto.setEmail(driver.getEmail());
+		dto.setName(driver.getName());
+		dto.setPhone(driver.getPhone());
+		dto.setEmail(driver.getEmail());
 
-	    if (driver.getUser() != null) {
-	        dto.setUserId(driver.getUser().getId());
-	    }
+		if (driver.getUser() != null) {
+			dto.setUserId(driver.getUser().getId());
+		}
 
-	    dto.setLicenseNumber(driver.getLicenseNumber());
-	    dto.setLicenseExpiry(driver.getLicenseExpiry());
-	    dto.setAadharNumber(driver.getAadharNumber());
-	    dto.setAddress(driver.getAddress());
-	    dto.setStatus(driver.getStatus());
-	    dto.setExperience(driver.getExperience());
-	    dto.setSalary(driver.getSalary());
-	    dto.setAssignedVehicle(driver.getAssignedVehicle());
-	    dto.setCurrentLocation(driver.getCurrentLocation());
-	    dto.setBloodGroup(driver.getBloodGroup());
-	    dto.setEmergencyContact(driver.getEmergencyContact());
-	    dto.setPerformance(driver.getPerformance());
-	    dto.setJoinedDate(driver.getJoinedDate());
-	    dto.setLastTrip(driver.getLastTrip());
+		dto.setLicenseNumber(driver.getLicenseNumber());
+		dto.setLicenseExpiry(driver.getLicenseExpiry());
+		dto.setAadharNumber(driver.getAadharNumber());
+		dto.setAddress(driver.getAddress());
+		dto.setStatus(driver.getStatus());
+		dto.setExperience(driver.getExperience());
+		dto.setSalary(driver.getSalary());
+		dto.setAssignedVehicle(driver.getAssignedVehicle());
+		dto.setCurrentLocation(driver.getCurrentLocation());
+		dto.setBloodGroup(driver.getBloodGroup());
+		dto.setEmergencyContact(driver.getEmergencyContact());
+		dto.setPerformance(driver.getPerformance());
+		dto.setJoinedDate(driver.getJoinedDate());
+		dto.setLastTrip(driver.getLastTrip());
 
-	    dto.setActive(driver.isActive());
-	    dto.setCreatedBy(driver.getCreatedBy());
+		dto.setActive(driver.isActive());
+		dto.setCreatedBy(driver.getCreatedBy());
 
-	    dto.setOrgId(driver.getOrgId());
-	    dto.setBranchCode(driver.getBranchCode());
-	    dto.setBranchName(driver.getBranchName());
+		dto.setOrgId(driver.getOrgId());
+		dto.setBranchCode(driver.getBranchCode());
+		dto.setBranchName(driver.getBranchName());
 
 		if (driver.getTdriverDocumentsVO() == null) {
 			dto.setDocuments(null);
@@ -1951,15 +1974,7 @@ public class TransactionServiceImpl implements TransactionService {
 			return;
 
 		// 1️⃣ Fetch old docs
-		List<TdriverDocumentsVO> oldDocs = tdriverDocumentsRepo.findByTdriverVOAndDocumentType(driver, documentType);
-
-		// 2️⃣ Delete physical files
-		for (TdriverDocumentsVO doc : oldDocs) {
-			deleteFileSafely(doc.getFilePath());
-		}
-
-		// 3️⃣ Delete DB rows
-		tdriverDocumentsRepo.deleteAll(oldDocs);
+		
 
 		// 4️⃣ Remove from persistence context
 		if (driver.getTdriverDocumentsVO() != null) {
@@ -2040,7 +2055,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException {
 
-		return serveFile(request, "/api/transaction/driverFiles/", uploadDriverBasePath,"uploads/driver/");
+		return serveFile(request, "/api/transaction/driverFiles/", uploadDriverBasePath, "uploads/driver/");
 	}
 
 	private ResponseEntity<byte[]> serveFile(HttpServletRequest request, String apiPrefix, String uploadBasePath,
@@ -2424,7 +2439,7 @@ public class TransactionServiceImpl implements TransactionService {
 				approvedQuoteRepo.save(approvedQuoteVO);
 
 				String msg = "Your Quote is Accepted";
-				notificationService.createNotification(userVO.getId(),  msg, "Quote Accepted");
+				notificationService.createNotification(userVO.getId(), msg, "Quote Accepted");
 
 				List<QuoteVO> quotes = quoteRepo.findAllByAuctionAndUserNot(auctionVO, userVO);
 
@@ -2819,44 +2834,41 @@ public class TransactionServiceImpl implements TransactionService {
 		Page<Map<String, Object>> approvedQuotes = approvedQuoteRepo.getApprovedQuotesByOrg(orgId, pageable);
 		return paginationService.buildResponse(approvedQuotes);
 	}
-	
-	
+
 	@Scheduled(cron = "0 0 5 * * ?")
-    public void notifyVehicleExpiry() {
+	public void notifyVehicleExpiry() {
 
-        List<Object[]> results = vehicleRepo.findVehiclesExpiringWithin30Days();
+		List<Object[]> results = vehicleRepo.findVehiclesExpiringWithin30Days();
 
-        for (Object[] row : results) {
+		for (Object[] row : results) {
 
-            String vehicleNumber = (String) row[0];
-            Long orgId = ((Number) row[1]).longValue();
+			String vehicleNumber = (String) row[0];
+			Long orgId = ((Number) row[1]).longValue();
 
-            LocalDate insurance = toLocalDate(row[2]);
-            LocalDate fitness = toLocalDate(row[3]);
-            LocalDate service = toLocalDate(row[4]);
+			LocalDate insurance = toLocalDate(row[2]);
+			LocalDate fitness = toLocalDate(row[3]);
+			LocalDate service = toLocalDate(row[4]);
 
-            processExpiry(orgId, vehicleNumber, insurance, "INSURANCE");
-            processExpiry(orgId, vehicleNumber, fitness, "FITNESS");
-            processExpiry(orgId, vehicleNumber, service, "SERVICE");
-        }
-    }
+			processExpiry(orgId, vehicleNumber, insurance, "INSURANCE");
+			processExpiry(orgId, vehicleNumber, fitness, "FITNESS");
+			processExpiry(orgId, vehicleNumber, service, "SERVICE");
+		}
+	}
 
-    private void processExpiry(Long orgId, String vehicleNo,
-                               LocalDate expiryDate, String type) {
+	private void processExpiry(Long orgId, String vehicleNo, LocalDate expiryDate, String type) {
 
-        if (expiryDate == null) return;
+		if (expiryDate == null)
+			return;
 
-        long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
+		long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
 
-        // 🔥 CORE LOGIC
-        if (daysLeft > 0 && daysLeft <= 30 && daysLeft % 5 == 0) {
+		// 🔥 CORE LOGIC
+		if (daysLeft > 0 && daysLeft <= 30 && daysLeft % 5 == 0) {
 
-            String message =
-                "Vehicle " + vehicleNo + " " + type +
-                " expires in " + daysLeft + " days";
+			String message = "Vehicle " + vehicleNo + " " + type + " expires in " + daysLeft + " days";
 
-            notificationService.createNotification(orgId, message, type);
-        }
-    }
+			notificationService.createNotification(orgId, message, type);
+		}
+	}
 
 }
