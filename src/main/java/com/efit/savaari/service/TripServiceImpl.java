@@ -1,15 +1,12 @@
 package com.efit.savaari.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TripDTO;
@@ -194,12 +191,9 @@ public class TripServiceImpl implements TripService {
 	}
 
 	@Override
-	public Map<String, Object> getAllTripByOrgId(Long orgId, int page, int count) {
-		Pageable pageable = PageRequest.of(page - 1, count);
-		Page<TripVO> quotePage = tripRepo.getTripByOrgId(orgId, pageable);
+	public List<TripVO> getAllTripByOrgId(Long orgId) {
+		return tripRepo.getTripByOrgId(orgId);
 
-		Page<TripResponseDTO> dtoPage = quotePage.map(this::mapToTripResponseDTO);
-		return paginationService.buildResponse(dtoPage);
 	}
 
 	@Override

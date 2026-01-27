@@ -1,6 +1,8 @@
 package com.efit.savaari.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.MaintenanceDTO;
+import com.efit.savaari.entity.MaintenanceVO;
 import com.efit.savaari.responseDTO.MaintenanceResponseDTO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MaintenanceService;
@@ -52,16 +55,16 @@ public class MaintenanceController extends BaseController {
 	}
 
     @GetMapping("/getAllMaintenanceByOrgId")
-	public ResponseEntity<ResponseDTO> getAllMaintenanceByOrgId(@RequestParam Long orgId,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+	public ResponseEntity<ResponseDTO> getAllMaintenanceByOrgId(@RequestParam Long orgId) {
 		String methodName = "getAllMaintenanceByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
+		List<MaintenanceVO> maintenance = new ArrayList<>();
 
 		try {
-			Map<String, Object> maintenance = maintenanceService.getAllMaintenanceByOrgId(orgId, page, count);
+		 maintenance = maintenanceService.getAllMaintenanceByOrgId(orgId);
 			responseMap.put("message", "Maintenance Details retrieved successfully");
 			responseMap.put("maintenance", maintenance);
 			responseDTO = createServiceResponse(responseMap);

@@ -1,6 +1,8 @@
 package com.efit.savaari.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.TyreMasterDTO;
+import com.efit.savaari.entity.TyreMasterVO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.responseDTO.TyreMasterResponseDTO;
 import com.efit.savaari.service.TyreMasterService;
@@ -50,16 +53,16 @@ public class TyreMasterController extends BaseController {
 	}
 
 	@GetMapping("/getAllTyreByOrgId")
-	public ResponseEntity<ResponseDTO> getAllTyreByOrgId(@RequestParam Long orgId,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+	public ResponseEntity<ResponseDTO> getAllTyreByOrgId(@RequestParam Long orgId) {
 		String methodName = "getAllTyreByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
 
+		List<TyreMasterVO> tyre = new ArrayList<>();
 		try {
-			Map<String, Object> tyre = tyreMasterService.getAllTyreByOrgId(orgId, page, count);
+			tyre = tyreMasterService.getAllTyreByOrgId(orgId);
 			responseMap.put("message", "Tyre Details retrieved successfully");
 			responseMap.put("tyre", tyre);
 			responseDTO = createServiceResponse(responseMap);
