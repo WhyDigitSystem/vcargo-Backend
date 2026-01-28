@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.efit.savaari.dto.ConsentDTO;
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.dto.TripWaypointDTO;
 import com.efit.savaari.entity.TdriverVO;
@@ -20,8 +21,12 @@ import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripRepo;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
+import com.efit.savaari.responseDTO.ConsentResponse;
+import com.efit.savaari.responseDTO.TraqoErrorResponse;
 import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.responseDTO.TripWaypointResponseDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 @Service
 public class TripServiceImpl implements TripService {
@@ -40,6 +45,9 @@ public class TripServiceImpl implements TripService {
 
 	@Autowired
 	TdriverRepo driverRepo;
+
+	@Autowired
+	TraqoService traqoService;
 
 	@Transactional
 	@Override
@@ -205,43 +213,61 @@ public class TripServiceImpl implements TripService {
 
 	@Transactional
 	@Override
-	public String updateTripStartEnd(Long id, String status) {
+	public String updateTripStartEnd(Long id, String status, boolean forceProceed)
+			throws JsonMappingException, JsonProcessingException {
 
-		  TripVO trip = tripRepo.findById(id)
-		            .orElseThrow(() -> new RuntimeException("Trip not found"));
+		TripVO trip = tripRepo.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
 
-		    TdriverVO driver = trip.getDriver();
+		TdriverVO driver = trip.getDriver();
 
-		    if (driver == null) {
-		        throw new RuntimeException("Driver not assigned to trip");
-		    }
-		
-	    if ("START".equalsIgnoreCase(status)) {
-	    	
-	        int updated = tripRepo.updateTripStart(id);
-	        if (updated == 0) {
-	            throw new RuntimeException("Trip not found");
-	        }
-	        
-	        driverRepo.updateDriverStatus(driver.getId(), "Ontrip");
+		if (driver == null) {
+			throw new RuntimeException("Driver not assigned to trip");
+		}
 
-	        return "Trip Started Successfully";
+		if ("START".equalsIgnoreCase(status)) {
 
-	    } else if ("END".equalsIgnoreCase(status)) {
+			int updated = tripRepo.updateTripStart(id);
+			if (updated == 0) {
+				throw new RuntimeException("Trip not found");
+			}
 
-	        int updated = tripRepo.updateTripEnd(id);
-	        if (updated == 0) {
-	            throw new RuntimeException("Trip not found");
-	        }
-	        
-	        driverRepo.updateDriverStatus(driver.getId(), "Active");
+			driverRepo.updateDriverStatus(driver.getId(), "Ontrip");
 
-	        return "Trip Completed Successfully";
+			return "Trip Started Successfully";
 
-	    } else {
-	        throw new IllegalArgumentException("Invalid status value");
-	    }
+		} else if ("END".equalsIgnoreCase(status)) {
+
+			int updated = tripRepo.updateTripEnd(id);
+			if (updated == 0) {
+				throw new RuntimeException("Trip not found");
+			}
+
+			driverRepo.updateDriverStatus(driver.getId(), "Active");
+
+			return "Trip Completed Successfully";
+
+		} else {
+			throw new IllegalArgumentException("Invalid status value");
+		}
 	}
 
+	@Override
+	public Object checkTripConsent(Long tripId) {
+
+		
+
+		TripVO trip = tripRepo.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found"));
+
+		TdriverVO driver = trip.getDriver();
+		if (driver == null) {
+			throw new RuntimeException("Driver not assigned");
+		}
+		
+		ConsentDTO consentDTO= new ConsentDTO();
+		consentDTO.setTel(driver.getPhone());
+
+		Object consentResponse = traqoService.checkConsent(consentDTO);
+		return consentResponse;
+	}
 
 }
