@@ -20,6 +20,11 @@ public class TripResponseDTO {
     private String customer;
     private double distance;
     private String estimatedDuration;
+    private String sourceLat;
+	private String sourceLng;
+	private String destinationLat;
+	private String destinationLng;
+	private String tripTrackId;
 
     private LocalDate startDate;
     private LocalTime startTime;

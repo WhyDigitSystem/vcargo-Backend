@@ -13,8 +13,10 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.efit.savaari.dto.ConsentDTO;
+import com.efit.savaari.dto.TraqoTripRequest;
 import com.efit.savaari.responseDTO.ConsentResponse;
 import com.efit.savaari.responseDTO.TraqoErrorResponse;
+import com.efit.savaari.responseDTO.TraqoTripResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -81,6 +83,26 @@ public class TraqoService {
 			e.printStackTrace();
 			return new TraqoErrorResponse("TRAQO_API_DOWN");
 		}
+	}
+
+	private static final String URL = "https://dashboard.traqo.in/api/v3/trip/create/";
+
+	public TraqoTripResponse createTrip(TraqoTripRequest request) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        headers.setBasicAuth("whydigit", "whydigit@123");
+
+        HttpEntity<TraqoTripRequest> entity =
+                new HttpEntity<>(request, headers);
+
+        ResponseEntity<TraqoTripResponse> response =
+                restTemplate.postForEntity(URL, entity, TraqoTripResponse.class);
+
+        return response.getBody();
 	}
 
 }

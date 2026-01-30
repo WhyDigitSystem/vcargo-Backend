@@ -44,6 +44,18 @@ public class TripVO {
 	@Column(name = "destination")
 	private String destination;
 	
+	@Column(name = "sourcelat")
+	private String sourceLat;
+	@Column(name = "sourcelng")
+	private String sourceLng;
+	@Column(name = "destinationlat")
+	private String destinationLat;
+	@Column(name = "destinationlng")
+	private String destinationLng;
+	
+	@Column(name = "triptrackid")
+	private String tripTrackId;
+	
 	@Column(name = "customer")
 	private String customer;
 
