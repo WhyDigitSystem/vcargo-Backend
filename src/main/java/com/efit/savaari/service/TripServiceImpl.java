@@ -1,5 +1,6 @@
 package com.efit.savaari.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.ConsentDTO;
+import com.efit.savaari.dto.EndTripDTO;
 import com.efit.savaari.dto.TraqoTripRequest;
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.dto.TripWaypointDTO;
@@ -22,7 +24,10 @@ import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripRepo;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
+import com.efit.savaari.responseDTO.EndTripResponse;
+import com.efit.savaari.responseDTO.FetchTripsResponse;
 import com.efit.savaari.responseDTO.TraqoTripResponse;
+import com.efit.savaari.responseDTO.TripLocationResponseDTO;
 import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.responseDTO.TripWaypointResponseDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -119,7 +124,7 @@ public class TripServiceImpl implements TripService {
 			request.setTruck_number(trip.getVehicle().getVehicleNumber());
 
 		request.setInvoice(trip.getId().toString());
-		request.setEta_hrs(dto.getEstimatedDuration());
+		request.setEta_hrs("100");
 
 		TraqoTripResponse traqresponse = traqoService.createTrip(request);
 
@@ -277,14 +282,26 @@ public class TripServiceImpl implements TripService {
 
 		} else if ("END".equalsIgnoreCase(status)) {
 
+			
+			
+
+			EndTripDTO endTripDTO=new EndTripDTO();
+			endTripDTO.setId(trip.getTripTrackId());
+			
+			EndTripResponse traqresponse = traqoService.endTrip(endTripDTO);
+
+//			// 🔥 FAILURE → THROW EXCEPTION → ROLLBACK
+//			if (traqresponse == null || !"success".equalsIgnoreCase(traqresponse.getStatus())) {
+//				throw new RuntimeException(traqresponse != null ? traqresponse.getStatus() : "Traqo API failed");
+//			}
 			int updated = tripRepo.updateTripEnd(id);
 			if (updated == 0) {
 				throw new RuntimeException("Trip not found");
 			}
-
+			
 			driverRepo.updateDriverStatus(driver.getId(), "Active");
 
-			return "Trip Completed Successfully";
+			return traqresponse.getStatus();
 
 		} else {
 			throw new IllegalArgumentException("Invalid status value");
@@ -307,5 +324,33 @@ public class TripServiceImpl implements TripService {
 		Object consentResponse = traqoService.checkConsent(consentDTO);
 		return consentResponse;
 	}
+
+	@Override
+	public FetchTripsResponse fetchAllTraqTrips(String fromDate, String toDate) {
+		
+				
+		FetchTripsResponse traqresponse = traqoService.fetchTrips(fromDate, toDate);
+		
+		return traqresponse;
+	}
+
+	@Override
+	public TripResponseDTO tripSimTrackingStatus(Long id) {
+		
+		TripVO trip= tripRepo.findById(id).get();
+		
+		TripResponseDTO responseDTO = mapToTripResponseDTO(trip);
+		
+		EndTripDTO endTripDTO=new EndTripDTO();
+		endTripDTO.setId(trip.getTripTrackId());
+		
+		TripLocationResponseDTO locationResponseDTO= traqoService.Sim_Tracking(endTripDTO);
+		responseDTO.setCurrentLocation(locationResponseDTO);
+		return responseDTO;
+	}
+
+	
+
+	
 
 }

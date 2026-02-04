@@ -60,4 +60,6 @@ public class TripResponseDTO {
     private String driver;
 
     private List<TripWaypointResponseDTO> waypoints;
+    
+    private TripLocationResponseDTO currentLocation;
 }

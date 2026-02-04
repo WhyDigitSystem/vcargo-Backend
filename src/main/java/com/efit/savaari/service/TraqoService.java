@@ -13,10 +13,15 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.efit.savaari.dto.ConsentDTO;
+import com.efit.savaari.dto.EndTripDTO;
+import com.efit.savaari.dto.FetchTripsRequestDTO;
 import com.efit.savaari.dto.TraqoTripRequest;
 import com.efit.savaari.responseDTO.ConsentResponse;
+import com.efit.savaari.responseDTO.EndTripResponse;
+import com.efit.savaari.responseDTO.FetchTripsResponse;
 import com.efit.savaari.responseDTO.TraqoErrorResponse;
 import com.efit.savaari.responseDTO.TraqoTripResponse;
+import com.efit.savaari.responseDTO.TripLocationResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -89,20 +94,82 @@ public class TraqoService {
 
 	public TraqoTripResponse createTrip(TraqoTripRequest request) {
 
-        RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = new RestTemplate();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
 
-        headers.setBasicAuth("whydigit", "whydigit@123");
+		headers.setBasicAuth("whydigit", "whydigit@123");
 
-        HttpEntity<TraqoTripRequest> entity =
-                new HttpEntity<>(request, headers);
+		HttpEntity<TraqoTripRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<TraqoTripResponse> response =
-                restTemplate.postForEntity(URL, entity, TraqoTripResponse.class);
+		ResponseEntity<TraqoTripResponse> response = restTemplate.postForEntity(URL, entity, TraqoTripResponse.class);
 
-        return response.getBody();
+		return response.getBody();
 	}
+
+	private static final String EndTripURL = "https://dashboard.traqo.in/api/v3/trip/end/";
+
+	public EndTripResponse endTrip(EndTripDTO endTripDTO) {
+		RestTemplate restTemplate = new RestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		headers.setBasicAuth("whydigit", "whydigit@123");
+
+		HttpEntity<EndTripDTO> entity = new HttpEntity<>(endTripDTO, headers);
+
+		ResponseEntity<EndTripResponse> response = restTemplate.postForEntity(EndTripURL, entity,
+				EndTripResponse.class);
+
+		return response.getBody();
+	}
+	
+	private static final String FETCH_TRIPS_URL = "https://dashboard.traqo.in/api/v4/trips/fetch/";
+	public FetchTripsResponse fetchTrips(String sDate, String eDate) {
+
+	    RestTemplate restTemplate = new RestTemplate();
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+	    headers.setBasicAuth("whydigit", "whydigit@123");
+
+	    FetchTripsRequestDTO requestDTO = new FetchTripsRequestDTO();
+	    requestDTO.setSdate(sDate);
+	    requestDTO.setEdate(eDate);
+
+	    HttpEntity<FetchTripsRequestDTO> entity =
+	            new HttpEntity<>(requestDTO, headers);
+
+	    ResponseEntity<FetchTripsResponse> response =
+	            restTemplate.postForEntity(
+	                    FETCH_TRIPS_URL,
+	                    entity,
+	                    FetchTripsResponse.class
+	            );
+
+	    return response.getBody();
+	}
+	
+	private static final String tracking_URL = "https://dashboard.traqo.in/api/v3/trip/location/";
+
+	public TripLocationResponseDTO Sim_Tracking(EndTripDTO endTripDTO) {
+		RestTemplate restTemplate = new RestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		headers.setBasicAuth("whydigit", "whydigit@123");
+
+		HttpEntity<EndTripDTO> entity = new HttpEntity<>(endTripDTO, headers);
+
+		ResponseEntity<TripLocationResponseDTO> response = restTemplate.postForEntity(tracking_URL, entity,
+				TripLocationResponseDTO.class);
+
+		return response.getBody();
+	}
+
+	
 
 }
