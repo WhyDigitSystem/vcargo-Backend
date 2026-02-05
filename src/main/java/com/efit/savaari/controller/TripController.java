@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.entity.TripVO;
+import com.efit.savaari.responseDTO.FetchTripsResponse;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.responseDTO.TripResponseDTO;
+import com.efit.savaari.service.TraqoService;
 import com.efit.savaari.service.TripService;
 
 @RestController
@@ -29,6 +31,9 @@ public class TripController extends BaseController {
 
 	@Autowired
 	private TripService tripService;
+	
+	@Autowired
+	TraqoService traqoService; 
 
 	@PutMapping("/createUpdateTrip")
 	public ResponseEntity<ResponseDTO> createUpdateTrip(@RequestBody TripDTO tripDTO) {
@@ -98,7 +103,7 @@ public class TripController extends BaseController {
 	}
 
 	@PutMapping("/trip/{id}/status")
-	public ResponseEntity<ResponseDTO> createTripStartEnd(@PathVariable Long id, @RequestParam String status) {
+	public ResponseEntity<ResponseDTO> createTripStartEnd(@PathVariable Long id, @RequestParam String status,@RequestParam boolean forceProceed) {
 		String methodName = "createTripStartEnd()";
 		LOGGER.debug("Starting {}", methodName);
 
@@ -106,8 +111,71 @@ public class TripController extends BaseController {
 		ResponseDTO responseDTO;
 
 		try {
-			String message = tripService.updateTripStartEnd(id, status);
+			String message = tripService.updateTripStartEnd(id, status,forceProceed);
 			responseMap.put("message", message);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
+
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/trip/Consent")
+	public ResponseEntity<ResponseDTO> checkConsent(@RequestParam Long id) {
+		String methodName = "checkConsent()";
+		LOGGER.debug("Starting {}", methodName);
+
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			Object message = tripService.checkTripConsent(id);
+			responseMap.put("message", message);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
+
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/fetchAlltrip")
+	public ResponseEntity<ResponseDTO> fetchAlltrip(@RequestParam String fromDate,@RequestParam String toDate) {
+		String methodName = "fetchAlltrip()";
+		LOGGER.debug("Starting {}", methodName);
+
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			FetchTripsResponse fetchTripsResponse = tripService.fetchAllTraqTrips(fromDate,toDate);
+			responseMap.put("fetchTripsResponse", fetchTripsResponse);
+			responseDTO = createServiceResponse(responseMap);
+		} catch (Exception e) {
+			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+			responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+		}
+
+		LOGGER.debug("Ending {}", methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/tripSimTrackingStatus")
+	public ResponseEntity<ResponseDTO> tripSimTrackingStatus(@RequestParam Long id) {
+		String methodName = "tripSimTrackingStatus()";
+		LOGGER.debug("Starting {}", methodName);
+
+		Map<String, Object> responseMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			TripResponseDTO trip = tripService.tripSimTrackingStatus(id);
+			responseMap.put("trip", trip);
 			responseDTO = createServiceResponse(responseMap);
 		} catch (Exception e) {
 			LOGGER.error("Error in {}: {}", methodName, e.getMessage());

@@ -2870,5 +2870,37 @@ public class TransactionServiceImpl implements TransactionService {
 			notificationService.createNotification(orgId, message, type);
 		}
 	}
+	
+	@Scheduled(cron = "0 1 5 * * ?")
+	public void notifyDriverExpiry() {
+
+		List<Object[]> results = tdriverRepo.findTdriverExpiringWithin30Days();
+
+		for (Object[] row : results) {
+
+			String driverName = (String) row[0];
+			Long orgId = ((Number) row[1]).longValue();
+
+			LocalDate licence = toLocalDate(row[2]);
+
+			processDriverExpiry(orgId, driverName, licence, "LICENCE");
+		}
+	}
+
+	private void processDriverExpiry(Long orgId, String driverName, LocalDate expiryDate, String type) {
+
+		if (expiryDate == null)
+			return;
+
+		long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
+
+// 🔥 CORE LOGIC
+		if (daysLeft > 0 && daysLeft <= 30 && daysLeft % 5 == 0) {
+
+			String message = "Driver " + driverName + " " + type + " expires in " + daysLeft + " days";
+
+			notificationService.createNotification(orgId, message, type);
+		}
+	}
 
 }

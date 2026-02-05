@@ -1,5 +1,6 @@
 package com.efit.savaari.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,9 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.efit.savaari.dto.ConsentDTO;
+import com.efit.savaari.dto.EndTripDTO;
+import com.efit.savaari.dto.TraqoTripRequest;
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.dto.TripWaypointDTO;
 import com.efit.savaari.entity.TdriverVO;
@@ -20,8 +24,14 @@ import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripRepo;
 import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.UserRepo;
+import com.efit.savaari.responseDTO.EndTripResponse;
+import com.efit.savaari.responseDTO.FetchTripsResponse;
+import com.efit.savaari.responseDTO.TraqoTripResponse;
+import com.efit.savaari.responseDTO.TripLocationResponseDTO;
 import com.efit.savaari.responseDTO.TripResponseDTO;
 import com.efit.savaari.responseDTO.TripWaypointResponseDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 @Service
 public class TripServiceImpl implements TripService {
@@ -41,7 +51,10 @@ public class TripServiceImpl implements TripService {
 	@Autowired
 	TdriverRepo driverRepo;
 
-	@Transactional
+	@Autowired
+	TraqoService traqoService;
+
+	@Transactional(rollbackOn = Exception.class)
 	@Override
 	public Map<String, Object> createUpdateTrip(TripDTO dto) {
 
@@ -93,6 +106,36 @@ public class TripServiceImpl implements TripService {
 		}
 
 		trip = tripRepo.save(trip);
+		String driverPhone=null;
+		if (trip.getDriver() != null) {
+			driverPhone=trip.getDriver().getPhone();
+		}
+		
+		TraqoTripRequest request = new TraqoTripRequest();
+		request.setTel(driverPhone);
+
+		request.setSrc(trip.getSourceLat() + "," + trip.getSourceLng());
+		request.setDest(trip.getDestinationLat() + "," + trip.getDestinationLng());
+
+		request.setSrcname(trip.getSource());
+		request.setDestname(trip.getDestination());
+
+		if (trip.getVehicle() != null)
+			request.setTruck_number(trip.getVehicle().getVehicleNumber());
+
+		request.setInvoice(trip.getId().toString());
+		request.setEta_hrs("100");
+
+		TraqoTripResponse traqresponse = traqoService.createTrip(request);
+
+		// 🔥 FAILURE → THROW EXCEPTION → ROLLBACK
+		if (traqresponse == null || !"success".equalsIgnoreCase(traqresponse.getStatus())) {
+			throw new RuntimeException(traqresponse != null ? traqresponse.getStatus() : "Traqo API failed");
+		}
+
+		// 🔥 SUCCESS → SAVE tripTrackId
+		trip.setTripTrackId(traqresponse.getTripId());
+		tripRepo.save(trip);
 
 		TripResponseDTO responseDTO = mapToTripResponseDTO(trip);
 
@@ -110,7 +153,10 @@ public class TripServiceImpl implements TripService {
 		trip.setCustomer(dto.getCustomer());
 		trip.setDistance(dto.getDistance());
 		trip.setEstimatedDuration(dto.getEstimatedDuration());
-
+		trip.setSourceLat(dto.getSourceLat());
+		trip.setSourceLng(dto.getSourceLng());
+		trip.setDestinationLat(dto.getDestinationLat());
+		trip.setDestinationLng(dto.getDestinationLng());
 		trip.setStartDate(dto.getStartDate());
 		trip.setStartTime(dto.getStartTime());
 		trip.setEndDate(dto.getEndDate());
@@ -146,6 +192,11 @@ public class TripServiceImpl implements TripService {
 		dto.setCustomer(trip.getCustomer());
 		dto.setDistance(trip.getDistance());
 		dto.setEstimatedDuration(trip.getEstimatedDuration());
+		dto.setSourceLat(trip.getSourceLat());
+		dto.setSourceLng(trip.getSourceLng());
+		dto.setDestinationLat(trip.getDestinationLat());
+		dto.setDestinationLng(trip.getDestinationLng());
+		dto.setTripTrackId(trip.getTripTrackId());
 
 		dto.setStartDate(trip.getStartDate());
 		dto.setStartTime(trip.getStartTime());
@@ -176,13 +227,15 @@ public class TripServiceImpl implements TripService {
 		if (trip.getUser() != null)
 			dto.setUser(trip.getUser().getId());
 
-		if (trip.getVehicle() != null)
+		if (trip.getVehicle() != null) {
 			dto.setVehicleId(trip.getVehicle().getId());
-		dto.setVehicle(trip.getVehicle().getVehicleNumber());
+			dto.setVehicle(trip.getVehicle().getVehicleNumber());
+		}
 
-		if (trip.getDriver() != null)
+		if (trip.getDriver() != null) {
 			dto.setDriverId(trip.getDriver().getId());
-		dto.setDriver(trip.getDriver().getName());
+			dto.setDriver(trip.getDriver().getName());
+		}
 
 		dto.setWaypoints(trip.getWaypoints().stream()
 				.map(w -> new TripWaypointResponseDTO(w.getId(), w.getLocation(), w.getSequenceNo())).toList());
@@ -205,43 +258,99 @@ public class TripServiceImpl implements TripService {
 
 	@Transactional
 	@Override
-	public String updateTripStartEnd(Long id, String status) {
+	public String updateTripStartEnd(Long id, String status, boolean forceProceed)
+			throws JsonMappingException, JsonProcessingException {
 
-		  TripVO trip = tripRepo.findById(id)
-		            .orElseThrow(() -> new RuntimeException("Trip not found"));
+		TripVO trip = tripRepo.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
 
-		    TdriverVO driver = trip.getDriver();
+		TdriverVO driver = trip.getDriver();
 
-		    if (driver == null) {
-		        throw new RuntimeException("Driver not assigned to trip");
-		    }
-		
-	    if ("START".equalsIgnoreCase(status)) {
-	    	
-	        int updated = tripRepo.updateTripStart(id);
-	        if (updated == 0) {
-	            throw new RuntimeException("Trip not found");
-	        }
-	        
-	        driverRepo.updateDriverStatus(driver.getId(), "Ontrip");
+		if (driver == null) {
+			throw new RuntimeException("Driver not assigned to trip");
+		}
 
-	        return "Trip Started Successfully";
+		if ("START".equalsIgnoreCase(status)) {
 
-	    } else if ("END".equalsIgnoreCase(status)) {
+			int updated = tripRepo.updateTripStart(id);
+			if (updated == 0) {
+				throw new RuntimeException("Trip not found");
+			}
 
-	        int updated = tripRepo.updateTripEnd(id);
-	        if (updated == 0) {
-	            throw new RuntimeException("Trip not found");
-	        }
-	        
-	        driverRepo.updateDriverStatus(driver.getId(), "Active");
+			driverRepo.updateDriverStatus(driver.getId(), "Ontrip");
 
-	        return "Trip Completed Successfully";
+			return "Trip Started Successfully";
 
-	    } else {
-	        throw new IllegalArgumentException("Invalid status value");
-	    }
+		} else if ("END".equalsIgnoreCase(status)) {
+
+			
+			
+
+			EndTripDTO endTripDTO=new EndTripDTO();
+			endTripDTO.setId(trip.getTripTrackId());
+			
+			EndTripResponse traqresponse = traqoService.endTrip(endTripDTO);
+
+//			// 🔥 FAILURE → THROW EXCEPTION → ROLLBACK
+//			if (traqresponse == null || !"success".equalsIgnoreCase(traqresponse.getStatus())) {
+//				throw new RuntimeException(traqresponse != null ? traqresponse.getStatus() : "Traqo API failed");
+//			}
+			int updated = tripRepo.updateTripEnd(id);
+			if (updated == 0) {
+				throw new RuntimeException("Trip not found");
+			}
+			
+			driverRepo.updateDriverStatus(driver.getId(), "Active");
+
+			return traqresponse.getStatus();
+
+		} else {
+			throw new IllegalArgumentException("Invalid status value");
+		}
 	}
 
+	@Override
+	public Object checkTripConsent(Long tripId) {
+
+		TripVO trip = tripRepo.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found"));
+
+		TdriverVO driver = trip.getDriver();
+		if (driver == null) {
+			throw new RuntimeException("Driver not assigned");
+		}
+
+		ConsentDTO consentDTO = new ConsentDTO();
+		consentDTO.setTel(driver.getPhone());
+
+		Object consentResponse = traqoService.checkConsent(consentDTO);
+		return consentResponse;
+	}
+
+	@Override
+	public FetchTripsResponse fetchAllTraqTrips(String fromDate, String toDate) {
+		
+				
+		FetchTripsResponse traqresponse = traqoService.fetchTrips(fromDate, toDate);
+		
+		return traqresponse;
+	}
+
+	@Override
+	public TripResponseDTO tripSimTrackingStatus(Long id) {
+		
+		TripVO trip= tripRepo.findById(id).get();
+		
+		TripResponseDTO responseDTO = mapToTripResponseDTO(trip);
+		
+		EndTripDTO endTripDTO=new EndTripDTO();
+		endTripDTO.setId(trip.getTripTrackId());
+		
+		TripLocationResponseDTO locationResponseDTO= traqoService.Sim_Tracking(endTripDTO);
+		responseDTO.setCurrentLocation(locationResponseDTO);
+		return responseDTO;
+	}
+
+	
+
+	
 
 }

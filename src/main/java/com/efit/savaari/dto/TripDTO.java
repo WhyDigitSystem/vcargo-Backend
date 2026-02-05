@@ -19,6 +19,10 @@ public class TripDTO {
 	private String destination;
 	private String customer;
 	private double distance;
+	private String sourceLat;
+	private String sourceLng;
+	private String destinationLat;
+	private String destinationLng;
 	private String estimatedDuration;
 	private LocalDate startDate;
 	private LocalTime startTime;

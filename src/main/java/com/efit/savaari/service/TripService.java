@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.entity.TripVO;
+import com.efit.savaari.responseDTO.FetchTripsResponse;
 import com.efit.savaari.responseDTO.TripResponseDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 @Service
 public interface TripService {
@@ -18,7 +21,16 @@ public interface TripService {
 
 	TripResponseDTO getTripById(Long id);
 	
-	String updateTripStartEnd(Long id, String status);
+
+	String updateTripStartEnd(Long id, String status, boolean forceProceed) throws JsonMappingException, JsonProcessingException;
+
+
+	Object checkTripConsent(Long id);
+
+	FetchTripsResponse fetchAllTraqTrips(String fromDate, String toDate);
+
+	TripResponseDTO tripSimTrackingStatus(Long id);
+	
 	
 	
 }

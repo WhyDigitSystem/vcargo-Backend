@@ -40,5 +40,14 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 	@Modifying
 	@Query("UPDATE TdriverVO d SET d.status=:status WHERE d.id=:id")
 	int updateDriverStatus(@Param("id") Long id, @Param("status") String status);
+	
+
+	@Query(nativeQuery = true, value = "SELECT name, orgid, licenseexpiry\r\n"
+			+ "					    FROM tdriver\r\n"
+			+ "					    WHERE active = 1\r\n"
+			+ "					      AND (\r\n"
+			+ "					           DATEDIFF(licenseexpiry, CURDATE()) BETWEEN 1 AND 30\r\n"
+			+ "					      )")
+	List<Object[]> findTdriverExpiringWithin30Days();
 
 }
