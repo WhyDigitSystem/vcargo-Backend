@@ -147,6 +147,8 @@ public class TripVO {
 	@JoinColumn(name = "vehicle")
 	private TvehicleVO vehicle;
 	
+	private String invoiceNo;
+	
 	
 	
 	
@@ -157,6 +159,8 @@ public class TripVO {
 	@OneToMany(mappedBy = "tripVO", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private List<TripWaypointVO> waypoints = new ArrayList<>();
+	
+	
 
 	
 }
