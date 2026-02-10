@@ -150,7 +150,8 @@ public class TripVO {
 	@ManyToOne
 	@JoinColumn(name = "customer")
 	private CustomerVO customer;
-	
+
+	private String invoiceNo;	
 	
 	@ManyToOne
 	@JoinColumn(name = "driver")
@@ -159,6 +160,8 @@ public class TripVO {
 	@OneToMany(mappedBy = "tripVO", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private List<TripWaypointVO> waypoints = new ArrayList<>();
+	
+	
 
 	
 }

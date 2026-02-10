@@ -1,5 +1,8 @@
 package com.efit.savaari.service;
 
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +77,10 @@ public class TripServiceImpl implements TripService {
 			trip = new TripVO();
 			trip.setCreatedBy(dto.getCreatedBy());
 			trip.setUpdatedBy(dto.getCreatedBy());
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+			String formatted = now.format(formatter);			
+			trip.setInvoiceNo(formatted);
 			message = "Trip Created Successfully";
 		}
 
@@ -134,7 +141,7 @@ public class TripServiceImpl implements TripService {
 		if (trip.getVehicle() != null)
 			request.setTruck_number(trip.getVehicle().getVehicleNumber());
 
-		request.setInvoice(trip.getId().toString());
+		request.setInvoice(trip.getInvoiceNo());
 		request.setEta_hrs("100");
 
 		TraqoTripResponse traqresponse = traqoService.createTrip(request);
@@ -380,7 +387,5 @@ public class TripServiceImpl implements TripService {
 		responseDTO.setCurrentLocation(locationResponseDTO);
 		return responseDTO;
 	}
-
-	
 
 }
