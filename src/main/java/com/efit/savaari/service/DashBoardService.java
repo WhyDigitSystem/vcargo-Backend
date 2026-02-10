@@ -13,4 +13,6 @@ public interface DashBoardService {
 
 	Map<String, Object> getDashboardData(Long orgId);
 
+	Map<String, Object> getAllDashBoardVehicleDetails(Long orgId);
+
 }

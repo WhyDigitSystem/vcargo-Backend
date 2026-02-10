@@ -129,6 +129,7 @@ public class TripServiceImpl implements TripService {
 			driverPhone=trip.getDriver().getPhone();
 		}
 		
+		if(dto.getId() == null) {
 		TraqoTripRequest request = new TraqoTripRequest();
 		request.setTel(driverPhone);
 
@@ -137,6 +138,8 @@ public class TripServiceImpl implements TripService {
 
 		request.setSrcname(trip.getSource());
 		request.setDestname(trip.getDestination());
+		
+		
 
 		if (trip.getVehicle() != null)
 			request.setTruck_number(trip.getVehicle().getVehicleNumber());
@@ -154,7 +157,9 @@ public class TripServiceImpl implements TripService {
 		// 🔥 SUCCESS → SAVE tripTrackId
 		trip.setTripTrackId(traqresponse.getTripId());
 		tripRepo.save(trip);
-
+		}
+		
+		
 		TripResponseDTO responseDTO = mapToTripResponseDTO(trip);
 
 		Map<String, Object> response = new HashMap<>();
@@ -250,23 +255,28 @@ public class TripServiceImpl implements TripService {
 			dto.setVehicle(trip.getVehicle().getVehicleNumber());
 		}
 		
-//		if (trip.getCustomer() != null) {
-//
-//		    dto.setCustomerId(trip.getCustomer().getId());
-//		    dto.setCustomer(trip.getCustomer().getCustomerName());
-//		    dto.setEmail(trip.getCustomer().getEmail());
-//		    dto.setPhoneNo(trip.getCustomer().getPhoneNumber());
-//
-//		    // PRIMARY ADDRESS
-//		    if (trip.getCustomer().getCustomerAddressVO() != null &&
-//		        !trip.getCustomer().getCustomerAddressVO().isEmpty()) {
-//
-//		        CustomerAddressVO addr =
-//		                trip.getCustomer().getCustomerAddressVO().get(0);
-//
-//		        dto.setAddress(addr.getPrimaryAddress());
-//		    }
-//		}
+		if (trip.getCustomer() != null) {
+
+		    dto.setCustomerId(trip.getCustomer().getId());
+		    dto.setCustomer(trip.getCustomer().getCustomerName());
+		    dto.setEmail(trip.getCustomer().getEmail());
+		    dto.setPhoneNo(trip.getCustomer().getPhoneNumber());
+
+		    // PRIMARY ADDRESS
+		    if (trip.getCustomer().getCustomerAddressVO() != null &&
+		        !trip.getCustomer().getCustomerAddressVO().isEmpty()) {
+
+		        CustomerAddressVO addr =
+		                trip.getCustomer().getCustomerAddressVO().get(0);
+
+		        dto.setPrimaryAddress(addr.getPrimaryAddress());
+		        dto.setAdditionalAddress(addr.getAdditionalAddress());
+		        dto.setCity(addr.getCity());
+		        dto.setState(addr.getState());
+		        dto.setType(addr.getType());
+		        dto.setPincode(addr.getPincode());		
+		        }
+		}
 
 
 

@@ -20,6 +20,7 @@ import com.efit.savaari.repo.FuelRepo;
 import com.efit.savaari.repo.MaintenanceRepo;
 import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripRepo;
+import com.efit.savaari.repo.TvehicleRepo;
 import com.efit.savaari.repo.TyreMasterRepo;
 import com.efit.savaari.repo.VehicleRepo;
 
@@ -44,6 +45,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 	 TdriverRepo tdriverRepo;
 	 @Autowired
 	 private VehicleRepo vehiclesRepo;
+	 
+	 @Autowired
+	 TvehicleRepo tVehiclesrepo;
 
 //	    @Override
 //	    public Map<String, Object> getDashboardData(Long orgId) {
@@ -257,6 +261,34 @@ public class DashBoardServiceImpl implements DashBoardService {
 		    return d;
 		}
 
+	 @Override
+	 public Map<String, Object> getAllDashBoardVehicleDetails(Long orgId) {
+
+	     List<Object[]> result = tVehiclesrepo.getAllDashBoardVehicleDetails(orgId);
+
+	     Map<String, Object> map = new HashMap<>();
+
+	     // Safety check
+	     if (result == null || result.isEmpty()) {
+	         map.put("maintenanceVehicles", 0);
+	         map.put("onTripVehicles", 0);
+	         map.put("activeVehicles", 0);
+	         return map;
+	     }
+
+	     Object[] row = result.get(0);   // ✅ take first row
+
+	     map.put("maintenanceVehicles",
+	             row[0] != null ? ((Number) row[0]).longValue() : 0);
+
+	     map.put("onTripVehicles",
+	             row[1] != null ? ((Number) row[1]).longValue() : 0);
+
+	     map.put("activeVehicles",
+	             row[2] != null ? ((Number) row[2]).longValue() : 0);
+
+	     return map;
+	 }
 
 }
 

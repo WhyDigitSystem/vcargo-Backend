@@ -40,8 +40,8 @@ public class TripInvoiceVO {
 
     /* ================= RELATIONS ================= */
 
-    @Column(name = "customer")
-    private String customer;
+//    @Column(name = "customer")
+//    private String customer;
 
     @ManyToOne
     @JoinColumn(name = "tvehicleid")
@@ -121,6 +121,10 @@ public class TripInvoiceVO {
 
     @Column(name = "cancel")
     private Boolean cancel = false;
+    
+    @ManyToOne
+	@JoinColumn(name = "customer")
+	private CustomerVO customer;
 
     /* ================= INVOICE ITEMS ================= */
 

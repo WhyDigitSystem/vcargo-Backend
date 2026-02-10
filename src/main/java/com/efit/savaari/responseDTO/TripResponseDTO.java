@@ -19,11 +19,16 @@ public class TripResponseDTO {
     private Long id;
     private String source;
     private String destination;
-//    private Long customerId;
-//    private String customer;
-//    private String address;
-//    private String email;
-//    private String phoneNo;
+    private Long customerId;
+    private String customer;
+    private String primaryAddress;
+   	private String additionalAddress;
+   	private String city;
+   	private String state;
+   	private String type;
+   	private int pincode;
+   	private String email;
+    private String phoneNo;
 
     private double distance;
     private String estimatedDuration;

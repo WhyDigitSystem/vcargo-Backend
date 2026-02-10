@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import com.efit.savaari.dto.TripInvoiceDTO;
 import com.efit.savaari.dto.TripInvoiceItemResponseDTO;
 import com.efit.savaari.dto.TripInvoiceResponseDTO;
+import com.efit.savaari.entity.CustomerAddressVO;
+import com.efit.savaari.entity.CustomerVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripInvoiceItemVO;
 import com.efit.savaari.entity.TripInvoiceVO;
@@ -352,6 +355,12 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 	        invoice.setVehicle(vehicle);
 	    }
 
+	    if (dto.getCustomer() != null) {
+			CustomerVO customerVO = customerRepo.findById(Long.parseLong(dto.getCustomer()))
+					.orElseThrow(() -> new RuntimeException("Invalid Customer"));
+			invoice.setCustomer(customerVO);
+		}
+	    
 	    /* ===== DRIVER ===== */
 	    if (dto.getDriverId() != null && !dto.getDriverId().isEmpty()) {
 
@@ -393,7 +402,7 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 	    invoice.setStatus(dto.getStatus());
 	    invoice.setPaymentMethod(dto.getPaymentMethod());
 	    invoice.setPaymentDate(dto.getPaymentDate());
-	    invoice.setCustomer(dto.getCustomer());
+//	    invoice.setCustomer(dto.getCustomer());
 
 	    invoice.setSubtotal(dto.getSubtotal());
 	    invoice.setTaxRate(dto.getTaxRate());
@@ -433,7 +442,7 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 
 	    dto.setId(invoice.getInvoiceId());
 	    dto.setOrgId(invoice.getOrgId());
-	    dto.setCustomer(invoice.getCustomer());
+//	    dto.setCustomer(invoice.getCustomer());
 
 
 //	    if (invoice.getCustomer() != null)
@@ -452,6 +461,32 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 	        dto.setTripId(invoice.getTrip().getId());
 	        dto.setTrip(invoice.getTrip().getSource() + " → " + invoice.getTrip().getDestination());
 	    }
+	    
+	    if (invoice.getCustomer() != null) {
+
+		    dto.setCustomerId(invoice.getCustomer().getId());
+		    dto.setCustomer(invoice.getCustomer().getCustomerName());
+		    dto.setEmail(invoice.getCustomer().getEmail());
+		    dto.setPhoneNo(invoice.getCustomer().getPhoneNumber());
+
+		    // PRIMARY ADDRESS
+		    if (invoice.getCustomer().getCustomerAddressVO() != null &&
+		        !invoice.getCustomer().getCustomerAddressVO().isEmpty()) {
+
+		        CustomerAddressVO addr =
+		        		invoice.getCustomer().getCustomerAddressVO().get(0);
+
+		        dto.setPrimaryAddress(addr.getPrimaryAddress());
+		        dto.setAdditionalAddress(addr.getAdditionalAddress());
+		        dto.setCity(addr.getCity());
+		        dto.setState(addr.getState());
+		        dto.setType(addr.getType());
+		        dto.setPincode(addr.getPincode());
+
+		    	
+		    }
+		}
+
 
 	    dto.setTripDetails(invoice.getTripDetails());
 	    dto.setIssueDate(invoice.getIssueDate());

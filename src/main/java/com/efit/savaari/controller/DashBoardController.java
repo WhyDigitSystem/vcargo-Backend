@@ -106,5 +106,40 @@ public class DashBoardController extends BaseController  {
 	        LOGGER.debug("Ending {}", methodName);
 	        return ResponseEntity.ok(responseDTO);
 	    }
+	  
+	  @GetMapping("/getAllDashBoardVehicleDetails")
+	    public ResponseEntity<ResponseDTO> getAllDashBoardVehicleDetails(
+	            @RequestParam Long orgId) {
+
+	        String methodName = "getAllDashBoardVehicleDetails()";
+	        LOGGER.debug("Starting {}", methodName);
+
+	        Map<String, Object> responseMap = new HashMap<>();
+	        ResponseDTO responseDTO;
+
+	        try {
+
+	            Map<String, Object> vehicles =
+	                    dashBoardService.getAllDashBoardVehicleDetails(orgId);
+
+	            responseMap.put("message", "Dashboard Vehicles details fetched successfully");
+	            responseMap.put("vehicles", vehicles);
+
+	            responseDTO = createServiceResponse(responseMap);
+
+	        } catch (Exception e) {
+
+	            LOGGER.error("Error in {}: {}", methodName, e.getMessage(), e);
+
+	            responseDTO = createServiceResponseError(
+	                    responseMap,
+	                    "Error fetching dashboard data",
+	                    e.getMessage()
+	            );
+	        }
+
+	        LOGGER.debug("Ending {}", methodName);
+	        return ResponseEntity.ok(responseDTO);
+	    }
 
 }

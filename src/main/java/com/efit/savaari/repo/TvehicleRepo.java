@@ -33,4 +33,37 @@ public interface TvehicleRepo extends JpaRepository<TvehicleVO, Long> {
 
 	Optional<TripInvoiceVO> findByOrgIdAndId(Long orgId, String vehicleId);
 
+
+	@Query(value = "SELECT\r\n"
+			+ "    COUNT(DISTINCT CASE \r\n"
+			+ "        WHEN v.active = 'MAINTENANCE' \r\n"
+			+ "        THEN v.tvehicleid \r\n"
+			+ "    END) AS maintenance_vehicle_count,\r\n"
+			+ "\r\n"
+			+ "    COUNT(DISTINCT CASE \r\n"
+			+ "        WHEN v.active = 'ACTIVE'\r\n"
+			+ "         AND t.tripid IS NOT NULL\r\n"
+			+ "        THEN v.tvehicleid\r\n"
+			+ "    END) AS ontrip_vehicle_count,\r\n"
+			+ "\r\n"
+			+ "    COUNT(DISTINCT CASE \r\n"
+			+ "        WHEN v.active = 'ACTIVE'\r\n"
+			+ "         AND t.tripid IS NULL\r\n"
+			+ "        THEN v.tvehicleid\r\n"
+			+ "    END) AS active_vehicle_count\r\n"
+			+ "\r\n"
+			+ "FROM tvehicle v\r\n"
+			+ "LEFT JOIN trip t\r\n"
+			+ "    ON t.vehicle = v.tvehicleid\r\n"
+			+ "   AND t.status IN ('scheduled','started')\r\n"
+			+ "   AND t.orgid = v.orgid\r\n"
+			+ "WHERE v.orgid = ?1",
+	        nativeQuery = true)
+	List<Object[]> getAllDashBoardVehicleDetails(Long orgId);
+
+
+
+	
+	
+	    
 }
