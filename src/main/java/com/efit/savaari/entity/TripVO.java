@@ -56,8 +56,8 @@ public class TripVO {
 	@Column(name = "triptrackid")
 	private String tripTrackId;
 	
-	@Column(name = "customer")
-	private String customer;
+//	@Column(name = "customer")
+//	private String customer;
 
 	@Column(name = "distance")
 	private double distance;
@@ -147,7 +147,9 @@ public class TripVO {
 	@JoinColumn(name = "vehicle")
 	private TvehicleVO vehicle;
 	
-	
+	@ManyToOne
+	@JoinColumn(name = "customer")
+	private CustomerVO customer;
 	
 	
 	@ManyToOne

@@ -445,6 +445,7 @@ public class TripInvoiceServiceImpl implements TripInvoiceService {
 
 	    if (invoice.getDriver() != null)
 	        dto.setDriverNumber(invoice.getDriver().getPhone());
+        dto.setDriverName(invoice.getDriver().getName());
            dto.setDriverId(invoice.getDriver().getId());
 
 	    if (invoice.getTrip() != null) {

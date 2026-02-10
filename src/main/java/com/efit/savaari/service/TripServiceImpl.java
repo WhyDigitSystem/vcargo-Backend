@@ -1,6 +1,5 @@
 package com.efit.savaari.service;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +14,14 @@ import com.efit.savaari.dto.EndTripDTO;
 import com.efit.savaari.dto.TraqoTripRequest;
 import com.efit.savaari.dto.TripDTO;
 import com.efit.savaari.dto.TripWaypointDTO;
+import com.efit.savaari.entity.CustomerAddressVO;
+import com.efit.savaari.entity.CustomerVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripVO;
 import com.efit.savaari.entity.TripWaypointVO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.UserVO;
+import com.efit.savaari.repo.CustomerRepo;
 import com.efit.savaari.repo.TdriverRepo;
 import com.efit.savaari.repo.TripRepo;
 import com.efit.savaari.repo.TvehicleRepo;
@@ -53,6 +55,9 @@ public class TripServiceImpl implements TripService {
 
 	@Autowired
 	TraqoService traqoService;
+	
+	@Autowired
+	CustomerRepo customerRepo;
 
 	@Transactional(rollbackOn = Exception.class)
 	@Override
@@ -89,6 +94,12 @@ public class TripServiceImpl implements TripService {
 			TdriverVO driver = driverRepo.findById(Long.parseLong(dto.getDriver()))
 					.orElseThrow(() -> new RuntimeException("Invalid Driver"));
 			trip.setDriver(driver);
+		}
+		
+		if (dto.getCustomer() != null) {
+			CustomerVO customerVO = customerRepo.findById(Long.parseLong(dto.getCustomer()))
+					.orElseThrow(() -> new RuntimeException("Invalid Customer"));
+			trip.setCustomer(customerVO);
 		}
 
 		if (trip.getWaypoints() != null) {
@@ -150,7 +161,7 @@ public class TripServiceImpl implements TripService {
 
 		trip.setSource(dto.getSource());
 		trip.setDestination(dto.getDestination());
-		trip.setCustomer(dto.getCustomer());
+//		trip.setCustomer(dto.getCustomer());
 		trip.setDistance(dto.getDistance());
 		trip.setEstimatedDuration(dto.getEstimatedDuration());
 		trip.setSourceLat(dto.getSourceLat());
@@ -189,7 +200,7 @@ public class TripServiceImpl implements TripService {
 		dto.setId(trip.getId());
 		dto.setSource(trip.getSource());
 		dto.setDestination(trip.getDestination());
-		dto.setCustomer(trip.getCustomer());
+//		dto.setCustomer(trip.getCustomer());
 		dto.setDistance(trip.getDistance());
 		dto.setEstimatedDuration(trip.getEstimatedDuration());
 		dto.setSourceLat(trip.getSourceLat());
@@ -231,7 +242,28 @@ public class TripServiceImpl implements TripService {
 			dto.setVehicleId(trip.getVehicle().getId());
 			dto.setVehicle(trip.getVehicle().getVehicleNumber());
 		}
+		
+//		if (trip.getCustomer() != null) {
+//
+//		    dto.setCustomerId(trip.getCustomer().getId());
+//		    dto.setCustomer(trip.getCustomer().getCustomerName());
+//		    dto.setEmail(trip.getCustomer().getEmail());
+//		    dto.setPhoneNo(trip.getCustomer().getPhoneNumber());
+//
+//		    // PRIMARY ADDRESS
+//		    if (trip.getCustomer().getCustomerAddressVO() != null &&
+//		        !trip.getCustomer().getCustomerAddressVO().isEmpty()) {
+//
+//		        CustomerAddressVO addr =
+//		                trip.getCustomer().getCustomerAddressVO().get(0);
+//
+//		        dto.setAddress(addr.getPrimaryAddress());
+//		    }
+//		}
 
+
+
+		
 		if (trip.getDriver() != null) {
 			dto.setDriverId(trip.getDriver().getId());
 			dto.setDriver(trip.getDriver().getName());
@@ -348,8 +380,6 @@ public class TripServiceImpl implements TripService {
 		responseDTO.setCurrentLocation(locationResponseDTO);
 		return responseDTO;
 	}
-
-	
 
 	
 

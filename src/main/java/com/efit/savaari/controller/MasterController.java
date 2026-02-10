@@ -46,9 +46,7 @@ import com.efit.savaari.entity.ListOfValuesVO;
 import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.VendorRateVO;
-
 import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
-
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MasterService;
 
@@ -199,28 +197,29 @@ public class MasterController extends BaseController {
 		@GetMapping("/getCustomerByOrgId")
 		public ResponseEntity<ResponseDTO> getUsersByOrgId(
 		        @RequestParam(required = false) String branchCode,
-		        @RequestParam Long orgId,
-		        @RequestParam(defaultValue = "") String search,
-		        @RequestParam(defaultValue = "1") int page,
-		        @RequestParam(defaultValue = "10") int count
-		) {
-		    String methodName = "getCustomerByOrgId()";
-		    LOGGER.debug("Starting {}", methodName);
+		        @RequestParam Long orgId) {
 
 		    Map<String, Object> responseMap = new HashMap<>();
 		    ResponseDTO responseDTO;
 
 		    try {
-		        Map<String, Object> customerVO = masterService.getCustomerByOrgId( branchCode,orgId, search, page, count);
+		        List<CustomerVO> customers =
+		                masterService.getCustomerByOrgId(branchCode, orgId);
+
 		        responseMap.put("message", "Customer retrieved successfully");
-		        responseMap.put("customerVO", customerVO);
+		        responseMap.put("customerVO", customers);
+
 		        responseDTO = createServiceResponse(responseMap);
+
 		    } catch (Exception e) {
-		        LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-		        responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+
+		        responseDTO = createServiceResponseError(
+		                responseMap,
+		                "Error fetching users",
+		                e.getMessage()
+		        );
 		    }
 
-		    LOGGER.debug("Ending {}", methodName);
 		    return ResponseEntity.ok(responseDTO);
 		}
 

@@ -26,7 +26,7 @@ public interface TvehicleDocumentsRepo extends JpaRepository<TvehicleDocumentsVO
 	@Transactional
 	@Query(value = "DELETE FROM tvehicledocuments WHERE tvehicleid = :vehicleId", nativeQuery = true)
 	void deleteByVehicleId(@Param("vehicleId") Long vehicleId);
-
+  
 
 
 	List<TvehicleDocumentsVO> findByTvehicle(TvehicleVO vo);

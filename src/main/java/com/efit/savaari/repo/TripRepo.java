@@ -15,7 +15,7 @@ import com.efit.savaari.entity.TripVO;
 @Repository
 public interface TripRepo extends JpaRepository<TripVO, Long> {
 
-	@Query(nativeQuery = true, value = "select a.* from trip a where a.orgid=:orgId")
+	@Query(nativeQuery = true, value = "select * from trip  where orgid=?1")
 	List<TripVO> getTripByOrgId(Long orgId);
 
 	@Query(nativeQuery = true, value = "select * from trip a where a.orgid=?1  ORDER BY a.tripid DESC LIMIT 5")

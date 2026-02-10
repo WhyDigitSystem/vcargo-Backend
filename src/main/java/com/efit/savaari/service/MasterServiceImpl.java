@@ -400,22 +400,10 @@ public class MasterServiceImpl implements MasterService {
 	}
 
 	@Override
-	public Map<String, Object> getCustomerByOrgId(String branchCode,Long orgId, String search, int page, int count) {
-
-		if (search != null) {
-			search = search.trim();
-			if (search.isEmpty()) {
-				search = null;
-			}
-		}
-
-		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("customerName").ascending());
-		Page<CustomerVO> customerPage = customerRepo.getCustomerByOrgId(branchCode,orgId, search, pageable);
-
-		// return paginated response
-		return paginationService.buildResponse(customerPage);
-
+	public List<CustomerVO> getCustomerByOrgId(String branchCode, Long orgId) {
+	    return customerRepo.getCustomerByOrgId(branchCode, orgId);
 	}
+
 
 	@Override
 	public Map<String, Object> createUpdateIndents(IndentsDTO indentsDTO, List<MultipartFile> tripFiles)

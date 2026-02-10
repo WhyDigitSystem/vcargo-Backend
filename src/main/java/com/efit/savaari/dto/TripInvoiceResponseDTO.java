@@ -17,6 +17,7 @@ public class TripInvoiceResponseDTO {
     private Long vehicleId;
     private String driverNumber;
     private Long driverId;
+    private String driverName;
     private Long tripId;
     private String trip;
 
