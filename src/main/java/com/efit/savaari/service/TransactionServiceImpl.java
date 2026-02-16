@@ -12,12 +12,14 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -45,6 +47,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -63,8 +66,6 @@ import com.efit.savaari.dto.TripGeofenceAlertsDTO;
 import com.efit.savaari.dto.TripReportMisDTO;
 import com.efit.savaari.dto.TripsDTO;
 import com.efit.savaari.dto.TvehicleDTO;
-import com.efit.savaari.dto.TvehicleDocumentResponseDTO;
-import com.efit.savaari.dto.TvehicleResponseDTO;
 import com.efit.savaari.dto.VendorInvoiceChargesDTO;
 import com.efit.savaari.dto.VendorInvoiceDTO;
 import com.efit.savaari.dto.VendorInvoiceTripsDetailsDTO;
@@ -84,6 +85,7 @@ import com.efit.savaari.entity.PayoutsVendorDetailsVO;
 import com.efit.savaari.entity.QuoteVO;
 import com.efit.savaari.entity.RequestforQuotesVO;
 import com.efit.savaari.entity.TaggingVO;
+import com.efit.savaari.entity.TdriverDocumentsVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripAlertsVO;
 import com.efit.savaari.entity.TripGeofenceAlertsVO;
@@ -135,6 +137,10 @@ import com.efit.savaari.repo.VendorInvoiceRepo;
 import com.efit.savaari.repo.VendorInvoiceTripsDetailsRepo;
 import com.efit.savaari.repo.VendorInvoiceTripsDocumentRepo;
 import com.efit.savaari.repo.VendorRepo;
+import com.efit.savaari.responseDTO.TdriverDocumentResponseDTO;
+import com.efit.savaari.responseDTO.TdriverResponseDTO;
+import com.efit.savaari.responseDTO.TvehicleDocumentResponseDTO;
+import com.efit.savaari.responseDTO.TvehicleResponseDTO;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -882,8 +888,6 @@ public class TransactionServiceImpl implements TransactionService {
 				bccEmailIds.append(",");
 			}
 			bccEmailIds.append(vo1.getUserName());
-			n1.setUserid(userId);
-			n1.setAuctionsid(vo.getId());
 			n1.setMessage(vo.getOrganizationName() + " ,Auction ID: " + vo.getId() + " Bid and Win...");
 			n1.setNotificationType("New Auction");
 			n.add(n1);
@@ -1497,8 +1501,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 		UserVO uv = userVO.get();
 		NotificationVO n1 = new NotificationVO();
-		n1.setAuctionsid(auction.getId());
-		n1.setUserid(auction.getUser().getId());
 		n1.setMessage("A new quote has been submitted by " + uv.getOrganizationName() + " for your auction "
 				+ auction.getId() + " . Please review the quote details.");
 		n1.setNotificationType("Quote Received");
@@ -1616,6 +1618,21 @@ public class TransactionServiceImpl implements TransactionService {
 		// 2️⃣ Base vehicle folder
 		Path vehicleFolder = Paths.get(uploadBasePath, vehicleNo);
 		createDirectory(vehicleFolder);
+		
+		List<TvehicleDocumentsVO> oldDocs = tvehicleDocumentsRepo.findByTvehicle(vo);
+
+		tvehicleDocumentsRepo.deleteByVehicleId(vo.getId());
+		
+		if (vo.getDocuments() != null) {
+		    vo.getDocuments().clear();
+		} else {
+		    vo.setDocuments(new ArrayList<>());
+		}
+		
+		// 2️⃣ Delete physical files
+		for (TvehicleDocumentsVO doc : oldDocs) {
+			deleteFileSafely(doc.getFilePath());
+		}
 
 		replaceDocuments(vo, "RC", rcFiles, vehicleFolder);
 		replaceDocuments(vo, "INSURANCE", insuranceFiles, vehicleFolder);
@@ -1641,6 +1658,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setType(vehicle.getType());
 		dto.setModel(vehicle.getModel());
 		dto.setCapacity(vehicle.getCapacity());
+		dto.setRegistrationType(vehicle.getRegistrationType());
 
 		if (vehicle.getUser() != null) {
 			dto.setUser(vehicle.getUser().getId());
@@ -1664,7 +1682,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setLastService(vehicle.getLastService());
 		dto.setNextService(vehicle.getNextService());
 
-		dto.setActive(vehicle.isActive());
+		dto.setActive(vehicle.getActive());
 		dto.setCancel(vehicle.isCancel());
 
 		dto.setOrgId(vehicle.getOrgId());
@@ -1699,17 +1717,7 @@ public class TransactionServiceImpl implements TransactionService {
 		if (files == null || files.length == 0)
 			return;
 
-		// 1️⃣ Fetch old docs
-		List<TvehicleDocumentsVO> oldDocs = tvehicleDocumentsRepo.findByTvehicleAndDocumentType(vehicle, documentType);
-
-		// 2️⃣ Delete physical files
-		for (TvehicleDocumentsVO doc : oldDocs) {
-			deleteFileSafely(doc.getFilePath());
-		}
-
-		// 3️⃣ Delete DB rows
-		tvehicleDocumentsRepo.deleteAll(oldDocs);
-
+		
 		// 4️⃣ Remove from persistence context
 		if (vehicle.getDocuments() != null) {
 			vehicle.getDocuments().removeIf(d -> documentType.equals(d.getDocumentType()));
@@ -1741,7 +1749,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 			for (MultipartFile file : files) {
 
-				String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 				Path filePath = docFolder.resolve(fileName);
 
 				// ✅ IMPORTANT: close stream
@@ -1759,10 +1767,14 @@ public class TransactionServiceImpl implements TransactionService {
 				doc.setFileSize(file.getSize());
 				doc.setUploadedOn(LocalDateTime.now());
 
-				tvehicleDocumentsRepo.save(doc);
+//				tvehicleDocumentsRepo.save(doc);
 				if (vehicle.getDocuments() == null) {
-				    vehicle.setDocuments(new ArrayList<>());
+					vehicle.setDocuments(new ArrayList<>());
 				}
+				doc.setTvehicle(vehicle);
+				vehicle.getDocuments().add(doc);
+				tvehicleRepo.save(vehicle);
+
 			}
 
 		} catch (IOException e) {
@@ -1800,54 +1812,19 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setEngineNumber(dto.getEngineNumber());
 		vo.setPermitType(dto.getPermitType());
 		vo.setOwnerName(dto.getOwnerName());
+		vo.setRegistrationType(dto.getRegistrationType());
 
-		vo.setActive(dto.isActive());
+		vo.setActive(dto.getActive());
 		vo.setOrgId(dto.getOrgId());
 		vo.setBranchCode(dto.getBranchCode());
 		vo.setBranchName(dto.getBranchName());
 	}
 
-    @Override
-    public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
+	@Override
+	public ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException {
 
-        String uri = request.getRequestURI();
-
-        // Remove API prefix
-        String relativePath = uri.replace("/api/transaction/files/", "");
-
-        // Decode URL (%20 → space)
-        relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
-
-        // Remove uploads/vehicles since base path already points there
-        if (relativePath.startsWith("uploads/vehicles/")) {
-            relativePath = relativePath.substring("uploads/vehicles/".length());
-        }
-
-        Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
-        Path filePath = baseDir.resolve(relativePath).normalize();
-
-        // 🔐 Security check
-        if (!filePath.startsWith(baseDir)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        if (!Files.exists(filePath)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        byte[] data = Files.readAllBytes(filePath);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
-                .body(data);
-    }
-
+		return serveFile(request, "/api/transaction/files/", uploadBasePath, "uploads/vehicles/");
+	}
 
 	@Override
 	public TvehicleVO getTvehiclesById(Long id) throws ApplicationException {
@@ -1855,55 +1832,36 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public Map<String, Object> getTvehiclesByOrgId(String branchCode, Long userId, String search, int page, int count) {
+	public List<TvehicleVO> getTvehiclesByOrgId(String branchCode, Long orgId) {
 
-		if (search != null) {
-			search = search.trim();
-			if (search.isEmpty()) {
-				search = null;
-			}
-		}
-
-		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("vehiclenumber").ascending());
-		Page<TvehicleVO> TvehiclePage = tvehicleRepo.getTvehiclesByOrgId(branchCode, userId, search, pageable);
-		
-		Page<TvehicleResponseDTO> dtoPage =
-				TvehiclePage.map(this::mapToResponseDTO);
-
-		// return paginated response
-		return paginationService.buildResponse(dtoPage);
+		return tvehicleRepo.getTvehiclesByOrgId(branchCode, orgId);
 
 	}
 
-//	@Override
-//	@Transactional
-//	public Map<String, Object> createUpdateTdriver(TdriverDTO dto, List<MultipartFile> documents)
-//			throws ApplicationException {
+	@Value("${driver.file.upload.path}")
+	private String uploadDriverBasePath;
 
 	@Override
 	@Transactional
-	public Map<String, Object> createUpdateTdriver(TdriverDTO dto) throws ApplicationException {
+	public Map<String, Object> createUpdateTdriver(TdriverDTO dto, MultipartFile[] dlFiles, MultipartFile[] aadharFiles,
+			MultipartFile[] panFiles, MultipartFile[] photoFiles, MultipartFile[] expFiles,
+			MultipartFile[] medicalFiles, MultipartFile[] otherFiles) throws ApplicationException {
 
 		TdriverVO vo;
 		String message;
 
-		// ========== UPDATE ==========
-		if (dto.getId() != null) {
-
+		// UPDATE
+		if (ObjectUtils.isNotEmpty(dto.getId())) {
 			vo = tdriverRepo.findById(dto.getId()).orElseThrow(() -> new ApplicationException("Invalid Driver ID"));
-
-			// Delete existing child docs
-//			tdriverDocumentsRepo.deleteAll(tdriverDocumentsRepo.findByTdriverVO(vo));
-
 			vo.setUpdatedBy(dto.getCreatedBy());
-			message = "TDriver Updated Successfully";
-
-		} else {
-			// ========== CREATE ==========
+			message = "Driver Updated Successfully";
+		}
+		// CREATE
+		else {
 			vo = new TdriverVO();
 			vo.setCreatedBy(dto.getCreatedBy());
 			vo.setUpdatedBy(dto.getCreatedBy());
-			message = "TDriver Created Successfully";
+			message = "Driver Created Successfully";
 		}
 
 		if (dto.getUserId() != null) {
@@ -1912,48 +1870,161 @@ public class TransactionServiceImpl implements TransactionService {
 			vo.setUser(user);
 		}
 
-		// ===== MAP BASIC FIELDS =====
 		mapTdriverDTOtoVO(dto, vo);
+		vo = tdriverRepo.save(vo);
 
-		// ===== CHILD TABLE: DOCUMENTS =====
-//		List<TdriverDocumentsVO> documentList = new ArrayList<>();
-//
-//		if (dto.getTdriverDocumentsDTO() != null) {
-//
-//			for (int i = 0; i < dto.getTdriverDocumentsDTO().size(); i++) {
-//
-//				TdriverDocumentsDTO d = dto.getTdriverDocumentsDTO().get(i);
-//				TdriverDocumentsVO doc = new TdriverDocumentsVO();
-//
-//				doc.setName(d.getName());
-//				doc.setTdriverVO(vo);
-//
-//				// match each document file with its index
-//				if (documents != null && i < documents.size()) {
-//					MultipartFile file = documents.get(i);
-//					if (!file.isEmpty()) {
-//						try {
-//							doc.setDocuments(file.getBytes());
-//						} catch (Exception ex) {
-//							throw new ApplicationException("Error reading document file");
-//						}
-//					}
-//				}
-//				documentList.add(doc);
-//			}
-//		}
-//
-//		vo.setTdriverDocumentsVO(documentList);
+		String licenceNo = vo.getLicenseNumber();
 
-		// ===== SAVE =====
-		tdriverRepo.save(vo);
+		// Base driver folder
+		Path driverFolder = Paths.get(uploadDriverBasePath, licenceNo);
+		createDirectory(driverFolder);
 
-		// ===== RESPONSE =====
+//		List<TdriverDocumentsVO> oldDocs = tdriverDocumentsRepo.findByTdriverVO(vo);
+////		if (oldDocs != null && !oldDocs.isEmpty()) {
+//		    tdriverDocumentsRepo.deleteAll(oldDocs);
+////		}
+
+		
+		List<TdriverDocumentsVO> oldDocs = tdriverDocumentsRepo.findByTdriverVO(vo);
+
+		tdriverDocumentsRepo.deleteByDriverId(vo.getId());
+		
+		
+		// 2️⃣ Delete physical files
+		for (TdriverDocumentsVO doc : oldDocs) {
+			deleteFileSafely(doc.getFilePath());
+		}
+
+		replaceDriverDocuments(vo, "DL", dlFiles, driverFolder);
+		replaceDriverDocuments(vo, "AADHAR", aadharFiles, driverFolder);
+		replaceDriverDocuments(vo, "PAN", panFiles, driverFolder);
+		replaceDriverDocuments(vo, "PHOTO", photoFiles, driverFolder);
+		replaceDriverDocuments(vo, "EXP", expFiles, driverFolder);
+		replaceDriverDocuments(vo, "MEDICAL", medicalFiles, driverFolder);
+		replaceDriverDocuments(vo, "OTHER", otherFiles, driverFolder);
+
 		Map<String, Object> response = new HashMap<>();
-		response.put("tdriverVO", vo);
+		response.put("tdriverVO", mapToDriverResponseDTO(vo));
 		response.put("message", message);
 
 		return response;
+	}
+
+	public TdriverResponseDTO mapToDriverResponseDTO(TdriverVO driver) {
+
+		TdriverResponseDTO dto = new TdriverResponseDTO();
+
+		dto.setId(driver.getId());
+		dto.setName(driver.getName());
+		dto.setPhone(driver.getPhone());
+		dto.setEmail(driver.getEmail());
+
+		if (driver.getUser() != null) {
+			dto.setUserId(driver.getUser().getId());
+		}
+
+		dto.setLicenseNumber(driver.getLicenseNumber());
+		dto.setLicenseExpiry(driver.getLicenseExpiry());
+		dto.setAadharNumber(driver.getAadharNumber());
+		dto.setAddress(driver.getAddress());
+		dto.setStatus(driver.getStatus());
+		dto.setExperience(driver.getExperience());
+		dto.setSalary(driver.getSalary());
+		dto.setAssignedVehicle(driver.getAssignedVehicle());
+		dto.setCurrentLocation(driver.getCurrentLocation());
+		dto.setBloodGroup(driver.getBloodGroup());
+		dto.setEmergencyContact(driver.getEmergencyContact());
+		dto.setPerformance(driver.getPerformance());
+		dto.setJoinedDate(driver.getJoinedDate());
+		dto.setLastTrip(driver.getLastTrip());
+
+		dto.setActive(driver.isActive());
+		dto.setCreatedBy(driver.getCreatedBy());
+
+		dto.setOrgId(driver.getOrgId());
+		dto.setBranchCode(driver.getBranchCode());
+		dto.setBranchName(driver.getBranchName());
+
+		if (driver.getTdriverDocumentsVO() == null) {
+			dto.setDocuments(null);
+		} else {
+			dto.setDocuments(driver.getTdriverDocumentsVO().stream().map(doc -> {
+				TdriverDocumentResponseDTO d = new TdriverDocumentResponseDTO();
+				d.setId(doc.getId());
+				d.setDocumentType(doc.getDocumentType());
+				d.setFileName(doc.getFileName());
+
+				String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+						.path("/api/transaction/driverFiles/").toUriString();
+
+				d.setFilePath(baseUrl + doc.getFilePath());
+				d.setFileType(doc.getFileType());
+				d.setFileSize(doc.getFileSize());
+				d.setUploadedOn(doc.getUploadedOn());
+				return d;
+			}).toList());
+		}
+
+		return dto;
+	}
+
+	private void replaceDriverDocuments(TdriverVO driver, String documentType, MultipartFile[] files,
+			Path driverFolder) {
+		if (files == null || files.length == 0)
+			return;
+
+		// 1️⃣ Fetch old docs
+		
+
+		// 4️⃣ Remove from persistence context
+		if (driver.getTdriverDocumentsVO() != null) {
+			driver.getTdriverDocumentsVO().removeIf(d -> documentType.equals(d.getDocumentType()));
+		}
+
+		// 5️⃣ Save new files
+		saveDriverFiles(driver, documentType, files, driverFolder);
+
+	}
+
+	private void saveDriverFiles(TdriverVO driver, String documentType, MultipartFile[] files, Path driverFolder) {
+		if (files == null || files.length == 0)
+			return;
+
+		try {
+			Path docFolder = driverFolder.resolve(documentType);
+			createDirectory(docFolder);
+
+			for (MultipartFile file : files) {
+
+				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+				Path filePath = docFolder.resolve(fileName);
+
+				// ✅ IMPORTANT: close stream
+				try (InputStream is = file.getInputStream()) {
+					Files.copy(is, filePath, StandardCopyOption.REPLACE_EXISTING);
+				}
+
+				// Save DB entry
+				TdriverDocumentsVO doc = new TdriverDocumentsVO();
+				doc.setTdriverVO(driver);
+				doc.setDocumentType(documentType);
+				doc.setFileName(fileName);
+				doc.setFilePath(filePath.toString().replace("\\", "/"));
+				doc.setFileType(file.getContentType());
+				doc.setFileSize(file.getSize());
+				doc.setUploadedOn(LocalDateTime.now());
+
+				tdriverDocumentsRepo.save(doc);
+				if (driver.getTdriverDocumentsVO() == null) {
+					driver.setTdriverDocumentsVO(new ArrayList<>());
+				}
+				driver.getTdriverDocumentsVO().add(doc);
+			}
+
+		} catch (IOException e) {
+			throw new RuntimeException("File upload failed for " + documentType, e);
+		}
+
 	}
 
 	private void mapTdriverDTOtoVO(TdriverDTO dto, TdriverVO vo) {
@@ -1982,25 +2053,59 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
+	public ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException {
+
+		return serveFile(request, "/api/transaction/driverFiles/", uploadDriverBasePath, "uploads/driver/");
+	}
+
+	private ResponseEntity<byte[]> serveFile(HttpServletRequest request, String apiPrefix, String uploadBasePath,
+			String uploadFolderPrefix) throws IOException {
+
+		String uri = request.getRequestURI();
+
+		// Remove API prefix
+		String relativePath = uri.replace(apiPrefix, "");
+
+		// Decode URL (%20 → space)
+		relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
+
+		// Remove logical upload folder from URL path
+		if (relativePath.startsWith(uploadFolderPrefix)) {
+			relativePath = relativePath.substring(uploadFolderPrefix.length());
+		}
+
+		Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
+		Path filePath = baseDir.resolve(relativePath).normalize();
+
+		// 🔐 Security check
+		if (!filePath.startsWith(baseDir)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		if (!Files.exists(filePath)) {
+			return ResponseEntity.notFound().build();
+		}
+
+		String contentType = Files.probeContentType(filePath);
+		if (contentType == null) {
+			contentType = "application/octet-stream";
+		}
+
+		byte[] data = Files.readAllBytes(filePath);
+
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline").body(data);
+	}
+
+	@Override
 	public TdriverVO getTdriverById(Long id) throws ApplicationException {
 		return tdriverRepo.findById(id).orElseThrow(() -> new ApplicationException("Tdriver not found"));
 	}
 
 	@Override
-	public Map<String, Object> getTdriverByOrgId(String branchCode, Long userId, String search, int page, int count) {
+	public List<TdriverVO> getTdriverByOrgId(String branchCode, Long orgId) {
 
-		if (search != null) {
-			search = search.trim();
-			if (search.isEmpty()) {
-				search = null;
-			}
-		}
-
-		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("name").ascending());
-		Page<TdriverVO> quotePage = tdriverRepo.getTdriverByOrgId(branchCode, userId, search, pageable);
-
-		// return paginated response
-		return paginationService.buildResponse(quotePage);
+		return tdriverRepo.getTdriverByOrgId(branchCode, orgId);
 
 	}
 
@@ -2046,7 +2151,7 @@ public class TransactionServiceImpl implements TransactionService {
 			dto.setEngineNumber(getString(row, 15));
 			dto.setPermitType(getString(row, 16));
 			dto.setOwnerName(getString(row, 17));
-			dto.setActive(getBoolean(row, 18));
+			dto.setActive(getString(row, 18));
 			dto.setCreatedBy(createdBy);
 			dto.setOrgId(orgId);
 			dto.setBranchCode(getString(row, 19));
@@ -2087,7 +2192,7 @@ public class TransactionServiceImpl implements TransactionService {
 			vo.setEngineNumber(dto.getEngineNumber());
 			vo.setPermitType(dto.getPermitType());
 			vo.setOwnerName(dto.getOwnerName());
-			vo.setActive(dto.isActive());
+			vo.setActive(dto.getActive());
 			vo.setCreatedBy(dto.getCreatedBy());
 			vo.setUpdatedBy(dto.getCreatedBy());
 			vo.setOrgId(dto.getOrgId());
@@ -2334,7 +2439,7 @@ public class TransactionServiceImpl implements TransactionService {
 				approvedQuoteRepo.save(approvedQuoteVO);
 
 				String msg = "Your Quote is Accepted";
-				notificationService.createNotification(userVO.getId(), auctionId, msg, "Quote Accepted");
+				notificationService.createNotification(userVO.getId(), msg, "Quote Accepted");
 
 				List<QuoteVO> quotes = quoteRepo.findAllByAuctionAndUserNot(auctionVO, userVO);
 
@@ -2343,8 +2448,6 @@ public class TransactionServiceImpl implements TransactionService {
 					QuoteVO quo = quoteVO2;
 					UserVO userVO1 = quoteVO2.getUser();
 					NotificationVO n1 = new NotificationVO();
-					n1.setUserid(userVO1.getId());
-					n1.setAuctionsid(auctionId);
 					n1.setMessage("Your Quote is Rejected");
 					n1.setNotificationType("Quote Rejected");
 					n.add(n1);
@@ -2730,6 +2833,74 @@ public class TransactionServiceImpl implements TransactionService {
 		Pageable pageable = PageRequest.of(page - 1, count);
 		Page<Map<String, Object>> approvedQuotes = approvedQuoteRepo.getApprovedQuotesByOrg(orgId, pageable);
 		return paginationService.buildResponse(approvedQuotes);
+	}
+
+	@Scheduled(cron = "0 0 5 * * ?")
+	public void notifyVehicleExpiry() {
+
+		List<Object[]> results = vehicleRepo.findVehiclesExpiringWithin30Days();
+
+		for (Object[] row : results) {
+
+			String vehicleNumber = (String) row[0];
+			Long orgId = ((Number) row[1]).longValue();
+
+			LocalDate insurance = toLocalDate(row[2]);
+			LocalDate fitness = toLocalDate(row[3]);
+			LocalDate service = toLocalDate(row[4]);
+
+			processExpiry(orgId, vehicleNumber, insurance, "INSURANCE");
+			processExpiry(orgId, vehicleNumber, fitness, "FITNESS");
+			processExpiry(orgId, vehicleNumber, service, "SERVICE");
+		}
+	}
+
+	private void processExpiry(Long orgId, String vehicleNo, LocalDate expiryDate, String type) {
+
+		if (expiryDate == null)
+			return;
+
+		long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
+
+		// 🔥 CORE LOGIC
+		if (daysLeft > 0 && daysLeft <= 30 && daysLeft % 5 == 0) {
+
+			String message = "Vehicle " + vehicleNo + " " + type + " expires in " + daysLeft + " days";
+
+			notificationService.createNotification(orgId, message, type);
+		}
+	}
+	
+	@Scheduled(cron = "0 1 5 * * ?")
+	public void notifyDriverExpiry() {
+
+		List<Object[]> results = tdriverRepo.findTdriverExpiringWithin30Days();
+
+		for (Object[] row : results) {
+
+			String driverName = (String) row[0];
+			Long orgId = ((Number) row[1]).longValue();
+
+			LocalDate licence = toLocalDate(row[2]);
+
+			processDriverExpiry(orgId, driverName, licence, "LICENCE");
+		}
+	}
+
+	private void processDriverExpiry(Long orgId, String driverName, LocalDate expiryDate, String type) {
+
+		if (expiryDate == null)
+			return;
+
+		long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
+
+// 🔥 CORE LOGIC
+		if (daysLeft > 0 && daysLeft <= 30 && daysLeft % 5 == 0) {
+
+			String message = "Driver " + driverName + " " + type + " expires in " + daysLeft + " days";
+
+			notificationService.createNotification(orgId, message, type);
+		}
 	}
 
 }

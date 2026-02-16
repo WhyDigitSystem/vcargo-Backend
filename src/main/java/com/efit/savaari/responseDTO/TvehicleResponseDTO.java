@@ -1,4 +1,4 @@
-package com.efit.savaari.dto;
+package com.efit.savaari.responseDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,9 +36,10 @@ public class TvehicleResponseDTO {
     private LocalDate fitnessExpiry;
     private LocalDate lastService;
     private LocalDate nextService;
+    private String registrationType;
 
     // Status
-    private boolean active;
+    private String active;
     private boolean cancel;
 
     // Organization info

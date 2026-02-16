@@ -34,7 +34,6 @@ import com.efit.savaari.dto.LoginFormDTO;
 import com.efit.savaari.dto.RefreshTokenDTO;
 import com.efit.savaari.dto.ResetPasswordDTO;
 import com.efit.savaari.dto.ResetPasswordFormDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.ResponsibilityDTO;
 import com.efit.savaari.dto.RolesDTO;
 import com.efit.savaari.dto.RolesResponsibilityDTO;
@@ -66,6 +65,7 @@ import com.efit.savaari.repo.UserBranchAccessRepo;
 import com.efit.savaari.repo.UserLoginRolesRepo;
 import com.efit.savaari.repo.UserRepo;
 import com.efit.savaari.repo.VendorRepo;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.security.TokenProvider;
 import com.efit.savaari.util.CryptoUtils;
 
@@ -306,18 +306,17 @@ public class AuthServiceImpl implements AuthService {
 			throw new ApplicationContextException("Invalid Type Details");
 		}
 
-		else if (userVO.getType().equalsIgnoreCase("Industry")) {
-			IndustryVO industryVO = new IndustryVO();
-			industryVO.setIndustryType(userVO.getType());
-			industryVO.setCreatedBy(userVO.getCreatedby());
-			industryVO.setEmail(userVO.getEmail());
-			industryVO.setUserName(userVO.getUserName());
-			industryVO.setUserPassword(userVO.getPassword());
-			industryVO.setPhoneNumber(userVO.getMobileNo());
-			industryVO.setIndustryName(userVO.getOrganizationName());
-			industryRepo.save(industryVO);
-			userVO.setOrgId(industryVO.getId());
-		}
+//		else if (userVO.getType().equalsIgnoreCase("Industry")) {
+//			IndustryVO industryVO = new IndustryVO();
+//			industryVO.setIndustryType(userVO.getType());
+//			industryVO.setCreatedBy(userVO.getCreatedby());
+//			industryVO.setEmail(userVO.getEmail());
+//			industryVO.setUserName(userVO.getUserName());
+//			industryVO.setUserPassword(userVO.getPassword());
+//			industryVO.setPhoneNumber(userVO.getMobileNo());
+//			industryVO.setIndustryName(userVO.getOrganizationName());
+//			industryRepo.save(industryVO);
+//		}
 
 		else if (userVO.getType().equalsIgnoreCase("Transporter")) {
 
@@ -332,9 +331,8 @@ public class AuthServiceImpl implements AuthService {
 			vendorVO.setVendorType(userVO.getType());
 			vendorRepo.save(vendorVO);
 			userVO.setVendorId(vendorVO.getId());
+			userVO.setOrgId(vendorVO.getId());
 		}
-
-		
 		userRepo.save(userVO);
 
 		// Audit log

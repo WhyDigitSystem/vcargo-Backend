@@ -31,10 +31,11 @@ public class TvehicleDTO {
 	private String engineNumber;
 	private String permitType;
 	private String ownerName;
-	private boolean active;
+	private String active;
 	private String createdBy;
 	private Long orgId;
 	private String branchCode;
 	private String branchName;
+	private String registrationType;
 
 }

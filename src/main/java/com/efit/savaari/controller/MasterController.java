@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +29,12 @@ import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
 import com.efit.savaari.dto.BranchDTO;
 import com.efit.savaari.dto.ChargeTypeDTO;
+import com.efit.savaari.dto.CompanyProfileDTO;
 import com.efit.savaari.dto.CustomerDTO;
 import com.efit.savaari.dto.CustomerRateDTO;
 import com.efit.savaari.dto.IndentsDTO;
 import com.efit.savaari.dto.ListOfValuesDTO;
 import com.efit.savaari.dto.PlaceDetailsDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.RoutesDTO;
 import com.efit.savaari.dto.VendorRateDTO;
 import com.efit.savaari.entity.BranchVO;
@@ -45,7 +46,8 @@ import com.efit.savaari.entity.ListOfValuesVO;
 import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
 import com.efit.savaari.entity.VendorRateVO;
-import com.efit.savaari.exception.ApplicationException;
+import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MasterService;
 
 @CrossOrigin
@@ -195,28 +197,29 @@ public class MasterController extends BaseController {
 		@GetMapping("/getCustomerByOrgId")
 		public ResponseEntity<ResponseDTO> getUsersByOrgId(
 		        @RequestParam(required = false) String branchCode,
-		        @RequestParam Long orgId,
-		        @RequestParam(defaultValue = "") String search,
-		        @RequestParam(defaultValue = "1") int page,
-		        @RequestParam(defaultValue = "10") int count
-		) {
-		    String methodName = "getCustomerByOrgId()";
-		    LOGGER.debug("Starting {}", methodName);
+		        @RequestParam Long orgId) {
 
 		    Map<String, Object> responseMap = new HashMap<>();
 		    ResponseDTO responseDTO;
 
 		    try {
-		        Map<String, Object> customerVO = masterService.getCustomerByOrgId( branchCode,orgId, search, page, count);
+		        List<CustomerVO> customers =
+		                masterService.getCustomerByOrgId(branchCode, orgId);
+
 		        responseMap.put("message", "Customer retrieved successfully");
-		        responseMap.put("customerVO", customerVO);
+		        responseMap.put("customerVO", customers);
+
 		        responseDTO = createServiceResponse(responseMap);
+
 		    } catch (Exception e) {
-		        LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-		        responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+
+		        responseDTO = createServiceResponseError(
+		                responseMap,
+		                "Error fetching users",
+		                e.getMessage()
+		        );
 		    }
 
-		    LOGGER.debug("Ending {}", methodName);
 		    return ResponseEntity.ok(responseDTO);
 		}
 
@@ -1048,6 +1051,111 @@ public class MasterController extends BaseController {
 		}
 		
 		
+		//CompanyProfile
+		
+//		@PutMapping("/createUpdateCompanyProfile")
+//		public ResponseEntity<ResponseDTO> createUpdateCompanyProfile(
+//		        @RequestBody CompanyProfileDTO companyProfileDTO	) {
+//
+//		    String methodName = "createUpdateCompanyProfile()";
+//		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//
+//		    try {
+//		        Map<String, Object> Response = masterService.createUpdateCompanyProfile(companyProfileDTO);
+//
+//		        ResponseDTO responseDTO = createServiceResponse(Response);
+//		        return ResponseEntity.ok(responseDTO);
+//
+//		    } catch (Exception e) {
+//		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+//		        ResponseDTO responseDTO = createServiceResponseError(
+//		                new HashMap<>(),
+//		                "Unexpected Error",
+//		                e.getMessage()
+//		        );
+//		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+//		    }
+//		}
+//		
+		@PutMapping(
+			    value = "/createUpdateCompanyProfile",
+				    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+				)
+				public ResponseEntity<ResponseDTO> createUpdateCompanyProfile(
+				        @RequestPart("companyProfileDTO") CompanyProfileDTO companyProfileDTO,
+//				        @RequestBody CompanyProfileDTO companyProfileDTO,
+
+			        @RequestPart(value = "image", required = false) MultipartFile image) {
+
+		    String methodName = "createUpdateCompanyProfile()";
+		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		    try {
+
+		        Map<String, Object> response =
+		                masterService.createUpdateCompanyProfile(companyProfileDTO, image);
+
+		        ResponseDTO responseDTO = createServiceResponse(response);
+		        return ResponseEntity.ok(responseDTO);
+
+		    } catch (Exception e) {
+		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+		        ResponseDTO responseDTO = createServiceResponseError(
+		                new HashMap<>(),
+		                "Unexpected Error",
+		                e.getMessage()
+		        );
+		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+		    }
+		}
+
+		
+		@GetMapping("/getAllCompanyProfileByOrgId")
+		public ResponseEntity<ResponseDTO> getAllCompanyProfileByOrgId(@RequestParam Long orgId,
+				@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+			String methodName = "getAllCompanyProfileByOrgId()";
+			LOGGER.debug("Starting {}", methodName);
+
+			Map<String, Object> responseMap = new HashMap<>();
+			ResponseDTO responseDTO;
+
+			try {
+				Map<String, Object> companyProfile = masterService.getAllCompanyProfileByOrgId(orgId, page, count);
+				responseMap.put("message", "CompanyProfile Details retrieved successfully");
+				responseMap.put("companyProfile", companyProfile);
+				responseDTO = createServiceResponse(responseMap);
+			} catch (Exception e) {
+				LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+				responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+			}
+
+			LOGGER.debug("Ending {}", methodName);
+			return ResponseEntity.ok(responseDTO);
+		}
+
+		@GetMapping("/getCompanyProfileById")
+		public ResponseEntity<ResponseDTO> getCompanyProfileById(@RequestParam Long id) {
+			String methodName = "getCompanyProfileById()";
+			LOGGER.debug("Starting {}", methodName);
+
+			Map<String, Object> responseMap = new HashMap<>();
+			ResponseDTO responseDTO;
+
+			try {
+				CompanyProfileResponseDTO companyProfileDTO = masterService.getCompanyProfileById(id);
+				responseMap.put("message", "CompanyProfile Details retrieved successfully");
+				responseMap.put("companyProfileDTO", companyProfileDTO);
+				responseDTO = createServiceResponse(responseMap);
+			} catch (Exception e) {
+				LOGGER.error("Error in {}: {}", methodName, e.getMessage());
+				responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
+			}
+
+			LOGGER.debug("Ending {}", methodName);
+			return ResponseEntity.ok(responseDTO);
+		}
+
+
 		
 }
 

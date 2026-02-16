@@ -19,8 +19,7 @@ public class NotificationVO {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
 
-    private Long userid;            // To whom notification goes
-    private Long auctionsid;        // Auction reference
+    private Long orgid;            // To whom notification goes
     private String message;
     private boolean isRead = false;
     private boolean isDeleted = false;

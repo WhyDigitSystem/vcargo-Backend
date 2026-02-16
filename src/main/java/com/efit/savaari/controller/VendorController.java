@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.VendorDTO;
 import com.efit.savaari.entity.VendorVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.VendorService;
 
 

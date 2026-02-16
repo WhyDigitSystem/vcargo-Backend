@@ -52,7 +52,7 @@ public class UserVO {
 	@Column(name = "branchcode")
 	private String branchCode;
 	@Column(name = "active")
-	private boolean active;
+	private boolean active=true;
 	@Column(name = "createdby")
 	private String createdby;
 	@Column(name = "modifiedby")
@@ -86,7 +86,7 @@ public class UserVO {
 
 	public boolean isActive() {
 		// TODO Auto-generated method stub
-		return true;
+		return this.active;
 	}
 
 	
