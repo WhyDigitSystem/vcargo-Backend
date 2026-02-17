@@ -50,4 +50,16 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 			+ "					      )")
 	List<Object[]> findTdriverExpiringWithin30Days();
 
+
+	  boolean existsByPhoneAndOrgId(String phone, Long orgId);
+
+
+	  boolean existsByLicenseNumberAndOrgId(String license, Long orgIdStr);
+
+
+	  boolean existsByEmailAndOrgId(String email, Long orgIdStr);
+
+
+	  boolean existsByAadharNumberAndOrgId(String aadhar, Long orgIdStr);
+
 }
