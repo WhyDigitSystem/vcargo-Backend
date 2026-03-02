@@ -15,6 +15,7 @@ import com.efit.savaari.dto.ResetPasswordFormDTO;
 import com.efit.savaari.dto.ResponsibilityDTO;
 import com.efit.savaari.dto.RolesDTO;
 import com.efit.savaari.dto.SignUpFormDTO;
+import com.efit.savaari.dto.UserListDTO;
 import com.efit.savaari.dto.UserResponseDTO;
 import com.efit.savaari.entity.ResponsibilityVO;
 import com.efit.savaari.entity.RolesVO;
@@ -63,7 +64,7 @@ public interface AuthService {
 
 //	public Map<String, Object> getUsersByOrgId(Long orgId, String branchcode, int pageNumber, int count, String search);
 
-	Map<String, Object> getAllUsersList( String branchCode, String search, int page, int count);
+	List<UserListDTO> getAllUsersList( String branchCode);
 
 	 void checkUserExists(String email) throws ApplicationException;
 	 

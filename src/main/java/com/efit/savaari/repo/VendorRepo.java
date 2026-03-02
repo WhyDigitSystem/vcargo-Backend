@@ -67,6 +67,21 @@ public interface VendorRepo extends JpaRepository<VendorVO, Long> {
 
 	VendorVO findByVendorTypeAndId(String type,Long id);
 
+
+	boolean existsByPrimaryEmailAndIdNot(String primaryEmail, Long id);
+
+
+	boolean existsByPrimaryEmail(String primaryEmail);
+
+
+	boolean existsByPrimaryPhoneNumber(String primaryPhoneNumber);
+
+
+	boolean existsByPrimaryPhoneNumberAndIdNot(String primaryPhoneNumber, Long id);
+
+
+	@Query(value = "SELECT MAX(CAST(SUBSTRING(vendorcode, 4) AS UNSIGNED)) FROM vendor", nativeQuery = true)
+	Integer findLastVendorNumber();
 //	@Query("SELECT v FROM VendorVO v WHERE v.email = :email")
 //	Optional<UserVO> findByEmail(String email); // WRONG RETURN TYPE
 

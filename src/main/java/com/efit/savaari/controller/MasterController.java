@@ -1155,6 +1155,41 @@ public class MasterController extends BaseController {
 			return ResponseEntity.ok(responseDTO);
 		}
 
+		@GetMapping("/getNextCustomerCode")
+		public ResponseEntity<ResponseDTO> getNextCustomerCode() {
+
+		    String methodName = "getNextCustomerCode()";
+		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		    Map<String, Object> responseObjectsMap = new HashMap<>();
+		    ResponseDTO responseDTO;
+
+		    try {
+
+		        String customerCode = masterService.getNextCustomerCode();
+
+		        responseObjectsMap.put("message", "Customer Code generated successfully");
+		        responseObjectsMap.put("customerCode", customerCode);
+
+		        responseDTO = createServiceResponse(responseObjectsMap);
+
+		    } catch (Exception e) {
+
+		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+		        responseDTO = createServiceResponseError(
+		                responseObjectsMap,
+		                "Unexpected Error",
+		                e.getMessage()
+		        );
+
+		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+		    }
+
+		    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		    return ResponseEntity.ok(responseDTO);
+		}
+
 
 		
 }

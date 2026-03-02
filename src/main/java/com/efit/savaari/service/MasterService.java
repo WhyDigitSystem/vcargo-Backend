@@ -113,6 +113,8 @@ public interface MasterService {
 
 	List<CustomerVO> getCustomerByOrgId(String branchCode, Long orgId);
 
+	String getNextCustomerCode();
+
 
 
 

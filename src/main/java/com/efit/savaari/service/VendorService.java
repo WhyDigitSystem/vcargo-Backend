@@ -27,4 +27,6 @@ public interface VendorService {
 	Map<String, Object> uploadVendorDocuments(Long vendorId, MultipartFile contractAttachment,
 			MultipartFile backgroundVerification, MultipartFile securityCheck,String createdBy) throws Exception;
 
+	String getNextVendorCode();
+
 }
