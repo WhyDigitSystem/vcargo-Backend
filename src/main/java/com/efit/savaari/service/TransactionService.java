@@ -124,15 +124,12 @@ public interface TransactionService {
 
 	TvehicleVO getTvehiclesById(Long id) throws ApplicationException;
 
-	Map<String, Object> getTvehiclesByOrgId(String branchCode,Long userId, String search, int page, int count);
+	List<TvehicleVO> getTvehiclesByOrgId(String branchCode,Long orgId);
 
-//	Map<String, Object> createUpdateTdriver(TdriverDTO tdriverDTO, List<MultipartFile> documents) throws ApplicationException;
-
-	Map<String, Object> createUpdateTdriver(TdriverDTO tdriverDTO) throws ApplicationException;
 
 	TdriverVO getTdriverById(Long id) throws ApplicationException;
 
-	Map<String, Object> getTdriverByOrgId(String branchCode,Long userId, String search, int page, int count);
+	List<TdriverVO> getTdriverByOrgId(String branchCode,Long orgId);
 
 	List<TvehicleVO> uploadTVehicleExcel(MultipartFile file, String createdBy, Long orgId) throws Exception;
 
@@ -171,5 +168,15 @@ public interface TransactionService {
 	Map<String, Object> getApprovedQuotesByOrgId(Long orgId, int page, int count);
 	
 	ResponseEntity<byte[]> viewFile(HttpServletRequest request) throws IOException;
+
+	Map<String, Object> createUpdateTdriver(TdriverDTO dto, MultipartFile[] dlFiles, MultipartFile[] aadharFiles,
+			MultipartFile[] panFiles, MultipartFile[] photoFiles, MultipartFile[] expFiles,
+			MultipartFile[] medicalFiles, MultipartFile[] otherFiles) throws ApplicationException;
+
+	ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException;
+
+	Map<String, Object> tDriverExcelUpload(MultipartFile file,Long createdBy,Long orgId) throws Exception;
+
+	Map<String, Object> tVehicleExcelUpload(MultipartFile file, Long createdBy, Long orgId) throws Exception;
 
 }

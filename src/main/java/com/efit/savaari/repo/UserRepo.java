@@ -88,27 +88,11 @@ public interface UserRepo extends JpaRepository<UserVO, Long> {
 
 	@Query(value = "SELECT u.* FROM users u " +
 	        "WHERE  " +
-	        " (:branchCode IS NULL OR u.branchcode = :branchCode) " +
-	        "AND ( :search  Is NULL OR :search = '' OR (LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.mobileno) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.organizationname) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.type) LIKE LOWER(CONCAT('%', :search, '%')) ))",
-	        
-	       countQuery = "SELECT COUNT(*) FROM users u " +
-	        "WHERE " +
-	        " (:branchCode IS NULL OR u.branchcode = :branchCode) " +
-	        "AND ( :search  Is NULL OR :search = '' OR (LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.mobileno) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.organizationname) LIKE LOWER(CONCAT('%', :search, '%')) " +
-	        "     OR LOWER(u.type) LIKE LOWER(CONCAT('%', :search, '%')) )) ",
+	        " (:branchCode IS NULL OR u.branchcode = :branchCode) ",
 	        
 	        nativeQuery = true)
-	Page<Map<String, Object>> getAllUsersList(
-	        @Param("branchCode") String branchCode,
-	        @Param("search") String search,
-	        org.springframework.data.domain.Pageable pageable
+	List<Map<String, Object>> getAllUsersList(
+	        @Param("branchCode") String branchCode
 	);
 
 

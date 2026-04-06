@@ -10,17 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
-import com.efit.savaari.dto.BranchDTO;
-import com.efit.savaari.dto.ResponseDTO;
-import com.efit.savaari.entity.BranchVO;
 import com.efit.savaari.entity.NotificationVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.NotificationService;
 
 @RestController
@@ -31,16 +28,16 @@ public class NotificationController extends BaseController {
 	NotificationService notificationService;
 	
 	
-	@GetMapping("/byUserId")
-	public ResponseEntity<ResponseDTO> getNotificationByUserId(@RequestParam Long userId) {
-		String methodName = "getNotificationByUserId()";
+	@GetMapping("/byOrgId")
+	public ResponseEntity<ResponseDTO> getNotificationByOrgId(@RequestParam Long orgId) {
+		String methodName = "getNotificationByOrgId()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;
 		Map<String, Object> responseObjectsMap = new HashMap<>();
 		ResponseDTO responseDTO = null;
 		List<NotificationVO> notificationVO = new ArrayList<>();
 		try {
-			notificationVO = notificationService.getNotifications(userId);
+			notificationVO = notificationService.getNotifications(orgId);
 		} catch (Exception e) {
 			errorMsg = e.getMessage();
 			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
@@ -95,14 +92,14 @@ public class NotificationController extends BaseController {
 	}
 	
 	@PutMapping("/clearAll")
-	public ResponseEntity<ResponseDTO> clearAllNotification(@RequestParam Long userId) {
+	public ResponseEntity<ResponseDTO> clearAllNotification(@RequestParam Long orgId) {
 		String methodName = "clearNotification()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;
 		Map<String, Object> responseObjectsMap = new HashMap<>();
 		ResponseDTO responseDTO = null;
 		try {
-			notificationService.clearAll(userId);
+			notificationService.clearAll(orgId);
 			responseDTO = createServiceResponse(responseObjectsMap);
 		} catch (Exception e) {
 	        errorMsg = e.getMessage();

@@ -1,12 +1,5 @@
 package com.efit.savaari.dto;
 
-import java.util.List;
-
-import javax.persistence.Column;
-
-import com.efit.savaari.entity.TripsDLVerificationVO;
-import com.efit.savaari.entity.TripsVO;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

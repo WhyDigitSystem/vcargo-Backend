@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.dto.ResponseDTO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 
 
 /**

@@ -22,19 +22,18 @@ public class NotificationServiceImpl implements NotificationService {
 	NotificationRepo notificationRepo;
 
 	@Override
-	public void createNotification(Long userId, Long auctionId, String message,String type) {
+	public void createNotification(Long orgId, String message,String type) {
 		NotificationVO n = new NotificationVO();
-        n.setUserid(userId);
-        n.setAuctionsid(auctionId);
+        n.setOrgid(orgId);
         n.setMessage(message);
         n.setNotificationType(type);
         notificationRepo.save(n);	
 	}
 
 	@Override
-	public List<NotificationVO> getNotifications(Long userId) {
+	public List<NotificationVO> getNotifications(Long orgId) {
 		// TODO Auto-generated method stub
-		return notificationRepo.findByUseridAndIsReadFalseAndIsDeletedFalse(userId);
+		return notificationRepo.findByOrgidAndIsReadFalseAndIsDeletedFalse(orgId);
 	}
 
 	@Override
@@ -55,8 +54,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void clearAll(Long userId) {
-        List<NotificationVO> list = notificationRepo.findByUserid(userId);
+    public void clearAll(Long orgId) {
+        List<NotificationVO> list = notificationRepo.findByOrgid(orgId);
         list.forEach(n -> n.setDeleted(true));
         notificationRepo.saveAll(list);
     }
