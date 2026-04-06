@@ -8,8 +8,8 @@ import com.efit.savaari.entity.NotificationVO;
 
 public interface NotificationRepo extends JpaRepository<NotificationVO, Long> {
 	
-	List<NotificationVO> findByUseridAndIsReadFalseAndIsDeletedFalse(Long userid);
+	List<NotificationVO> findByOrgidAndIsReadFalseAndIsDeletedFalse(Long orgId);
 
-    List<NotificationVO> findByUserid(Long userid);
+    List<NotificationVO> findByOrgid(Long orgId);
 
 }

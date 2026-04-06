@@ -1,5 +1,6 @@
 package com.efit.savaari.repo;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -64,5 +65,14 @@ public interface ApprovedQuoteRepo extends JpaRepository<ApprovedQuoteVO, Long> 
 		Page<Map<String, Object>> getApprovedQuotesByOrg(
 		        @Param("orgid") Long orgid,
 		        Pageable pageable);
+
+	@Query(nativeQuery = true, value = "SELECT *\r\n"
+			+ "FROM approvedquote q\r\n"
+			+ "WHERE NOT EXISTS (\r\n"
+			+ "    SELECT 1\r\n"
+			+ "    FROM trip t\r\n"
+			+ "    WHERE q.auctionsid = t.auctionsid\r\n"
+			+ ")")
+	List<ApprovedQuoteVO> getAuctionIdForTrip(Long orgId);
 
 }

@@ -1,11 +1,6 @@
 package com.efit.savaari.controller;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +34,6 @@ import com.efit.savaari.dto.DocumentDTO;
 import com.efit.savaari.dto.PayoutsDTO;
 import com.efit.savaari.dto.QuoteDTO;
 import com.efit.savaari.dto.RequestforQuotesDTO;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.TaggingDTO;
 import com.efit.savaari.dto.TdriverDTO;
 import com.efit.savaari.dto.TripAlertsDTO;
@@ -65,6 +56,7 @@ import com.efit.savaari.entity.TripReportMisVO;
 import com.efit.savaari.entity.TripsVO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.VendorInvoiceVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.TransactionService;
 
 @CrossOrigin
@@ -970,7 +962,8 @@ public class TransactionController extends BaseController {
 	}
 
 	@PutMapping(value = "/createUpdateTvehicle")
-	public ResponseEntity<ResponseDTO> createUpdateTvehicle(@RequestPart("tvehicleDTO") TvehicleDTO tvehicleDTO,
+	public ResponseEntity<ResponseDTO> createUpdateTvehicle(
+			@RequestPart("tvehicleDTO") TvehicleDTO tvehicleDTO,
 			@RequestPart(value = "RC", required = false) MultipartFile[] rcFiles,
 			@RequestPart(value = "INSURANCE", required = false) MultipartFile[] insuranceFiles,
 			@RequestPart(value = "FC", required = false) MultipartFile[] fcFiles,
@@ -1044,19 +1037,18 @@ public class TransactionController extends BaseController {
 
 	@GetMapping("/getTvehiclesByOrgId")
 	public ResponseEntity<ResponseDTO> getTvehiclesByOrgId(@RequestParam(required = false) String branchCode,
-			@RequestParam Long userId, @RequestParam(defaultValue = "") String search,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+			@RequestParam Long orgId) {
 		String methodName = "getTvehiclesByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
 
+		List<TvehicleVO> tvehicleVO = new ArrayList<>();
 		try {
-			Map<String, Object> tvehiclesVO = transactionService.getTvehiclesByOrgId(branchCode, userId, search, page,
-					count);
+			tvehicleVO = transactionService.getTvehiclesByOrgId(branchCode, orgId);
 			responseMap.put("message", "Tvehicles retrieved successfully");
-			responseMap.put("tvehiclesVO", tvehiclesVO);
+			responseMap.put("tvehicleVO", tvehicleVO);
 			responseDTO = createServiceResponse(responseMap);
 		} catch (Exception e) {
 			LOGGER.error("Error in {}: {}", methodName, e.getMessage());
@@ -1071,19 +1063,22 @@ public class TransactionController extends BaseController {
 
 //	@PutMapping(value = "/createUpdateTdriver", consumes = "multipart/form-data")
 	@PutMapping(value = "/createUpdateTdriver")
-	public ResponseEntity<ResponseDTO> createUpdateTdriver(
-//	        @RequestPart("tdriverDTO") TdriverDTO tdriverDTO,
-			@RequestBody TdriverDTO tdriverDTO
-//	        @RequestPart(value = "documents", required = false) List<MultipartFile> documents 
-	) {
+	public ResponseEntity<ResponseDTO> createUpdateTdriver(@RequestPart("tdriverDTO") TdriverDTO tdriverDTO,
+			@RequestPart(value = "DL", required = false) MultipartFile[] dlFiles,
+			@RequestPart(value = "AADHAR", required = false) MultipartFile[] aadharFiles,
+			@RequestPart(value = "PAN", required = false) MultipartFile[] panFiles,
+			@RequestPart(value = "PHOTO", required = false) MultipartFile[] photoFiles,
+			@RequestPart(value = "EXP", required = false) MultipartFile[] expFiles,
+			@RequestPart(value = "MEDICAL", required = false) MultipartFile[] medicalFiles,
+			@RequestPart(value = "OTHER", required = false) MultipartFile[] otherFiles) {
 
-		String methodName = "createUpdateTvehicle()";
+		String methodName = "createUpdateTdriver()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 
 		try {
-			Map<String, Object> serviceResponse = transactionService.createUpdateTdriver(tdriverDTO);
+			Map<String, Object> serviceResponse = transactionService.createUpdateTdriver(tdriverDTO,dlFiles,aadharFiles,panFiles,photoFiles,expFiles,medicalFiles,otherFiles);
 
 			responseMap.put("message", serviceResponse.get("message"));
 			responseMap.put("tdriverVO", serviceResponse.get("tdriverVO"));
@@ -1098,6 +1093,11 @@ public class TransactionController extends BaseController {
 			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
 		}
+	}
+
+	@GetMapping("/driverFiles/**")
+	public ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException {
+		return transactionService.viewDriverFile(request);
 	}
 
 	@GetMapping("/getTdriverById")
@@ -1137,17 +1137,17 @@ public class TransactionController extends BaseController {
 
 	@GetMapping("/getTdriverByOrgId")
 	public ResponseEntity<ResponseDTO> getTdriverByOrgId(@RequestParam(required = false) String branchCode,
-			@RequestParam Long userId, @RequestParam(defaultValue = "") String search,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int count) {
+			@RequestParam Long orgId) {
 		String methodName = "getTdriverByOrgId()";
 		LOGGER.debug("Starting {}", methodName);
 
 		Map<String, Object> responseMap = new HashMap<>();
 		ResponseDTO responseDTO;
+		
+		List<TdriverVO> tdriverVO = new ArrayList<>();
 
 		try {
-			Map<String, Object> tdriverVO = transactionService.getTdriverByOrgId(branchCode, userId, search, page,
-					count);
+			 tdriverVO = transactionService.getTdriverByOrgId(branchCode, orgId);
 			responseMap.put("message", "Tdriver retrieved successfully");
 			responseMap.put("tdriverVO", tdriverVO);
 			responseDTO = createServiceResponse(responseMap);
@@ -1547,5 +1547,51 @@ public class TransactionController extends BaseController {
 		LOGGER.debug("Ending {}", methodName);
 		return ResponseEntity.ok(responseDTO);
 	}
+	
+	//excel upload Tdriver
+	 
+		@PostMapping("/tDriverExcelUpload")
+		public ResponseEntity<ResponseDTO> tDriverExcelUpload(
+	            @RequestParam("file") MultipartFile file, @RequestParam("createdBy") Long  createdBy,@RequestParam("orgId") Long orgId) throws Exception {
+
+			String methodName = "uploadExcel()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+			try {
+				Map<String, Object> Response = transactionService.tDriverExcelUpload(file,createdBy, orgId);
+
+				ResponseDTO responseDTO = createServiceResponse(Response);
+				return ResponseEntity.ok(responseDTO);
+
+			} catch (Exception e) {
+				LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+				ResponseDTO responseDTO = createServiceResponseError(new HashMap<>(), "Unexpected Error", e.getMessage());
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+			}
+		}
+		
+		
+		//TVehicle Excel upload
+		
+		@PostMapping("/tVehicleExcelUpload")
+		public ResponseEntity<ResponseDTO> tVehicleExcelUpload(
+	            @RequestParam("file") MultipartFile file, @RequestParam("createdBy") Long  createdBy,@RequestParam("orgId") Long orgId) throws Exception {
+
+			String methodName = "tVehicleExcelUpload()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+			try {
+				Map<String, Object> Response = transactionService.tVehicleExcelUpload(file,createdBy, orgId);
+
+				ResponseDTO responseDTO = createServiceResponse(Response);
+				return ResponseEntity.ok(responseDTO);
+
+			} catch (Exception e) {
+				LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+				ResponseDTO responseDTO = createServiceResponseError(new HashMap<>(), "Unexpected Error", e.getMessage());
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+			}
+		}
+
 
 }

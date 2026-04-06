@@ -1,7 +1,6 @@
 package com.efit.savaari.entity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -19,6 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.efit.savaari.dto.CreatedUpdatedDate;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -94,9 +94,12 @@ public class TvehicleVO {
 
 	@Column(name = "ownername", length = 100)
 	private String ownerName;
-
+	
+	@Column(name = "registrationtype", length = 100)
+	private String registrationType;
+	
 	@Column(name = "active")
-	private boolean active;
+	private String active;
 
 	@Column(name = "createdby")
 	private String createdBy;
@@ -117,6 +120,7 @@ public class TvehicleVO {
 	private boolean cancel = false;
 
 	@OneToMany(mappedBy = "tvehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JsonManagedReference
 	private List<TvehicleDocumentsVO> documents;
 
 	@Embedded

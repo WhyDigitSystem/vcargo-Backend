@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.dto.ResponseDTO;
 import com.efit.savaari.dto.VendorDTO;
 import com.efit.savaari.entity.VendorVO;
+import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.VendorService;
 
 
@@ -226,6 +226,41 @@ public class VendorController extends BaseController {
 	    }
 	    
 	    LOGGER.debug("Ending {}", methodName);
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/getNextVendorCode")
+	public ResponseEntity<ResponseDTO> getNextVendorCode() {
+
+	    String methodName = "getNextVendorCode()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+
+	        String vendorCode = vendorService.getNextVendorCode();
+
+	        responseObjectsMap.put("message", "Vendor Code generated successfully");
+	        responseObjectsMap.put("vendorCode", vendorCode);
+
+	        responseDTO = createServiceResponse(responseObjectsMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Unexpected Error",
+	                e.getMessage()
+	        );
+
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
 	    return ResponseEntity.ok(responseDTO);
 	}
 	

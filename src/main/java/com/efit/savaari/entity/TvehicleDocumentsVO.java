@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,10 +31,6 @@ public class TvehicleDocumentsVO {
     @SequenceGenerator(name = "tvehicledocumentsgen", sequenceName = "tvehicledocumentsseq", initialValue = 1000000001, allocationSize = 1)
     @Column(name = "tvehicledocumentsid")
     private Long id;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tvehicleid", nullable = false)
-    private TvehicleVO tvehicle;
 
     @Column(name = "documenttype", length = 50)
     private String documentType;   // RC, INSURANCE, FC, PERMIT, PUC, OTHER
@@ -51,4 +49,9 @@ public class TvehicleDocumentsVO {
 
     @Column(name = "uploadedon")
     private LocalDateTime uploadedOn;
+    
+	@ManyToOne
+	@JoinColumn(name = "tvehicleid")
+	@JsonBackReference
+	private TvehicleVO tvehicle;
 }

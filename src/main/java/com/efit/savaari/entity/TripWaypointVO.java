@@ -1,0 +1,38 @@
+package com.efit.savaari.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import lombok.Data;
+
+@Entity
+@Table(name = "tripwaypoints")
+@Data
+public class TripWaypointVO {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tripwaypointgen")
+	@SequenceGenerator(name = "tripwaypointgen", sequenceName = "tripwaypointseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "waypointId")
+	private Long id;
+
+	@Column(name = "location")
+	private String location;
+	
+	@Column(name = "sequenceno")
+	private Integer sequenceNo;
+
+	@ManyToOne
+	@JoinColumn(name = "tripid")
+	@JsonBackReference
+	private TripVO tripVO;
+}

@@ -1,5 +1,9 @@
 package com.efit.savaari.repo;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,5 +47,29 @@ public interface VehicleRepo extends JpaRepository<VehicleVO, Long>{
 		        Pageable pageable
 		);
 
+
+	Optional<VehicleVO> findByOrgIdAndVehicleNumber(Long orgId, String vehicle);
+	
+	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'ACTIVE'", nativeQuery = true)
+	Long getActiveVehicleCount(Long orgId);
+
+	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'MAINTENANCE'", nativeQuery = true)
+	Number getMaintenanceVehicleCount(Long orgId);
+
+	@Query(value = "select Count(*) from maintenance where completeddate > current_date() and orgid=?1", nativeQuery = true)
+	Number getUpcomingMaintenanceVehicle(Long orgId);
+
+	@Query(value = "select sum(estimatedcost) from maintenance where completeddate < current_date() and orgid=?1", nativeQuery = true)
+	BigDecimal getmaintenanceCost(Long orgId);
+
+	@Query(value = "SELECT vehiclenumber, orgid, insuranceexpiry, fitnessexpiry, nextservice\r\n"
+			+ "		    FROM tvehicle\r\n"
+			+ "		    WHERE active = 'ACTIVE'\r\n"
+			+ "		      AND (\r\n"
+			+ "		           DATEDIFF(insuranceexpiry, CURDATE()) BETWEEN 1 AND 30\r\n"
+			+ "		        OR DATEDIFF(fitnessexpiry, CURDATE()) BETWEEN 1 AND 30\r\n"
+			+ "		        OR DATEDIFF(nextservice, CURDATE()) BETWEEN 1 AND 30\r\n"
+			+ "		      )", nativeQuery = true)
+	List<Object[]> findVehiclesExpiringWithin30Days();
 
 }
