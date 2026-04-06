@@ -1547,5 +1547,51 @@ public class TransactionController extends BaseController {
 		LOGGER.debug("Ending {}", methodName);
 		return ResponseEntity.ok(responseDTO);
 	}
+	
+	//excel upload Tdriver
+	 
+		@PostMapping("/tDriverExcelUpload")
+		public ResponseEntity<ResponseDTO> tDriverExcelUpload(
+	            @RequestParam("file") MultipartFile file, @RequestParam("createdBy") Long  createdBy,@RequestParam("orgId") Long orgId) throws Exception {
+
+			String methodName = "uploadExcel()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+			try {
+				Map<String, Object> Response = transactionService.tDriverExcelUpload(file,createdBy, orgId);
+
+				ResponseDTO responseDTO = createServiceResponse(Response);
+				return ResponseEntity.ok(responseDTO);
+
+			} catch (Exception e) {
+				LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+				ResponseDTO responseDTO = createServiceResponseError(new HashMap<>(), "Unexpected Error", e.getMessage());
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+			}
+		}
+		
+		
+		//TVehicle Excel upload
+		
+		@PostMapping("/tVehicleExcelUpload")
+		public ResponseEntity<ResponseDTO> tVehicleExcelUpload(
+	            @RequestParam("file") MultipartFile file, @RequestParam("createdBy") Long  createdBy,@RequestParam("orgId") Long orgId) throws Exception {
+
+			String methodName = "tVehicleExcelUpload()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+			try {
+				Map<String, Object> Response = transactionService.tVehicleExcelUpload(file,createdBy, orgId);
+
+				ResponseDTO responseDTO = createServiceResponse(Response);
+				return ResponseEntity.ok(responseDTO);
+
+			} catch (Exception e) {
+				LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+				ResponseDTO responseDTO = createServiceResponseError(new HashMap<>(), "Unexpected Error", e.getMessage());
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+			}
+		}
+
 
 }

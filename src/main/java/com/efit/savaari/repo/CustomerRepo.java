@@ -43,5 +43,8 @@ public interface CustomerRepo extends JpaRepository<CustomerVO, Long> {
 	)
 	List<Object[]> getValueDescriptionByListOfValues(Long orgId, String listDescription);
 
+	@Query(value = "SELECT customercode FROM customer ORDER BY customerid DESC LIMIT 1", nativeQuery = true)
+	String getLastCustomerCode();
+
 
 }

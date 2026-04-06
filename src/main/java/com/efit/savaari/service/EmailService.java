@@ -64,5 +64,40 @@ public class EmailService {
 		helper.setText(htmlBody, true);
 		mailSender.send(message);
 	}
+	
+	/**
+     * Send an HTML formatted email
+     */
+    public void sendHtmlEmail(String fromMail,String toEmail, String subject, String htmlContent) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            mimeMessage.addHeader("Auto-Submitted", "auto-generated");
+            mimeMessage.addHeader("Precedence", "bulk");
+            mimeMessage.addHeader("X-Auto-Response-Suppress", "All");
+
+            helper.setFrom(fromMail,"WHY DIGIT SYSTEMS (No Reply)");
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            System.out.println("✅ HTML Mail sent successfully to " + toEmail);
+
+        } catch (MessagingException e) {
+            System.err.println("❌ Messaging error while sending HTML mail: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ Failed to send HTML mail to " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+
+	public void sendSimpleEmail(String toEmail, String subject, String body) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

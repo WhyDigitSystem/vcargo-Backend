@@ -62,6 +62,15 @@ public interface TvehicleRepo extends JpaRepository<TvehicleVO, Long> {
 	List<Object[]> getAllDashBoardVehicleDetails(Long orgId);
 
 
+	boolean existsByVehicleNumberAndOrgId(String vehicleNumber, Long orgId);
+
+
+	boolean existsByChassisNumberAndOrgId(String chassisNo, Long orgId);
+
+
+	boolean existsByEngineNumberAndOrgId(String engineNo, Long orgId);
+
+
 
 	
 	

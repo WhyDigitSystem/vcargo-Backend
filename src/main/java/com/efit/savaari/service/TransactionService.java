@@ -175,4 +175,8 @@ public interface TransactionService {
 
 	ResponseEntity<byte[]> viewDriverFile(HttpServletRequest request) throws IOException;
 
+	Map<String, Object> tDriverExcelUpload(MultipartFile file,Long createdBy,Long orgId) throws Exception;
+
+	Map<String, Object> tVehicleExcelUpload(MultipartFile file, Long createdBy, Long orgId) throws Exception;
+
 }

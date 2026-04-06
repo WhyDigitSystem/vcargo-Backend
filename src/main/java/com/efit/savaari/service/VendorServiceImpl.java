@@ -88,6 +88,36 @@ public class VendorServiceImpl implements VendorService {
 		VendorVO vendorVO;
 		String message;
 
+		// DUPLICATE PHONE CHECK
+		if (vendorDTO.getId() == null) {
+
+		    if (vendorRepo.existsByPrimaryPhoneNumber(vendorDTO.getPrimaryPhoneNumber())) {
+		        throw new ApplicationException("Primary Phone Number already exists");
+		    }
+
+		} else {
+
+		    if (vendorRepo.existsByPrimaryPhoneNumberAndIdNot(
+		            vendorDTO.getPrimaryPhoneNumber(),
+		            vendorDTO.getId())) {
+		        throw new ApplicationException("Primary Phone Number already exists");
+		    }
+		}
+		// DUPLICATE EMAIL CHECK
+		if (vendorDTO.getId() == null) {
+
+		    if (vendorRepo.existsByPrimaryEmail(vendorDTO.getPrimaryEmail())) {
+		        throw new ApplicationException("Primary Email already exists");
+		    }
+
+		} else {
+
+		    if (vendorRepo.existsByPrimaryEmailAndIdNot(
+		            vendorDTO.getPrimaryEmail(),
+		            vendorDTO.getId())) {
+		        throw new ApplicationException("Primary Email already exists");
+		    }
+		}
 		// Updating vendor
 		if (vendorDTO.getId() != null) {
 
@@ -105,6 +135,8 @@ public class VendorServiceImpl implements VendorService {
 		} else {
 			// Creating vendor
 			vendorVO = new VendorVO();
+			String vendorCode = generateVendorCode();
+			vendorVO.setVendorCode(vendorCode);
 			vendorVO.setCreatedBy(vendorDTO.getCreatedBy());
 			vendorVO.setUpdatedBy(vendorDTO.getCreatedBy());
 			message = "Vendor Created Successfully";
@@ -175,7 +207,7 @@ public class VendorServiceImpl implements VendorService {
 
 	private void createUpdateVendorDTOByVendorVO(VendorDTO dto, VendorVO vo) {
 
-		vo.setVendorCode(dto.getVendorCode());
+//		vo.setVendorCode(dto.getVendorCode());
 		vo.setStatus(dto.getStatus());
 		vo.setOrganization(dto.getOrganization());
 		vo.setApprovalStatus("PENDING");
@@ -283,6 +315,24 @@ public class VendorServiceImpl implements VendorService {
 		vo.setVendorDetailsVO(detailsList);
 		vo.setVendorBankDetailsVO(bankDetailsList);
 
+	}
+	
+	private String generateVendorCode() {
+
+	    Integer lastNumber = vendorRepo.findLastVendorNumber();
+
+	    if (lastNumber == null) {
+	        return "VEN0001";
+	    }
+
+	    int nextNumber = lastNumber + 1;
+
+	    return String.format("VEN%04d", nextNumber);
+	}
+	
+	@Override
+	public String getNextVendorCode() {
+	    return generateVendorCode();
 	}
 
 	@Override
