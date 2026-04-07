@@ -55,6 +55,18 @@ public class TicketVO {
 
 	private boolean cancel;
 
+	@Column(name = "companyname")
+	private String companyName;
+
+	@Column(name = "branch")
+	private String branch;
+
+	@Column(name = "branchcode")
+	private String branchCode;
+
+	@Column(name = "sourceId")
+	private Long sourceId;
+
 	@Lob
 	@Column(name = "screenshot", columnDefinition = "LONGBLOB")
 	private byte[] screenShot;
