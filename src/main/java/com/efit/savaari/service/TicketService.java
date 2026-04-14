@@ -53,6 +53,8 @@ public interface TicketService {
 
 	TicketVO clearUserNotification(Long orgId, String userName, Long ticketId, String status);
 
+	TicketVO findByOrgIdAndId(Long orgId, Long id);
+
 
 	
 

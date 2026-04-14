@@ -184,7 +184,7 @@ public class TicketServiceImpl implements TicketService {
 			body.put("client", "LOCAL_APP");
 			body.put("createdBy", ticketVO.getCreatedBy());
 			body.put("description", ticketVO.getDescription());
-			body.put("email", ticketVO.getEmail());
+			body.put("sourceEmail", ticketVO.getEmail());
 			body.put("modifiedBy", ticketVO.getUpdatedBy());
 			body.put("priority", "HIGH");
 			body.put("title", ticketVO.getSubject());
@@ -194,7 +194,8 @@ public class TicketServiceImpl implements TicketService {
 			body.put("sourceOrgId", ticketVO.getOrgId());
 			body.put("sourceBranch", ticketVO.getBranch());
 			body.put("sourceBranchCode", ticketVO.getBranchCode());
-			body.put("projectName", "VCARGO - " + ticketVO.getCompanyName());
+			body.put("projectName", ticketVO.getCompanyName());
+			body.put("application", "VCARGO");
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
@@ -234,9 +235,9 @@ public class TicketServiceImpl implements TicketService {
 
 		try {
 
-		String url = "http://139.5.190.244:8061/api/ticket/uploadTicketBySourceId";
+	    String url = "http://139.5.190.244:8061/api/ticket/uploadTicketBySourceId";
 
-//			String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
+//		String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -563,6 +564,12 @@ public class TicketServiceImpl implements TicketService {
 			e.printStackTrace();
 			return "<p>Default email content</p>";
 		}
+	}
+	
+	@Override
+	public TicketVO findByOrgIdAndId(Long orgId, Long id) {
+
+		return ticketRepo.findByOrgIdAndId(orgId, id);
 	}
 
 }
