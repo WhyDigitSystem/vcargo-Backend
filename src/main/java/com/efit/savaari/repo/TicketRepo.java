@@ -65,6 +65,9 @@ public interface TicketRepo extends JpaRepository<TicketVO, Long> {
 	@Query(nativeQuery =true,value = "select * from ticket where username=?1")
 	List<TicketVO> findByUserName(String userName);
 
+	@Query(nativeQuery =true,value = "select * from ticket where orgid=?1 and ticketid=?2")
+	TicketVO findByOrgIdAndId(Long orgId, Long id);
+
 	
 
 }
