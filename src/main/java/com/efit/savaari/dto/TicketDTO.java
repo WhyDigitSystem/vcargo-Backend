@@ -32,5 +32,7 @@ public class TicketDTO {
 	private String branch;
 
 	private String branchCode;
+	
+	private String ticketStatus;
 
 }

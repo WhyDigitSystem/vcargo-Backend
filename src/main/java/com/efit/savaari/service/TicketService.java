@@ -20,8 +20,8 @@ import io.jsonwebtoken.io.IOException;
 @Service
 public interface TicketService {
 
-	//Ticket
-	
+	// Ticket
+
 	Map<String, Object> createUpdateTicket(@Valid TicketDTO ticketDTO) throws ApplicationException;
 
 	TicketVO uploadTicketScreenShotInBloob(MultipartFile file, Long id) throws IOException, java.io.IOException;
@@ -31,19 +31,18 @@ public interface TicketService {
 	List<TicketVO> getTicketByOrgId(Long orgId);
 
 	List<TicketVO> getTicketByUserName(String userName, Long orgId);
-	
-	TicketVO updateTicketStatus(Long orgId, Long ticketId,String status,String comments);
-	
-	//Comments
+
+	TicketVO updateTicketStatus(Long orgId, Long ticketId, String status, String comments);
+
+	// Comments
 
 	Map<String, Object> updateCreateComments(@Valid CommentsDTO commentsDTO) throws ApplicationException;
 
 	List<CommentsVO> getCommentsByTicketId(Long ticketId, Long orgId);
 
-
 	void deleteCommentsById(Long id);
-	
-	//Notification
+
+	// Notification
 
 	List<Map<String, Object>> getTicketNotification(Long orgId);
 
@@ -53,12 +52,6 @@ public interface TicketService {
 
 	TicketVO clearUserNotification(Long orgId, String userName, Long ticketId, String status);
 
-	TicketVO findByOrgIdAndId(Long orgId, Long id);
-
-
-	
-
+//	TicketVO findByOrgIdAndId(Long orgId, Long id);
 
 }
-
-

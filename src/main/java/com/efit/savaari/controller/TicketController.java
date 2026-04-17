@@ -1,5 +1,8 @@
 package com.efit.savaari.controller;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +33,7 @@ import com.efit.savaari.dto.CommentsDTO;
 import com.efit.savaari.dto.TicketDTO;
 import com.efit.savaari.entity.CommentsVO;
 import com.efit.savaari.entity.TicketVO;
+import com.efit.savaari.repo.TicketRepo;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.TicketService;
 
@@ -42,6 +46,9 @@ public class TicketController extends BaseController {
 
 	@Autowired
 	TicketService ticketService;
+	
+	@Autowired
+	TicketRepo ticketRepo;
 
 	@PutMapping("/createUpdateTicket")
 	public ResponseEntity<ResponseDTO> CreateUpdateTicket(@Valid @RequestBody TicketDTO ticketDTO) {
@@ -378,29 +385,62 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@GetMapping("/findByOrgIdAndId")
-	public ResponseEntity<ResponseDTO> findByOrgIdAndId(@RequestParam Long orgId, @RequestParam Long id) {
+//	@GetMapping("/findByOrgIdAndId")
+//	public ResponseEntity<ResponseDTO> findByOrgIdAndId(@RequestParam Long orgId, @RequestParam Long id) {
+//
+//		String methodName = "findByOrgIdAndId()";
+//		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//		String errorMsg = null;
+//		Map<String, Object> responseObjectsMap = new HashMap<>();
+//		ResponseDTO responseDTO;
+//
+//		try {
+//			// Assuming this updates the ticket status internally
+//			TicketVO ticketVO = ticketService.findByOrgIdAndId(orgId, id);
+//
+//			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket status updated successfully");
+//			responseObjectsMap.put("ticketVO", ticketVO);
+//			responseDTO = createServiceResponse(responseObjectsMap);
+//		} catch (Exception e) {
+//			errorMsg = e.getMessage();
+//			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+//			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket update failed status", errorMsg);
+//		}
+//
+//		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+//		return ResponseEntity.ok().body(responseDTO);
+//	}
 
-		String methodName = "findByOrgIdAndId()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO;
+	@PutMapping("/updateTicketFromRemote")
+	public ResponseEntity<ResponseDTO> updateTicketFromRemote(@RequestParam Long orgId, @RequestParam Long id,
+			@RequestParam String status, @RequestParam String empCode,@RequestParam String email,@RequestParam String ticketStatus) {
+
+		Map<String, Object> map = new HashMap<>();
+		ResponseDTO response;
 
 		try {
-			// Assuming this updates the ticket status internally
-			TicketVO ticketVO = ticketService.findByOrgIdAndId(orgId, id);
+			TicketVO ticket = ticketRepo.findByOrgIdAndIdEmail(orgId, id,email);
 
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket status updated successfully");
-			responseObjectsMap.put("ticketVO", ticketVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
+			if (ticket == null) {
+				throw new RuntimeException("Ticket not found");
+			}
+			String decodedStatus = URLDecoder.decode(ticketStatus, StandardCharsets.UTF_8);
+			ticket.setStatus(status);
+			ticket.setTicketStatus(decodedStatus);
+			ticket.setUpdatedBy(empCode);
+//			ticket.setCompletedBy(empCode);
+			ticket.setUpdatedDate(LocalDate.now());
+			ticketRepo.save(ticket);
+
+			map.put("message", "✅ Remote ticket updated");
+			map.put("ticket", ticket);
+
+			response = createServiceResponse(map);
+
 		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket update failed status", errorMsg);
+			response = createServiceResponseError(map, "❌ Remote update failed", e.getMessage());
 		}
 
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+		return ResponseEntity.ok(response);
 	}
 }

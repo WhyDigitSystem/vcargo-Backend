@@ -1,9 +1,9 @@
 package com.efit.savaari.service;
 
 import java.io.IOException;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,6 +174,7 @@ public class TicketServiceImpl implements TicketService {
 		vo.setBranch(dto.getBranch());
 		vo.setBranchCode(dto.getBranchCode());
 		vo.setCompanyName(dto.getCompanyName());
+		vo.setTicketStatus(dto.getTicketStatus());
 	}
 
 	private void externalApiCall(TicketVO ticketVO) {
@@ -237,7 +238,7 @@ public class TicketServiceImpl implements TicketService {
 
 	    String url = "http://139.5.190.244:8061/api/ticket/uploadTicketBySourceId";
 
-//		String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
+//	String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -566,10 +567,4 @@ public class TicketServiceImpl implements TicketService {
 		}
 	}
 	
-	@Override
-	public TicketVO findByOrgIdAndId(Long orgId, Long id) {
-
-		return ticketRepo.findByOrgIdAndId(orgId, id);
-	}
-
 }

@@ -1,5 +1,7 @@
 package com.efit.savaari.entity;
 
+import java.time.LocalDate;
+
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -46,6 +48,9 @@ public class TicketVO {
 	private String email;
 
 	private String status;
+	
+	@Column(name = "ticketstatus")
+	private String ticketStatus;
 
 	@Column(name = "statusflag")
 	private Boolean statusFlag = true;
@@ -66,6 +71,9 @@ public class TicketVO {
 
 	@Column(name = "sourceId")
 	private Long sourceId;
+	
+	@Column(name="updateddate")
+	private LocalDate updatedDate;
 
 	@Lob
 	@Column(name = "screenshot", columnDefinition = "LONGBLOB")
