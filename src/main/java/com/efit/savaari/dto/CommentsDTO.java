@@ -1,5 +1,7 @@
 package com.efit.savaari.dto;
 
+import javax.persistence.Column;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,16 +11,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommentsDTO {
 
-private Long id;
-	
+	private Long id;
+
 	private String comments;
-	
+
 	private String createdBy;
 	private String userName;
 	private Long orgId;
 	private Long ticketId;
-	
-//	private String status;
-	
-}
+	private String sourceUserName;
+	private Long sourceOrgId;
 
+	private Long sourceTicketId;
+
+//	private String status;
+
+}

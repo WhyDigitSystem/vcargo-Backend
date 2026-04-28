@@ -52,6 +52,10 @@ public interface TicketService {
 
 	TicketVO clearUserNotification(Long orgId, String userName, Long ticketId, String status);
 
+//	CommentsVO creatComments(CommentsDTO commentDTO);
+
+	Map<String, Object> createComments(CommentsDTO commentDTO);
+
 //	TicketVO findByOrgIdAndId(Long orgId, Long id);
 
 }

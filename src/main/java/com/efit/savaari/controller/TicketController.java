@@ -443,4 +443,25 @@ public class TicketController extends BaseController {
 
 		return ResponseEntity.ok(response);
 	}
+	
+	@PostMapping("/createComments")
+	public ResponseEntity<ResponseDTO> createComments(@RequestBody CommentsDTO commentDTO) {
+		String methodName = "createComments()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		String errorMsg = null;
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO = null;
+		try {
+			Map<String, Object> commentVO = ticketService.createComments(commentDTO);
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, commentVO.get("message"));
+			responseObjectsMap.put("commentVO", commentVO.get("commentVO"));
+			responseDTO = createServiceResponse(responseObjectsMap);
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+			responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
+		}
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok().body(responseDTO);
+	}
 }
