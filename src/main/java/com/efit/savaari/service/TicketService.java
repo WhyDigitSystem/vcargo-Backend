@@ -56,6 +56,8 @@ public interface TicketService {
 
 	Map<String, Object> createComments(CommentsDTO commentDTO);
 
+	List<CommentsVO> getAllCommentsList(Long ticketId);
+
 //	TicketVO findByOrgIdAndId(Long orgId, Long id);
 
 }

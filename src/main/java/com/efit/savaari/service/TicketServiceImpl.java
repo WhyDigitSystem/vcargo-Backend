@@ -16,11 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -570,26 +565,37 @@ public class TicketServiceImpl implements TicketService {
 		Map<String, Object> response = new HashMap<>();
 
 		try {
-			CommentsVO commentsVO = new CommentsVO();
+			System.out.println("📥 Incoming SourceId: " + commentDTO.getSourceId());
 
-			commentsVO.setComments(commentDTO.getComments());
-			commentsVO.setUserName(commentDTO.getUserName());
-			commentsVO.setTicketId(commentDTO.getTicketId());
-			commentsVO.setSourceUserName(commentDTO.getSourceUserName());
-			commentsVO.setOrgId(commentDTO.getOrgId());
-			commentsVO.setCreatedBy(commentDTO.getCreatedBy());
-			commentsVO.setUpdatedBy(commentDTO.getCreatedBy());
+			CommentsVO vo = new CommentsVO();
 
-			commentsRepo.saveAndFlush(commentsVO);
+			vo.setComments(commentDTO.getComments());
+			vo.setUserName(commentDTO.getUserName());
+			vo.setTicketId(commentDTO.getTicketId());
+			vo.setSourceUserName(commentDTO.getSourceUserName());
+			vo.setOrgId(commentDTO.getOrgId());
+			vo.setSourceTicketId(commentDTO.getSourceTicketId());
+			vo.setCreatedBy(commentDTO.getCreatedBy());
+			vo.setUpdatedBy(commentDTO.getCreatedBy());
 
-			System.out.println("💾 Saved in Server A: " + commentsVO.getId());
+			// 🔥 VERY IMPORTANT
+			vo.setSourceId(commentDTO.getSourceId());
 
-			// ✅ ONLY ONE-WAY CALL
-			commentSyncService.sendToServerB(commentsVO);
+			commentsRepo.saveAndFlush(vo);
+
+			System.out.println("💾 Saved in Server A: " + vo.getId());
+
+			// ✅ FIXED CONDITION
+			if (commentDTO.getSourceId() == null || commentDTO.getSourceId() == 0) {
+				System.out.println("🔁 A → B Triggered");
+				commentSyncService.sendToServerB(vo);
+			} else {
+				System.out.println("⛔ Skipping A → B (Synced data)");
+			}
 
 			response.put("status", true);
 			response.put("message", "Saved in Server A");
-			response.put("commentVO", commentsVO);
+			response.put("commentVO", vo);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -599,4 +605,11 @@ public class TicketServiceImpl implements TicketService {
 
 		return response;
 	}
+
+	@Override
+	public List<CommentsVO> getAllCommentsList(Long ticketId) {
+		return commentsRepo.getAllCommentsList(ticketId);
+
+	}
+
 }

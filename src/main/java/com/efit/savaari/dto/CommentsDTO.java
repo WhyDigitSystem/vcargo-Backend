@@ -21,7 +21,7 @@ public class CommentsDTO {
 	private Long ticketId;
 	private String sourceUserName;
 	private Long sourceOrgId;
-
+	private Long sourceId;
 	private Long sourceTicketId;
 
 //	private String status;

@@ -47,11 +47,14 @@ public class CommentsVO {
 	@Column(name = "sourceusername")
 	private String sourceUserName;
 	
-	@Column(name = "sourceorgId")
+	@Column(name = "sourceorgid")
 	private Long sourceOrgId;
 	
 	@Column(name = "sourceticketid")
 	private Long sourceTicketId;
+	
+	@Column(name = "sourceid")
+	private Long sourceId;
 
 	
 	@Column(name="notificationflag")
