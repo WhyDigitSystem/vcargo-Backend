@@ -61,6 +61,8 @@ public interface TicketService {
 
 	List<CommentsVO> getAllCommentsMyServer(Long ticketId);
 
+	CommentsVO updateComments(CommentsDTO dto);
+
 //	TicketVO findByOrgIdAndId(Long orgId, Long id);
 
 }

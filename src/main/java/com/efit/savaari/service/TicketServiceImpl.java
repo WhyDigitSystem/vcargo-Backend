@@ -618,4 +618,45 @@ public class TicketServiceImpl implements TicketService {
 
 	}
 
+	@Override
+	public CommentsVO updateComments(CommentsDTO dto) {
+
+		CommentsVO vo;
+
+		if (dto.getId() != null) {
+
+			vo = commentsRepo.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Not found in A by id"));
+
+			System.out.println("✏️ Updating in A using commentsid");
+
+			vo.setComments(dto.getComments());
+			vo.setUserName(dto.getUserName());
+			vo.setTicketId(dto.getTicketId());
+
+			commentsRepo.save(vo);
+
+			commentSyncService.updateToServerB(vo);
+		}
+
+		// ✅ 2. SYNC UPDATE FROM B
+		else if (dto.getSourceId() != null) {
+
+			vo = commentsRepo.findBySourceId(dto.getSourceId())
+					.orElseThrow(() -> new RuntimeException("Not found in A by sourceId"));
+
+			System.out.println("✏️ Updating in A using sourceId");
+
+			vo.setComments(dto.getComments());
+			vo.setUserName(dto.getUserName());
+			vo.setTicketId(dto.getTicketId());
+
+			commentsRepo.save(vo);
+		}
+
+		else {
+			throw new RuntimeException("❌ id and sourceId both NULL");
+		}
+
+		return vo;
+	}
 }

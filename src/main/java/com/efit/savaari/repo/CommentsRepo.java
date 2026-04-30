@@ -1,6 +1,7 @@
 package com.efit.savaari.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,5 +29,9 @@ public interface CommentsRepo extends JpaRepository<CommentsVO, Long> {
 	
 	@Query(nativeQuery = true, value = "select * from comments where ticketid=?1 and orgid is not  null")
 	List<CommentsVO> getAllCommentsMyServer(Long ticketId);
+	
+
+	@Query(nativeQuery = true, value = "select * from comments where sourceid=?1")
+	Optional<CommentsVO> findBySourceId(Long sourceId);
 
 }

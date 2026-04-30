@@ -518,5 +518,9 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
+	@PutMapping("/updateComments")
+	public CommentsVO updateComment(@RequestBody CommentsDTO dto) {
+		return ticketService.updateComments(dto);
+	}
 
 }

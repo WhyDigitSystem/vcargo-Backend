@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -37,7 +38,7 @@ public class CommentSyncService {
 			body.put("ticketId", commentsVO.getTicketId());
 
 //			String url = "http://localhost:8061/api/ticket/createComments";
-			
+
 			String url = "http://139.5.190.244:8061/api/ticket/createComments";
 
 			HttpHeaders headers = new HttpHeaders();
@@ -53,6 +54,40 @@ public class CommentSyncService {
 
 		} catch (Exception e) {
 			System.out.println("❌ ERROR A → B");
+			e.printStackTrace();
+		}
+	}
+
+	@Async("taskExecutor")
+	public void updateToServerB(CommentsVO vo) {
+
+		try {
+			Map<String, Object> body = new HashMap<>();
+
+			body.put("comment", vo.getComments());
+			body.put("commentName", vo.getUserName());
+			body.put("ticketId", vo.getTicketId());
+
+			// 🔥 THIS IS THE LINK
+			body.put("sourceId", vo.getId());
+
+			body.put("sourceUserName", vo.getSourceUserName());
+			body.put("sourceOrgId", vo.getOrgId());
+
+			String url = "http://139.5.190.244:8061/api/ticket/updateComments";
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+			System.out.println("📤 A → B Payload: " + body);
+
+			restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
+
+			System.out.println("✅ A → B updated");
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
