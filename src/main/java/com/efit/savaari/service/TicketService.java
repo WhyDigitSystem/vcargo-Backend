@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +41,7 @@ public interface TicketService {
 
 	List<CommentsVO> getCommentsByTicketId(Long ticketId, Long orgId);
 
-	void deleteCommentsById(Long id);
+//	void deleteCommentsById(Long id);
 
 	// Notification
 
@@ -56,13 +57,12 @@ public interface TicketService {
 
 	Map<String, Object> createComments(CommentsDTO commentDTO);
 
-
 	List<CommentsVO> getAllCommentsAnotherServer(Long ticketId);
 
 	List<CommentsVO> getAllCommentsMyServer(Long ticketId);
 
 	CommentsVO updateComments(CommentsDTO dto);
 
-//	TicketVO findByOrgIdAndId(Long orgId, Long id);
+	void deleteComments(Long id, Long sourceId);
 
 }

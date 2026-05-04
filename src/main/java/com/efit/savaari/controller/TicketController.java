@@ -256,25 +256,25 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@DeleteMapping("/deleteCommentsById")
-	public ResponseEntity<ResponseDTO> deleteCommentsById(@RequestParam(required = true) Long id) {
-		String methodName = "deleteCommentsById()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		try {
-			ticketService.deleteCommentsById(id);
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Comments deleted successfully By Id");
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			responseDTO = createServiceResponseError(responseObjectsMap, "Comments deletion failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
-	}
+//	@DeleteMapping("/deleteCommentsById")
+//	public ResponseEntity<ResponseDTO> deleteCommentsById(@RequestParam(required = true) Long id) {
+//		String methodName = "deleteCommentsById()";
+//		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//		String errorMsg = null;
+//		Map<String, Object> responseObjectsMap = new HashMap<>();
+//		ResponseDTO responseDTO = null;
+//		try {
+//			ticketService.deleteCommentsById(id);
+//			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Comments deleted successfully By Id");
+//			responseDTO = createServiceResponse(responseObjectsMap);
+//		} catch (Exception e) {
+//			errorMsg = e.getMessage();
+//			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+//			responseDTO = createServiceResponseError(responseObjectsMap, "Comments deletion failed", errorMsg);
+//		}
+//		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+//		return ResponseEntity.ok().body(responseDTO);
+//	}
 
 	// Notification
 
@@ -523,4 +523,33 @@ public class TicketController extends BaseController {
 		return ticketService.updateComments(dto);
 	}
 
+	@DeleteMapping("/deleteComments")
+	public ResponseEntity<ResponseDTO> deleteComments(@RequestParam(required = false) Long id,
+			@RequestParam(required = false) Long sourceId) {
+
+		String methodName = "deleteComments()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		String errorMsg = null;
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO = null;
+
+		try {
+			ticketService.deleteComments(id, sourceId);
+
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
+
+		if (StringUtils.isBlank(errorMsg)) {
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Comment deleted successfully");
+			responseDTO = createServiceResponse(responseObjectsMap);
+		} else {
+			responseDTO = createServiceResponseError(responseObjectsMap, "Comment delete failed", errorMsg);
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 }

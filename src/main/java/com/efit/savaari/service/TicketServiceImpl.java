@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -405,12 +406,6 @@ public class TicketServiceImpl implements TicketService {
 
 	}
 
-	@Override
-	public void deleteCommentsById(Long id) {
-
-		commentsRepo.deleteById(id);
-	}
-
 	// Notification
 
 	@Override
@@ -658,5 +653,34 @@ public class TicketServiceImpl implements TicketService {
 		}
 
 		return vo;
+	}
+
+	@Override
+	public void deleteComments(Long id, Long sourceId) {
+
+	    // ✅ 1. LOCAL DELETE (A UI)
+	    if (id != null) {
+
+	        commentsRepo.deleteById(id);
+	        System.out.println("🗑️ Deleted in Server A (LOCAL)");
+
+	        // 🔥 Sync to B
+	        commentSyncService.deleteInServerB(id);
+	    }
+
+	    // ✅ 2. SYNC DELETE (coming from B)
+	    else if (sourceId != null) {
+
+	        CommentsVO vo = commentsRepo.findBySourceId(sourceId)
+	                .orElseThrow(() -> new RuntimeException("Not found in A by sourceId"));
+
+	        commentsRepo.delete(vo);
+
+	        System.out.println("🗑️ Deleted in Server A (SYNC)");
+	    }
+
+	    else {
+	        throw new RuntimeException("❌ id and sourceId both NULL");
+	    }
 	}
 }

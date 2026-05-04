@@ -91,4 +91,24 @@ public class CommentSyncService {
 			e.printStackTrace();
 		}
 	}
+
+	@Async("taskExecutor")
+	public void deleteInServerB(Long id) {
+
+	    try {
+
+	        // 🔥 Only sourceId is required for sync
+	        String url = "http://139.5.190.244:8061/api/ticket/deleteComments?sourceId=" + id;
+
+	        System.out.println("📤 A → B DELETE URL: " + url);
+
+	        restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
+
+	        System.out.println("✅ A → B delete synced");
+
+	    } catch (Exception e) {
+	        System.err.println("❌ Error while calling Server B");
+	        e.printStackTrace();
+	    }
+	}
 }
