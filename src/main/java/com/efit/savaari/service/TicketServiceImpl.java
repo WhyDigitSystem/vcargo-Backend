@@ -1,6 +1,15 @@
 package com.efit.savaari.service;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -15,12 +25,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.efit.savaari.dto.CommentsDTO;
 import com.efit.savaari.dto.TicketDTO;
@@ -68,86 +86,6 @@ public class TicketServiceImpl implements TicketService {
 	@Autowired
 	private AsyncService asyncService;
 
-//	@Override
-//	@Transactional
-//	public Map<String, Object> createUpdateTicket(@Valid TicketDTO ticketDTO) {
-//
-//		TicketVO ticketVO = new TicketVO();
-//
-//		ticketVO.setCreatedBy(ticketDTO.getCreatedBy());
-//		ticketVO.setUpdatedBy(ticketDTO.getCreatedBy());
-//
-//		mapDtoToVo(ticketVO, ticketDTO);
-//
-//		ticketVO = ticketRepo.save(ticketVO);
-//
-//		Long generatedId = ticketVO.getId();
-//		System.out.println("✅ Ticket ID: " + generatedId);
-//		ticketVO.setSourceId(generatedId);
-//		ticketRepo.saveAndFlush(ticketVO);
-//
-//		System.out.println("✅ SourceId Set: " + ticketVO.getSourceId());
-//
-//		externalApiCall(ticketVO);
-//
-//		boolean mailSent = sendEmail(ticketVO);
-//
-//		Map<String, Object> response = new HashMap<>();
-//		response.put("ticketId", ticketVO.getId());
-//		response.put("sourceId", ticketVO.getSourceId());
-//		response.put("ticketVO", ticketVO);
-//
-//		return response;
-//	}
-//
-//	private void mapDtoToVo(TicketVO vo, TicketDTO dto) {
-//		vo.setSubject(dto.getSubject());
-//		vo.setDescription(dto.getDescription());
-//		vo.setUserName(dto.getUserName());
-//		vo.setOrgId(dto.getOrgId());
-//		vo.setStatus(dto.getStatus());
-//		vo.setEmail(dto.getEmail());
-//		vo.setBranch(dto.getBranch());
-//		vo.setBranchCode(dto.getBranchCode());
-//		vo.setCompanyName(dto.getCompanyName());
-//		vo.setTicketStatus(dto.getTicketStatus());
-//	}
-//
-//	private void externalApiCall(TicketVO ticketVO) {
-//
-//		try {
-//			Map<String, Object> body = new HashMap<>();
-//
-//			body.put("client", "LOCAL_APP");
-//			body.put("createdBy", ticketVO.getCreatedBy());
-//			body.put("description", ticketVO.getDescription());
-//			body.put("sourceEmail", ticketVO.getEmail());
-//			body.put("modifiedBy", ticketVO.getUpdatedBy());
-//			body.put("priority", "HIGH");
-//			body.put("title", ticketVO.getSubject());
-//
-//			body.put("sourceId", ticketVO.getSourceId());
-//			body.put("customer", ticketVO.getCompanyName());
-//			body.put("sourceOrgId", ticketVO.getOrgId());
-//			body.put("sourceBranch", ticketVO.getBranch());
-//			body.put("sourceBranchCode", ticketVO.getBranchCode());
-//			body.put("projectName", ticketVO.getCompanyName());
-//			body.put("application", "VCARGO");
-//
-//			HttpHeaders headers = new HttpHeaders();
-//			headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//			HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-//
-//			ResponseEntity<String> response = restTemplate.postForEntity(externalUrl, request, String.class);
-//
-//			System.out.println("✅ External API Response: " + response.getBody());
-//
-//		} catch (Exception e) {
-//			System.err.println("❌ External API Error: " + e.getMessage());
-//		}
-//	}
-
 	@Override
 	@Transactional
 	public Map<String, Object> createUpdateTicket(@Valid TicketDTO ticketDTO) {
@@ -189,98 +127,210 @@ public class TicketServiceImpl implements TicketService {
 		vo.setCompanyName(dto.getCompanyName());
 		vo.setTicketStatus(dto.getTicketStatus());
 	}
-//	@Override
-//	public TicketVO uploadTicketScreenShotInBloob(MultipartFile file, Long id) throws IOException {
-//		TicketVO ticketVO = ticketRepo.findById(id).get();
-//		ticketVO.setScreenShot(file.getBytes());
-//		return ticketRepo.save(ticketVO);
-//	}
 
-//	@Override
-//	public TicketVO uploadTicketScreenShotInBloob(MultipartFile file, Long id) throws IOException {
-//
-//		TicketVO ticketVO = ticketRepo.findById(id).orElseThrow(() -> new RuntimeException("Ticket not found"));
-//
-//		ticketVO.setScreenShot(file.getBytes());
-//		ticketVO = ticketRepo.save(ticketVO);
-//
-//		callExternalImageAPI(file, id);
-//
-//		return ticketVO;
-//	}
-//
-//	private void callExternalImageAPI(MultipartFile file, Long sourceId) {
-//
-//		try {
-//
-//			String url = "http://139.5.190.244:8061/api/ticket/uploadTicketBySourceId";
-//
-////	String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
-//
-//			HttpHeaders headers = new HttpHeaders();
-//			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//
-//			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-//
-//			// 🔥 file convert
-//			body.add("file", new ByteArrayResource(file.getBytes()) {
-//				@Override
-//				public String getFilename() {
-//					return file.getOriginalFilename();
-//				}
-//			});
-//
-//			// 🔥 send sourceId
-//			body.add("sourceId", sourceId.toString());
-//
-//			HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
-//
-//			ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-//
-//			if (response.getStatusCode().is2xxSuccessful()) {
-//				LOGGER.info("✅ Image synced to external server");
-//			} else {
-//				LOGGER.error("❌ External image upload failed");
-//			}
-//
-//		} catch (Exception e) {
-//			LOGGER.error("❌ External API Exception: ", e);
-//		}
-//	}
-
-//	private boolean sendEmail(TicketVO ticketVO) {
-//
-//		try {
-//			String createdOn = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss a").format(new Date());
-//
-//			String htmlContent = loadHtmlTemplate(ticketVO.getId(), ticketVO.getSubject(), ticketVO.getStatus(),
-//					ticketVO.getDescription(), ticketVO.getCreatedBy(), ticketVO.getEmail(), createdOn);
-//
-//			emailService.sendHtmlEmail(noReplayEmail, adminEmail, ticketVO.getSubject(), htmlContent);
-//			emailService.sendHtmlEmail(noReplayEmail, ticketVO.getEmail(), ticketVO.getSubject(), htmlContent);
-//
-//			return true;
-//
-//		} catch (Exception e) {
-//			LOGGER.error("❌ Mail Failed", e);
-//			return false;
-//		}
-//	}
+	@Value("${file.upload-dirs}")
+	private String uploadBasePath;
 
 	@Override
+	@Transactional
 	public TicketVO uploadTicketScreenShotInBloob(MultipartFile file, Long id) throws IOException {
 
 		TicketVO ticketVO = ticketRepo.findById(id).orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-		byte[] fileBytes = file.getBytes(); // ✅ read once
-		String fileName = file.getOriginalFilename();
+		Path ticketFolder = Paths.get(uploadBasePath, "ticketimages", id.toString());
 
-		ticketVO.setScreenShot(fileBytes);
+		createDirectoryTicket(ticketFolder);
+
+		if (ticketVO.getFilePath() != null && !ticketVO.getFilePath().isEmpty()) {
+
+			deleteFileSafelyTicket(ticketVO.getFilePath());
+		}
+
+		String originalName = file.getOriginalFilename();
+
+		if (originalName == null) {
+
+			originalName = "file";
+		}
+
+		originalName = originalName.replaceAll("\\s+", "_");
+
+		String extension = "";
+
+		if (originalName.contains(".")) {
+
+			extension = originalName.substring(originalName.lastIndexOf("."));
+
+			originalName = originalName.substring(0, originalName.lastIndexOf("."));
+		}
+
+		// NEW FILE NAME
+		String fileName = originalName + "_" + id + extension;
+
+		// FINAL FILE PATH
+		Path filePath = ticketFolder.resolve(fileName);
+
+		// SAVE FILE
+		try (InputStream inputStream = file.getInputStream()) {
+
+			Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		// BASE URL
+		String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+				.path("/api/ticketcontroller/viewTicketImage/").toUriString();
+
+		// RELATIVE PATH
+		String relativePath = uploadBasePath.replace("\\", "/");
+
+		relativePath = filePath.toString().replace("\\", "/").replace(relativePath + "/", "");
+
+		String publicUrl = baseUrl + relativePath;
+
+		ticketVO.setFileName(fileName);
+
+		ticketVO.setFilePath(publicUrl);
+
+		ticketVO.setFileSize(file.getSize());
+
+		ticketVO.setContentType(file.getContentType());
+
+		ticketVO.setUploadOn(LocalDateTime.now());
+
 		ticketVO = ticketRepo.save(ticketVO);
 
-		asyncService.uploadImageAsync(fileBytes, fileName, id);
+		System.out.println("FILE SAVED : " + filePath.toAbsolutePath());
+
+		System.out.println("PUBLIC URL : " + publicUrl);
+
+		callExternalImageAPI(file, id);
 
 		return ticketVO;
+	}
+
+	private void deleteFileSafelyTicket(String fileUrl) {
+
+		try {
+
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+
+			String relativePath = fileUrl.replace(baseUrl + "/api/ticketcontroller/viewTicketImage/", "");
+
+			Path filePath = Paths.get(uploadBasePath, relativePath);
+
+			if (Files.exists(filePath)) {
+
+				Files.delete(filePath);
+
+				System.out.println("Old file deleted : " + filePath);
+			}
+
+		} catch (Exception e) {
+
+			System.err.println("Unable to delete file : " + fileUrl);
+		}
+	}
+
+	private void createDirectoryTicket(Path path) throws IOException {
+
+		if (!Files.exists(path)) {
+
+			Files.createDirectories(path);
+		}
+	}
+
+	private void callExternalImageAPI(MultipartFile file, Long sourceId) {
+
+		try {
+
+			String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
+
+			HttpHeaders headers = new HttpHeaders();
+
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+			body.add("file", new ByteArrayResource(file.getBytes()) {
+
+				@Override
+				public String getFilename() {
+
+					return file.getOriginalFilename();
+				}
+			});
+
+			body.add("sourceId", sourceId.toString());
+
+			HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
+			ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+			if (response.getStatusCode().is2xxSuccessful()) {
+
+				LOGGER.info("Image synced to external server");
+
+			} else {
+
+				LOGGER.error("External image upload failed");
+			}
+
+		} catch (Exception e) {
+
+			LOGGER.error("External API Exception : ", e);
+		}
+	}
+
+	@Override
+	public ResponseEntity<byte[]> viewTicketImage(HttpServletRequest request) throws IOException {
+
+		return serveFileTicket(request, "/api/ticketcontroller/viewTicketImage/", uploadBasePath);
+	}
+
+	private ResponseEntity<byte[]> serveFileTicket(HttpServletRequest request, String apiPrefix, String uploadBasePath)
+			throws IOException {
+
+		String uri = request.getRequestURI();
+
+		// REMOVE API PREFIX
+		String relativePath = uri.replace(apiPrefix, "");
+
+		// URL DECODE
+		relativePath = URLDecoder.decode(relativePath, StandardCharsets.UTF_8);
+
+		// REMOVE uploads/
+		if (relativePath.startsWith("uploads/")) {
+
+			relativePath = relativePath.substring("uploads/".length());
+		}
+
+		Path baseDir = Paths.get(uploadBasePath).toAbsolutePath().normalize();
+
+		Path filePath = baseDir.resolve(relativePath).normalize();
+
+		// SECURITY CHECK
+		if (!filePath.startsWith(baseDir)) {
+
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		// FILE EXISTS
+		if (!Files.exists(filePath)) {
+
+			return ResponseEntity.notFound().build();
+		}
+
+		String contentType = Files.probeContentType(filePath);
+
+		if (contentType == null) {
+
+			contentType = "application/octet-stream";
+		}
+
+		byte[] data = Files.readAllBytes(filePath);
+
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline").body(data);
 	}
 
 	@Override
@@ -658,29 +708,29 @@ public class TicketServiceImpl implements TicketService {
 	@Override
 	public void deleteComments(Long id, Long sourceId) {
 
-	    // ✅ 1. LOCAL DELETE (A UI)
-	    if (id != null) {
+		// ✅ 1. LOCAL DELETE (A UI)
+		if (id != null) {
 
-	        commentsRepo.deleteById(id);
-	        System.out.println("🗑️ Deleted in Server A (LOCAL)");
+			commentsRepo.deleteById(id);
+			System.out.println("🗑️ Deleted in Server A (LOCAL)");
 
-	        // 🔥 Sync to B
-	        commentSyncService.deleteInServerB(id);
-	    }
+			// 🔥 Sync to B
+			commentSyncService.deleteInServerB(id);
+		}
 
-	    // ✅ 2. SYNC DELETE (coming from B)
-	    else if (sourceId != null) {
+		// ✅ 2. SYNC DELETE (coming from B)
+		else if (sourceId != null) {
 
-	        CommentsVO vo = commentsRepo.findBySourceId(sourceId)
-	                .orElseThrow(() -> new RuntimeException("Not found in A by sourceId"));
+			CommentsVO vo = commentsRepo.findBySourceId(sourceId)
+					.orElseThrow(() -> new RuntimeException("Not found in A by sourceId"));
 
-	        commentsRepo.delete(vo);
+			commentsRepo.delete(vo);
 
-	        System.out.println("🗑️ Deleted in Server A (SYNC)");
-	    }
+			System.out.println("🗑️ Deleted in Server A (SYNC)");
+		}
 
-	    else {
-	        throw new RuntimeException("❌ id and sourceId both NULL");
-	    }
+		else {
+			throw new RuntimeException("❌ id and sourceId both NULL");
+		}
 	}
 }

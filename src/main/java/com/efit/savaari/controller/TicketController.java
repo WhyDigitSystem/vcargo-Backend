@@ -1,5 +1,6 @@
 package com.efit.savaari.controller;
 
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
@@ -72,31 +74,31 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@PostMapping("/uploadTicketScreenShotInBloob")
-	public ResponseEntity<ResponseDTO> uploadTicketScreenShotInBloob(@RequestParam("file") MultipartFile file,
-			@RequestParam Long id) {
-		String methodName = "uploadTicketScreenShotInBloob()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		TicketVO ticketVO = null;
-		try {
-			ticketVO = ticketService.uploadTicketScreenShotInBloob(file, id);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error("Unable To Upload PartImage", methodName, errorMsg);
-		}
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket ScreenShot Successfully Upload");
-			responseObjectsMap.put("ticketVO", ticketVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket ScreenShot Upload Failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
-	}
+//	@PostMapping("/uploadTicketScreenShotInBloob")
+//	public ResponseEntity<ResponseDTO> uploadTicketScreenShotInBloob(@RequestParam("file") MultipartFile file,
+//			@RequestParam Long id) {
+//		String methodName = "uploadTicketScreenShotInBloob()";
+//		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//		String errorMsg = null;
+//		Map<String, Object> responseObjectsMap = new HashMap<>();
+//		ResponseDTO responseDTO = null;
+//		TicketVO ticketVO = null;
+//		try {
+//			ticketVO = ticketService.uploadTicketScreenShotInBloob(file, id);
+//		} catch (Exception e) {
+//			errorMsg = e.getMessage();
+//			LOGGER.error("Unable To Upload PartImage", methodName, errorMsg);
+//		}
+//		if (StringUtils.isBlank(errorMsg)) {
+//			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket ScreenShot Successfully Upload");
+//			responseObjectsMap.put("ticketVO", ticketVO);
+//			responseDTO = createServiceResponse(responseObjectsMap);
+//		} else {
+//			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket ScreenShot Upload Failed", errorMsg);
+//		}
+//		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+//		return ResponseEntity.ok().body(responseDTO);
+//	}
 
 	@GetMapping("/getTicketById")
 	public ResponseEntity<ResponseDTO> getTicketById(@RequestParam(required = false) Long id) {
@@ -551,5 +553,46 @@ public class TicketController extends BaseController {
 
 		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 		return ResponseEntity.ok(responseDTO);
+	}
+
+	@PostMapping("/uploadTicketScreenShotInBloob")
+	public ResponseEntity<ResponseDTO> uploadTicketScreenShotInBloob(
+
+			@RequestParam MultipartFile file,
+
+			@RequestParam Long id) {
+
+		String methodName = "uploadTicketScreenShotInBloob()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			TicketVO ticketVO = ticketService.uploadTicketScreenShotInBloob(file, id);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket Image Uploaded Successfully");
+
+			responseObjectsMap.put("ticketVO", ticketVO);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket Image Upload Failed", e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok().body(responseDTO);
+	}
+
+	@GetMapping("/viewTicketImage/**")
+	public ResponseEntity<byte[]> viewTicketImage(HttpServletRequest request) throws IOException {
+
+		return ticketService.viewTicketImage(request);
 	}
 }

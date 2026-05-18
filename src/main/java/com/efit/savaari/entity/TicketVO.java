@@ -1,6 +1,7 @@
 package com.efit.savaari.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -34,6 +35,9 @@ public class TicketVO {
 	private String subject;
 
 	private String description;
+	
+	@Column(name = "uploadon")
+	private LocalDateTime uploadOn;
 
 	@Column(name = "createdby")
 	private String createdBy;
@@ -74,6 +78,18 @@ public class TicketVO {
 	
 	@Column(name="updateddate")
 	private LocalDate updatedDate;
+	
+	@Column(name = "filename")
+	private String fileName;
+
+	@Column(name = "filepath")
+	private String filePath;
+	
+	@Column(name = "filesize")
+	private Long fileSize;
+
+	@Column(name = "contenttype")
+	private String contentType;
 
 	@Lob
 	@Column(name = "screenshot", columnDefinition = "LONGBLOB")

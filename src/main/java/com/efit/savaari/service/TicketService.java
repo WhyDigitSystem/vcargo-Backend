@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -64,5 +65,7 @@ public interface TicketService {
 	CommentsVO updateComments(CommentsDTO dto);
 
 	void deleteComments(Long id, Long sourceId);
+
+	ResponseEntity<byte[]> viewTicketImage(HttpServletRequest request) throws java.io.IOException;
 
 }
