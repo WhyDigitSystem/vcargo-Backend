@@ -68,4 +68,6 @@ public interface TicketService {
 
 	ResponseEntity<byte[]> viewTicketImage(HttpServletRequest request) throws java.io.IOException;
 
+	List<TicketVO> getTicketReport(Long orgId, String fromDate, String toDate);
+
 }

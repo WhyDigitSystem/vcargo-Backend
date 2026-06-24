@@ -257,6 +257,7 @@ public class AuthServiceImpl implements AuthService {
 			userVO.setCreatedby(signUpRequest.getCreatedby());
 			userVO.setActive(false);
 			userVO.setStatus(UserStatus.PENDING);
+			userVO.setUserType("USER");
 
 			if (!StringUtils.isBlank(signUpRequest.getPassword())) {
 				try {
@@ -278,6 +279,7 @@ public class AuthServiceImpl implements AuthService {
 			userVO.setOrganizationName(signUpRequest.getOrganizationName());
 			userVO.setCreatedby(signUpRequest.getCreatedby());
 			userVO.setActive(false);
+			userVO.setUserType("USER");
 			userVO.setStatus(UserStatus.PENDING);
 
 			try {

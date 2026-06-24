@@ -1,6 +1,5 @@
 package com.efit.savaari.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
@@ -243,7 +242,7 @@ public class TicketServiceImpl implements TicketService {
 
 		try {
 
-			String url = "http://localhost:8061/api/ticket/uploadTicketBySourceId";
+			String url = "http://139.5.190.244:8061/api/ticket/uploadTicketBySourceId";
 
 			HttpHeaders headers = new HttpHeaders();
 
@@ -733,4 +732,10 @@ public class TicketServiceImpl implements TicketService {
 			throw new RuntimeException("❌ id and sourceId both NULL");
 		}
 	}
+	
+	@Override
+	public List<TicketVO> getTicketReport(Long orgId, String fromDate, String toDate) {
+		return ticketRepo.getTicketReport( orgId,  fromDate,  toDate);
+	}
+
 }

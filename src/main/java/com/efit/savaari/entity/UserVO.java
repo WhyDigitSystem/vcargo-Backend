@@ -43,6 +43,8 @@ public class UserVO {
 	private String password;
 	@Column(name = "type")
 	private String type;
+	@Column(name = "usertype")
+	private String userType;
 	@Column(name = "organizationname")
 	private String organizationName;
 	@Column(name = "orgid")
