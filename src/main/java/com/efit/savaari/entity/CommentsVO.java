@@ -28,6 +28,7 @@ public class CommentsVO {
 	@Column(name = "commentsid")
 	private Long id;
 	
+	@Column(name="comments")
 	private String comments;
 	
 	@Column(name="createdby")
@@ -42,6 +43,19 @@ public class CommentsVO {
 	private String status;
 	@Column(name = "ticketid")
 	private Long ticketId;
+	
+	@Column(name = "sourceusername")
+	private String sourceUserName;
+	
+	@Column(name = "sourceorgid")
+	private Long sourceOrgId;
+	
+	@Column(name = "sourceticketid")
+	private Long sourceTicketId;
+	
+	@Column(name = "sourceid")
+	private Long sourceId;
+
 	
 	@Column(name="notificationflag")
 	private Boolean notificationFlag=false;

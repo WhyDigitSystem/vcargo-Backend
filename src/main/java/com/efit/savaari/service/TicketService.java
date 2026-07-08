@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,8 +22,8 @@ import io.jsonwebtoken.io.IOException;
 @Service
 public interface TicketService {
 
-	//Ticket
-	
+	// Ticket
+
 	Map<String, Object> createUpdateTicket(@Valid TicketDTO ticketDTO) throws ApplicationException;
 
 	TicketVO uploadTicketScreenShotInBloob(MultipartFile file, Long id) throws IOException, java.io.IOException;
@@ -31,19 +33,18 @@ public interface TicketService {
 	List<TicketVO> getTicketByOrgId(Long orgId);
 
 	List<TicketVO> getTicketByUserName(String userName, Long orgId);
-	
-	TicketVO updateTicketStatus(Long orgId, Long ticketId,String status,String comments);
-	
-	//Comments
+
+	TicketVO updateTicketStatus(Long orgId, Long ticketId, String status, String comments);
+
+	// Comments
 
 	Map<String, Object> updateCreateComments(@Valid CommentsDTO commentsDTO) throws ApplicationException;
 
 	List<CommentsVO> getCommentsByTicketId(Long ticketId, Long orgId);
 
+//	void deleteCommentsById(Long id);
 
-	void deleteCommentsById(Long id);
-	
-	//Notification
+	// Notification
 
 	List<Map<String, Object>> getTicketNotification(Long orgId);
 
@@ -53,12 +54,20 @@ public interface TicketService {
 
 	TicketVO clearUserNotification(Long orgId, String userName, Long ticketId, String status);
 
-	TicketVO findByOrgIdAndId(Long orgId, Long id);
+//	CommentsVO creatComments(CommentsDTO commentDTO);
 
+	Map<String, Object> createComments(CommentsDTO commentDTO);
 
-	
+	List<CommentsVO> getAllCommentsAnotherServer(Long ticketId);
 
+	List<CommentsVO> getAllCommentsMyServer(Long ticketId);
+
+	CommentsVO updateComments(CommentsDTO dto);
+
+	void deleteComments(Long id, Long sourceId);
+
+	ResponseEntity<byte[]> viewTicketImage(HttpServletRequest request) throws java.io.IOException;
+
+	List<TicketVO> getTicketReport(Long orgId, String fromDate, String toDate);
 
 }
-
-

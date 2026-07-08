@@ -1,11 +1,16 @@
 package com.efit.savaari.controller;
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +35,7 @@ import com.efit.savaari.dto.CommentsDTO;
 import com.efit.savaari.dto.TicketDTO;
 import com.efit.savaari.entity.CommentsVO;
 import com.efit.savaari.entity.TicketVO;
+import com.efit.savaari.repo.TicketRepo;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.TicketService;
 
@@ -42,6 +48,9 @@ public class TicketController extends BaseController {
 
 	@Autowired
 	TicketService ticketService;
+
+	@Autowired
+	TicketRepo ticketRepo;
 
 	@PutMapping("/createUpdateTicket")
 	public ResponseEntity<ResponseDTO> CreateUpdateTicket(@Valid @RequestBody TicketDTO ticketDTO) {
@@ -65,31 +74,31 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@PostMapping("/uploadTicketScreenShotInBloob")
-	public ResponseEntity<ResponseDTO> uploadTicketScreenShotInBloob(@RequestParam("file") MultipartFile file,
-			@RequestParam Long id) {
-		String methodName = "uploadTicketScreenShotInBloob()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		TicketVO ticketVO = null;
-		try {
-			ticketVO = ticketService.uploadTicketScreenShotInBloob(file, id);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error("Unable To Upload PartImage", methodName, errorMsg);
-		}
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket ScreenShot Successfully Upload");
-			responseObjectsMap.put("ticketVO", ticketVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket ScreenShot Upload Failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
-	}
+//	@PostMapping("/uploadTicketScreenShotInBloob")
+//	public ResponseEntity<ResponseDTO> uploadTicketScreenShotInBloob(@RequestParam("file") MultipartFile file,
+//			@RequestParam Long id) {
+//		String methodName = "uploadTicketScreenShotInBloob()";
+//		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//		String errorMsg = null;
+//		Map<String, Object> responseObjectsMap = new HashMap<>();
+//		ResponseDTO responseDTO = null;
+//		TicketVO ticketVO = null;
+//		try {
+//			ticketVO = ticketService.uploadTicketScreenShotInBloob(file, id);
+//		} catch (Exception e) {
+//			errorMsg = e.getMessage();
+//			LOGGER.error("Unable To Upload PartImage", methodName, errorMsg);
+//		}
+//		if (StringUtils.isBlank(errorMsg)) {
+//			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket ScreenShot Successfully Upload");
+//			responseObjectsMap.put("ticketVO", ticketVO);
+//			responseDTO = createServiceResponse(responseObjectsMap);
+//		} else {
+//			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket ScreenShot Upload Failed", errorMsg);
+//		}
+//		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+//		return ResponseEntity.ok().body(responseDTO);
+//	}
 
 	@GetMapping("/getTicketById")
 	public ResponseEntity<ResponseDTO> getTicketById(@RequestParam(required = false) Long id) {
@@ -249,25 +258,25 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@DeleteMapping("/deleteCommentsById")
-	public ResponseEntity<ResponseDTO> deleteCommentsById(@RequestParam(required = true) Long id) {
-		String methodName = "deleteCommentsById()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		try {
-			ticketService.deleteCommentsById(id);
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Comments deleted successfully By Id");
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			responseDTO = createServiceResponseError(responseObjectsMap, "Comments deletion failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
-	}
+//	@DeleteMapping("/deleteCommentsById")
+//	public ResponseEntity<ResponseDTO> deleteCommentsById(@RequestParam(required = true) Long id) {
+//		String methodName = "deleteCommentsById()";
+//		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//		String errorMsg = null;
+//		Map<String, Object> responseObjectsMap = new HashMap<>();
+//		ResponseDTO responseDTO = null;
+//		try {
+//			ticketService.deleteCommentsById(id);
+//			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Comments deleted successfully By Id");
+//			responseDTO = createServiceResponse(responseObjectsMap);
+//		} catch (Exception e) {
+//			errorMsg = e.getMessage();
+//			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+//			responseDTO = createServiceResponseError(responseObjectsMap, "Comments deletion failed", errorMsg);
+//		}
+//		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+//		return ResponseEntity.ok().body(responseDTO);
+//	}
 
 	// Notification
 
@@ -378,29 +387,239 @@ public class TicketController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@GetMapping("/findByOrgIdAndId")
-	public ResponseEntity<ResponseDTO> findByOrgIdAndId(@RequestParam Long orgId, @RequestParam Long id) {
+//	@GetMapping("/findByOrgIdAndId")
+//	public ResponseEntity<ResponseDTO> findByOrgIdAndId(@RequestParam Long orgId, @RequestParam Long id) {
+//
+//		String methodName = "findByOrgIdAndId()";
+//		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+//		String errorMsg = null;
+//		Map<String, Object> responseObjectsMap = new HashMap<>();
+//		ResponseDTO responseDTO;
+//
+//		try {
+//			// Assuming this updates the ticket status internally
+//			TicketVO ticketVO = ticketService.findByOrgIdAndId(orgId, id);
+//
+//			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket status updated successfully");
+//			responseObjectsMap.put("ticketVO", ticketVO);
+//			responseDTO = createServiceResponse(responseObjectsMap);
+//		} catch (Exception e) {
+//			errorMsg = e.getMessage();
+//			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+//			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket update failed status", errorMsg);
+//		}
+//
+//		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+//		return ResponseEntity.ok().body(responseDTO);
+//	}
 
-		String methodName = "findByOrgIdAndId()";
+	@PutMapping("/updateTicketFromRemote")
+	public ResponseEntity<ResponseDTO> updateTicketFromRemote(@RequestParam Long orgId, @RequestParam Long id,
+			@RequestParam String status, @RequestParam String empCode, @RequestParam String email,
+			@RequestParam String ticketStatus) {
+
+		Map<String, Object> map = new HashMap<>();
+		ResponseDTO response;
+
+		try {
+			TicketVO ticket = ticketRepo.findByOrgIdAndIdEmail(orgId, id, email);
+
+			if (ticket == null) {
+				throw new RuntimeException("Ticket not found");
+			}
+			String decodedStatus = URLDecoder.decode(ticketStatus, StandardCharsets.UTF_8);
+			ticket.setStatus(status);
+			ticket.setTicketStatus(decodedStatus);
+			ticket.setUpdatedBy(empCode);
+//			ticket.setCompletedBy(empCode);
+			ticket.setUpdatedDate(LocalDate.now());
+			ticketRepo.save(ticket);
+
+			map.put("message", "✅ Remote ticket updated");
+			map.put("ticket", ticket);
+
+			response = createServiceResponse(map);
+
+		} catch (Exception e) {
+			response = createServiceResponseError(map, "❌ Remote update failed", e.getMessage());
+		}
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/createComments")
+	public ResponseEntity<ResponseDTO> createComments(@RequestBody CommentsDTO commentDTO) {
+		String methodName = "createComments()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;
 		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO;
-
+		ResponseDTO responseDTO = null;
 		try {
-			// Assuming this updates the ticket status internally
-			TicketVO ticketVO = ticketService.findByOrgIdAndId(orgId, id);
-
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket status updated successfully");
-			responseObjectsMap.put("ticketVO", ticketVO);
+			Map<String, Object> commentVO = ticketService.createComments(commentDTO);
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, commentVO.get("message"));
+			responseObjectsMap.put("commentVO", commentVO.get("commentVO"));
 			responseDTO = createServiceResponse(responseObjectsMap);
 		} catch (Exception e) {
 			errorMsg = e.getMessage();
 			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket update failed status", errorMsg);
+			responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
+		}
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok().body(responseDTO);
+	}
+
+	@GetMapping("/getAllCommentsAnotherServer")
+	public ResponseEntity<ResponseDTO> getAllCommentsAnotherServer(@RequestParam Long ticketId) {
+		String methodName = "getAllCommentsAnotherServer()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		String errorMsg = null;
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO = null;
+		List<CommentsVO> commentsVO = new ArrayList<CommentsVO>();
+		try {
+			commentsVO = ticketService.getAllCommentsAnotherServer(ticketId);
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
+		if (StringUtils.isBlank(errorMsg)) {
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "comments information get successfully By TicketId");
+			responseObjectsMap.put("commentsVO", commentsVO);
+			responseDTO = createServiceResponse(responseObjectsMap);
+		} else {
+			responseDTO = createServiceResponseError(responseObjectsMap, "comments information receive failed By orgId",
+					errorMsg);
+		}
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok().body(responseDTO);
+	}
+
+	@GetMapping("/getAllCommentsMyServer")
+	public ResponseEntity<ResponseDTO> getAllCommentsMyServer(@RequestParam Long ticketId) {
+		String methodName = "getAllCommentsMyServer()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		String errorMsg = null;
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO = null;
+		List<CommentsVO> commentsVO = new ArrayList<CommentsVO>();
+		try {
+			commentsVO = ticketService.getAllCommentsMyServer(ticketId);
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
+		if (StringUtils.isBlank(errorMsg)) {
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "comments information get successfully By TicketId");
+			responseObjectsMap.put("commentsVO", commentsVO);
+			responseDTO = createServiceResponse(responseObjectsMap);
+		} else {
+			responseDTO = createServiceResponseError(responseObjectsMap, "comments information receive failed By orgId",
+					errorMsg);
+		}
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok().body(responseDTO);
+	}
+
+	@PutMapping("/updateComments")
+	public CommentsVO updateComment(@RequestBody CommentsDTO dto) {
+		return ticketService.updateComments(dto);
+	}
+
+	@DeleteMapping("/deleteComments")
+	public ResponseEntity<ResponseDTO> deleteComments(@RequestParam(required = false) Long id,
+			@RequestParam(required = false) Long sourceId) {
+
+		String methodName = "deleteComments()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		String errorMsg = null;
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO = null;
+
+		try {
+			ticketService.deleteComments(id, sourceId);
+
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
+
+		if (StringUtils.isBlank(errorMsg)) {
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Comment deleted successfully");
+			responseDTO = createServiceResponse(responseObjectsMap);
+		} else {
+			responseDTO = createServiceResponseError(responseObjectsMap, "Comment delete failed", errorMsg);
 		}
 
 		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	@PostMapping("/uploadTicketScreenShotInBloob")
+	public ResponseEntity<ResponseDTO> uploadTicketScreenShotInBloob(
+
+			@RequestParam MultipartFile file,
+
+			@RequestParam Long id) {
+
+		String methodName = "uploadTicketScreenShotInBloob()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			TicketVO ticketVO = ticketService.uploadTicketScreenShotInBloob(file, id);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Ticket Image Uploaded Successfully");
+
+			responseObjectsMap.put("ticketVO", ticketVO);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Ticket Image Upload Failed", e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
 		return ResponseEntity.ok().body(responseDTO);
+	}
+
+	@GetMapping("/viewTicketImage/**")
+	public ResponseEntity<byte[]> viewTicketImage(HttpServletRequest request) throws IOException {
+
+		return ticketService.viewTicketImage(request);
+	}
+
+	@GetMapping("/getTicketReport")
+	public ResponseEntity<ResponseDTO> getTicketReport(@RequestParam Long orgId,
+			@RequestParam(required = false) String fromDate, @RequestParam(required = false) String toDate) {
+		String methodName = "getTicketReport()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		String errorMsg = null;
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO = null;
+		List<TicketVO> ticketVO = new ArrayList<>();
+		try {
+			ticketVO = ticketService.getTicketReport(orgId, fromDate, toDate);
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
+		if (StringUtils.isBlank(errorMsg)) {
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "TicketReport information get successfully ");
+			responseObjectsMap.put("ticketVO", ticketVO);
+			responseDTO = createServiceResponse(responseObjectsMap);
+		} else {
+			responseDTO = createServiceResponseError(responseObjectsMap, "TicketReport receive failed", errorMsg);
+		}
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok().body(responseDTO);
+
 	}
 }
