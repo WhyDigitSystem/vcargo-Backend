@@ -1,6 +1,7 @@
 package com.efit.savaari.controller;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -961,7 +963,7 @@ public class TransactionController extends BaseController {
 		return ResponseEntity.ok(responseDTO);
 	}
 
-	@PutMapping(value = "/createUpdateTvehicle")
+	@PutMapping(value = "/createUpdateTvehicle",consumes = "multipart/form-data")
 	public ResponseEntity<ResponseDTO> createUpdateTvehicle(
 			@RequestPart("tvehicleDTO") TvehicleDTO tvehicleDTO,
 			@RequestPart(value = "RC", required = false) MultipartFile[] rcFiles,

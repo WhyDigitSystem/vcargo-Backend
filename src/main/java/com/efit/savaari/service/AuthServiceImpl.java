@@ -781,6 +781,7 @@ public class AuthServiceImpl implements AuthService {
 		userDTO.setOrganizationName(userVO.getOrganizationName());
 		userDTO.setStatus(userVO.getStatus());
 		userDTO.setCreatedby(userVO.getCreatedby());
+		userDTO.setUserType(userVO.getUserType());
 
 		// userDTO.setIsActive(userVO.getIsActive());
 		userDTO.setCommonDate(userVO.getCommonDate());

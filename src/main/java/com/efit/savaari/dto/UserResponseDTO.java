@@ -17,6 +17,7 @@ public class UserResponseDTO {
 	private String mobileNo;
 	private String email;
 	private String type;
+	private String userType;
 	private String organizationName;
 	private Long orgId;
 	private String branch;

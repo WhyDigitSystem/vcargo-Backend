@@ -74,9 +74,35 @@ public class DashBoardServiceImpl implements DashBoardService {
 	     map.put("maintenance", getMaintenance(orgId));
 	     map.put("fuel", getFuel(orgId));
 	     map.put("tyres", getTyres(orgId));
+	     map.put("invoices", getInvoices(orgId));
 
 	     return map;
 	 }
+
+	 private List<InvoiDTO> getTrips(Long orgId) {
+
+		    return tripRepo.findByOrgId(orgId).stream().map(t -> {
+		        TripDashboardDTO d = new TripDashboardDTO();
+		        d.setId(t.getId());
+		        
+		        if (t.getVehicle() != null) {
+		            d.setVehicleNo(t.getVehicle().getVehicleNumber());
+		        } else {
+		            d.setVehicleNo("");
+		        }
+		        
+		        if (t.getDriver() != null) {
+		            d.setDriverName(t.getDriver().getName());
+		        } else {
+		            d.setDriverName("");
+		        }
+		        
+		        d.setRoute(t.getSource());
+		        d.setStatus(t.getStatus());
+		        return d;
+		    }).collect(java.util.stream.Collectors.toList());
+		}
+
 
 	 private List<TripDashboardDTO> getTrips(Long orgId) {
 

@@ -39,7 +39,7 @@ public class EmailService {
 		MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
 				"UTF-8");
 
-		helper.setFrom("justin@whydigit.in");
+		helper.setFrom("info@whydigit.com");
 		helper.setTo(to);
 		helper.setSubject(subject);
 		helper.setText(html, true); // HTML enabled
