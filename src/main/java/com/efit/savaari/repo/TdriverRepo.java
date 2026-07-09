@@ -23,13 +23,25 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 	List<TdriverVO> getTdriverByOrgId( String branchCode,
 	                                 Long orgId);
 
-	 
-	@Query(value = " SELECT SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END)   AS activeCount,\r\n"
-			+ "					SUM(CASE WHEN status = 'Inactive' THEN 1 ELSE 0 END) AS inactiveCount,\r\n"
-			+ "				      SUM(CASE WHEN status = 'Leave' THEN 1 ELSE 0 END)    AS leaveCount\r\n"
-			+ "				    FROM tdriver\r\n"
-			+ "			    WHERE orgid = ?1 AND active = 1 ", nativeQuery = true)
-		DriverStatusCountProjection getDriverStatusCounts(Long orgId);
+	@Query(value = """
+		    SELECT
+		        SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) AS activeCount,
+		        SUM(CASE WHEN status = 'Inactive' THEN 1 ELSE 0 END) AS inactiveCount,
+		        SUM(CASE WHEN status = 'Leave' THEN 1 ELSE 0 END) AS leaveCount
+		    FROM tdriver
+		    WHERE orgid = :orgId
+		      AND active = 1
+		      AND (
+		            :fromDate IS NULL
+		            OR DATE(
+		                STR_TO_DATE(createdon, '%d-%m-%Y %h:%i:%s %p')
+		            ) BETWEEN :fromDate AND :toDate
+		      )
+		    """, nativeQuery = true)
+		DriverStatusCountProjection getDriverStatusCounts(
+		        @Param("orgId") Long orgId,
+		        @Param("fromDate") String fromDate,
+		        @Param("toDate") String toDate);
 
 //	Optional<TdriverVO> findByOrgIdAndPhone(Long orgId, String driverNumber);
 

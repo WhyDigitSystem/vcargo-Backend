@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,6 +20,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.efit.savaari.dto.CreatedUpdatedDate;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.AllArgsConstructor;
@@ -157,11 +162,22 @@ public class TripVO {
 	@JoinColumn(name = "driver")
 	private TdriverVO driver;
 
+//	@CreationTimestamp
+//	@Column(name = "createdon", updatable = false)
+//	private LocalDateTime createdOn;
+//
+//	@UpdateTimestamp
+//	@Column(name = "modifiedon")
+//	private LocalDateTime modifiedOn;
+	
 	@OneToMany(mappedBy = "tripVO", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private List<TripWaypointVO> waypoints = new ArrayList<>();
 	
 	
+	
+	@Embedded
+	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 
 	
 }
