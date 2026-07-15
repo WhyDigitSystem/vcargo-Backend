@@ -20,5 +20,10 @@ public interface NotificationService {
 
 	void createNotification(Long orgId, String message, String type);
 
+	//escalation notification
+	
+	void generateEscalationNotifications();
+
+	
 
 }

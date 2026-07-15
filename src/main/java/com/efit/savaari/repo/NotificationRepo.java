@@ -12,4 +12,6 @@ public interface NotificationRepo extends JpaRepository<NotificationVO, Long> {
 
     List<NotificationVO> findByOrgid(Long orgId);
 
+	boolean existsByNotificationTypeAndReferenceIdAndNotificationStage(String type, Long referenceId, String stage);
+
 }
