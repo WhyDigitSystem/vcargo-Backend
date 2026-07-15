@@ -26,7 +26,7 @@ public class MaintenanceResponseDTO {
     private BigDecimal estimatedCost;
     private BigDecimal totalCost;
     private BigDecimal totalQty;
-
+//	private LocalDate nextServiceMonth;
     private String serviceCenter;
     private String mechanic;
     private String description;

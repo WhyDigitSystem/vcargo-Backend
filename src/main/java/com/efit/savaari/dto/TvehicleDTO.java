@@ -19,6 +19,7 @@ public class TvehicleDTO {
 	private String capacity;
 	private LocalDate insuranceExpiry;
 	private LocalDate fitnessExpiry;
+	private LocalDate pucExpiry;
 	private LocalDate lastService;
 	private LocalDate nextService;
 	private String driver;

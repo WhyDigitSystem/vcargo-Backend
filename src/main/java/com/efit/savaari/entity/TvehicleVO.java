@@ -58,6 +58,9 @@ public class TvehicleVO {
 
 	@Column(name = "fitnessexpiry")
 	private LocalDate fitnessExpiry;
+	
+	@Column(name = "pucexpiry")
+	private LocalDate pucExpiry;
 
 	@Column(name = "lastservice")
 	private LocalDate lastService;
