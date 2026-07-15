@@ -1,5 +1,6 @@
 package com.efit.savaari.repo;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,7 +91,92 @@ public interface TvehicleRepo extends JpaRepository<TvehicleVO, Long> {
 
 
 
+//
+//	@Query("""
+//			SELECT v
+//			FROM TvehicleVO v
+//			WHERE v.orgId = :orgId
+//			AND (:vehicleNumber IS NULL OR v.vehicleNumber = :vehicleNumber)
+//			AND v.insuranceExpiry BETWEEN :fromDate AND :toDate
+//			AND v.active = 'ACTIVE'
+//			ORDER BY v.insuranceExpiry
+//			""")
+//			List<TvehicleVO> findInsuranceExpiryWeek(
+//			        @Param("orgId") Long orgId,
+//			        @Param("vehicleNumber") String vehicleNumber,
+//			        @Param("fromDate") LocalDate fromDate,
+//			        @Param("toDate") LocalDate toDate);
+//
+//	@Query("""
+//			SELECT v
+//			FROM TvehicleVO v
+//			WHERE v.orgId = :orgId
+//			AND (:vehicleNumber IS NULL OR v.vehicleNumber = :vehicleNumber)
+//			AND v.insuranceExpiry BETWEEN :fromDate AND :toDate
+//			AND v.active = 'ACTIVE'
+//			ORDER BY v.insuranceExpiry
+//			""")
+//			List<TvehicleVO> findInsuranceExpiryMonth(
+//			        @Param("orgId") Long orgId,
+//			        @Param("vehicleNumber") String vehicleNumber,
+//			        @Param("fromDate") LocalDate fromDate,
+//			        @Param("toDate") LocalDate toDate);
+//
+//	@Query("""
+//			SELECT v
+//			FROM TvehicleVO v
+//			WHERE v.orgId = :orgId
+//			AND (:vehicleNumber IS NULL OR v.vehicleNumber = :vehicleNumber)
+//			AND v.insuranceExpiry < :today
+//			AND v.active = 'ACTIVE'
+//			ORDER BY v.insuranceExpiry
+//			""")
+//			List<TvehicleVO> findInsuranceExpired(
+//			        @Param("orgId") Long orgId,
+//			        @Param("vehicleNumber") String vehicleNumber,
+//			        @Param("today") LocalDate today);
+//
+//
+//	
+	
+	@Query("""
+			SELECT v
+			FROM TvehicleVO v
+			WHERE v.orgId=:orgId
+			AND v.active='ACTIVE'
+			""")
+			List<TvehicleVO> getInsuranceDashboard(
+			        @Param("orgId") Long orgId);
+
+	@Query("""
+			SELECT v
+			FROM TvehicleVO v
+			WHERE v.orgId=:orgId
+			AND v.active='ACTIVE'
+			""")
+			List<TvehicleVO> getFitnessDashboard(
+			        @Param("orgId") Long orgId);
 	
 	
-	    
+	@Query("""
+			SELECT v
+			FROM TvehicleVO v
+			WHERE v.orgId=:orgId
+			AND v.active='ACTIVE'
+			""")
+			List<TvehicleVO> getPucDashboard(
+			        @Param("orgId") Long orgId);
+
+
+//	@Query("""
+//			SELECT v
+//			FROM TvehicleVO v
+//			WHERE v.orgId=:orgId
+//			AND v.active='ACTIVE'
+//			""")
+//			List<TvehicleVO> getPermitDashboard(
+//			        @Param("orgId") Long orgId);
+
+
+
 }

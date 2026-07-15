@@ -1,8 +1,10 @@
 package com.efit.savaari.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.efit.savaari.dto.EscalationDashboardDTO;
 import com.efit.savaari.dto.FuelDashboardDTO;
 import com.efit.savaari.dto.MaintenanceDashboardDTO;
 import com.efit.savaari.dto.TDriverDashboardDTO;
@@ -20,8 +23,10 @@ import com.efit.savaari.dto.TripDashboardDTO;
 import com.efit.savaari.dto.TyreDashboardDTO;
 import com.efit.savaari.entity.FuelVO;
 import com.efit.savaari.entity.MaintenanceVO;
+import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TripInvoiceVO;
 import com.efit.savaari.entity.TripVO;
+import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.TyreMasterVO;
 import com.efit.savaari.repo.DriverStatusCountProjection;
 import com.efit.savaari.repo.FuelRepo;
@@ -58,6 +63,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 	 
 	 @Autowired
 	 TvehicleRepo tVehiclesrepo;
+	 
+	 @Autowired
+	 TdriverRepo tDriverRepo;
 
 //	    @Override
 //	    public Map<String, Object> getDashboardData(Long orgId) {
@@ -446,5 +454,455 @@ public class DashBoardServiceImpl implements DashBoardService {
 
 	     return map;
 	 }
+	 
+//	 @Override
+//	 public List<MaintenanceResponseDTO> getMaintenanceScheduleForDashBoard(
+//	         Long orgId,
+//	         String vehicleNumber,
+//	         String type) throws ApplicationException {
+//
+//	     LocalDate today = LocalDate.now();
+//
+//	     List<MaintenanceVO> maintenanceList;
+//
+//	     switch (type.toUpperCase()) {
+//
+//	         case "WEEK":
+//	             maintenanceList = maintenanceRepo.findWeekSchedule(
+//	                     orgId, vehicleNumber, today, today.plusDays(7));
+//	             break;
+//
+//	         case "MONTH":
+//	             maintenanceList = maintenanceRepo.findMonthSchedule(
+//	                     orgId, vehicleNumber, today, today.plusMonths(1));
+//	             break;
+//
+//	         case "EXPIRED":
+//	             maintenanceList = maintenanceRepo.findExpiredSchedule(
+//	                     orgId, vehicleNumber, today);
+//	             break;
+//
+//	         default:
+//	             throw new ApplicationException("Invalid type. Use WEEK, MONTH or EXPIRED.");
+//	     }
+//
+//	     return maintenanceList.stream()
+//	             .map(this::mapToMaintenanceResponseDTO)
+//	             .collect(Collectors.toList());
+//	 }
+//	 
+//	 private MaintenanceResponseDTO mapToMaintenanceResponseDTO(MaintenanceVO vo) {
+//
+//	        MaintenanceResponseDTO dto = new MaintenanceResponseDTO();
+//
+//	        dto.setId(vo.getId());
+//	        dto.setTitle(vo.getTitle());
+//	        dto.setType(vo.getType());
+//	        dto.setStatus(vo.getStatus());
+//	        dto.setPriority(vo.getPriority());
+//	        dto.setScheduledDate(vo.getScheduledDate());
+//	        dto.setCompletedDate(vo.getCompletedDate());
+//	        dto.setOdometerReading(vo.getOdometerReading());
+//	        dto.setEstimatedCost(vo.getEstimatedCost());
+//	        dto.setTotalCost(vo.getTotalCost());
+//	        dto.setTotalQty(vo.getTotalqty());
+//	        dto.setServiceCenter(vo.getServiceCenter());
+//	        dto.setMechanic(vo.getMechanic());
+//	        dto.setDescription(vo.getDescription());
+//	        dto.setNotes(vo.getNotes());
+//	        dto.setActive(vo.isActive());
+//	        dto.setNextServiceMonth(vo.getNextServiceMonth());
+//
+//	        dto.setCreatedBy(vo.getCreatedBy());
+//	        dto.setBranchCode(vo.getBranchCode());
+//	        dto.setBranchName(vo.getBranchName());
+//	        dto.setOrgId(vo.getOrgId());
+//
+//	        if (vo.getVehicle() != null) {
+//	            dto.setVehicleId(vo.getVehicle().getId());
+//	            dto.setVehicle(vo.getVehicle().getVehicleNumber());
+//	        }
+//
+//	        if (vo.getUser() != null) {
+//	            dto.setUser(vo.getUser().getId());
+//	        }
+//
+//	        if (vo.getParts() != null) {
+//	        	dto.setParts(
+//	        		    vo.getParts().stream()
+//	        		        .map(p -> new MaintenancePartResponseDTO(
+//	        		                p.getId(),   // ✅ use correct ID field
+//	        		                p.getName(),
+//	        		                p.getQuantity(),
+//	        		                p.getCost()
+//	        		        ))
+//	        		        .collect(Collectors.toList()) // safer than toList() for Java < 16
+//	        		);
+//	        }
+//
+//	        return dto;
+//	    }
+//	 
+//	 @Override
+//	 public List<TvehicleResponseDTO> getInsuranceExpiryForDashBoard(
+//	         Long orgId,
+//	         String vehicleNumber,
+//	         String type) throws ApplicationException {
+//
+//	     LocalDate today = LocalDate.now();
+//
+//	     List<TvehicleVO> vehicleList;
+//
+//	     switch (type.toUpperCase()) {
+//
+//	         case "WEEK":
+//	             vehicleList = tVehiclesrepo.findInsuranceExpiryWeek(
+//	                     orgId,
+//	                     vehicleNumber,
+//	                     today,
+//	                     today.plusDays(7));
+//	             break;
+//
+//	         case "MONTH":
+//	             vehicleList = tVehiclesrepo.findInsuranceExpiryMonth(
+//	                     orgId,
+//	                     vehicleNumber,
+//	                     today,
+//	                     today.plusMonths(1));
+//	             break;
+//
+//	         case "EXPIRED":
+//	             vehicleList = tVehiclesrepo.findInsuranceExpired(
+//	                     orgId,
+//	                     vehicleNumber,
+//	                     today);
+//	             break;
+//
+//	         default:
+//	             throw new ApplicationException("Invalid type. Use WEEK, MONTH or EXPIRED.");
+//	     }
+//
+//	     List<TvehicleResponseDTO> response = new ArrayList<>();
+//
+//	     for (TvehicleVO vehicle : vehicleList) {
+//	         response.add(mapToVehicleResponseDTO(vehicle));
+//	     }
+//
+//	     return response;
+//	 }
+//	 
+//
+//	 public TvehicleResponseDTO mapToVehicleResponseDTO(TvehicleVO vehicle) {
+//
+//			TvehicleResponseDTO dto = new TvehicleResponseDTO();
+//
+//			dto.setId(vehicle.getId());
+//			dto.setVehicleNumber(vehicle.getVehicleNumber());
+//			dto.setType(vehicle.getType());
+//			dto.setModel(vehicle.getModel());
+//			dto.setCapacity(vehicle.getCapacity());
+//			dto.setRegistrationType(vehicle.getRegistrationType());
+//
+//			if (vehicle.getUser() != null) {
+//				dto.setUser(vehicle.getUser().getId());
+//			}
+//
+//			dto.setDriver(vehicle.getDriver());
+//			dto.setDriverPhone(vehicle.getDriverPhone());
+//			dto.setCurrentLocation(vehicle.getCurrentLocation());
+//
+//			dto.setFuelEfficiency(vehicle.getFuelEfficiency());
+//			dto.setMaintenanceRequired(vehicle.isMaintenanceRequired());
+//
+//			dto.setYear(vehicle.getYear());
+//			dto.setChassisNumber(vehicle.getChassisNumber());
+//			dto.setEngineNumber(vehicle.getEngineNumber());
+//			dto.setPermitType(vehicle.getPermitType());
+//			dto.setOwnerName(vehicle.getOwnerName());
+//
+//			dto.setInsuranceExpiry(vehicle.getInsuranceExpiry());
+//			dto.setFitnessExpiry(vehicle.getFitnessExpiry());
+//			dto.setLastService(vehicle.getLastService());
+//			dto.setNextService(vehicle.getNextService());
+//
+//			dto.setActive(vehicle.getActive());
+//			dto.setCancel(vehicle.isCancel());
+//
+//			dto.setOrgId(vehicle.getOrgId());
+//			dto.setBranchCode(vehicle.getBranchCode());
+//			dto.setBranchName(vehicle.getBranchName());
+//
+//			if (vehicle.getDocuments() == null) {
+//				dto.setDocuments(null);
+//			} else {
+//				dto.setDocuments(vehicle.getDocuments().stream().map(doc -> {
+//					TvehicleDocumentResponseDTO d = new TvehicleDocumentResponseDTO();
+//					d.setId(doc.getId());
+//					d.setDocumentType(doc.getDocumentType());
+//					d.setFileName(doc.getFileName());
+//
+//					String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/transaction/files")
+//							.toUriString();
+//
+//					d.setFilePath(baseUrl + doc.getFilePath());
+//					d.setFileType(doc.getFileType());
+//					d.setFileSize(doc.getFileSize());
+//					d.setUploadedOn(doc.getUploadedOn());
+//					return d;
+//				}).toList());
+//			}
+//
+//			return dto;
+//		}
+
+	 
+//	 @Override
+//	 public Map<String, Object> getDashboardAlerts(Long orgId) {
+//
+//	     Map<String, Object> response = new HashMap<>();
+//
+//	     response.put("maintenanceDue",
+//	             maintenanceRepo.findMaintenance(orgId));
+//
+//	     response.put("insuranceExpiry",
+//	             tVehiclesrepo.findInsuranceExpiry(orgId));
+//
+//	     response.put("fitnessExpiry",
+//	             tVehiclesrepo.findFitnessExpiry(orgId));
+//
+////	     response.put("permitExpiry",
+////	             tVehiclesrepo.findPermitExpiry(orgId));
+//
+//	     response.put("pucExpiry",
+//	             tVehiclesrepo.findPucExpiry(orgId));
+//
+//	     response.put("driverLicenseExpiry",
+//	             tDriverRepo.findDriverLicenseExpiry(orgId));
+//
+//	     return response;
+//	 }
+	 
+	 @Override
+	 public Map<String, Object> getEscalationDashboard(Long orgId) {
+
+	     List<EscalationDashboardDTO> escalations = new ArrayList<>();
+
+	     escalations.addAll(getMaintenance(orgId));
+
+	     escalations.addAll(getInsurance(orgId));
+
+	     escalations.addAll(getFitness(orgId));
+
+//	     escalations.addAll(getPermit(orgId));
+
+	     escalations.addAll(getPuc(orgId));
+
+	     escalations.addAll(getDriverLicense(orgId));
+
+	     Map<String, Object> summary = new HashMap<>();
+
+	     summary.put("critical",
+	             escalations.stream()
+	                     .filter(e -> "Critical".equals(e.getSeverity()))
+	                     .count());
+
+	     summary.put("high",
+	             escalations.stream()
+	                     .filter(e -> "High".equals(e.getSeverity()))
+	                     .count());
+
+	     summary.put("medium",
+	             escalations.stream()
+	                     .filter(e -> "Medium".equals(e.getSeverity()))
+	                     .count());
+
+	     summary.put("low",
+	             escalations.stream()
+	                     .filter(e -> "Low".equals(e.getSeverity()))
+	                     .count());
+
+	     summary.put("total", escalations.size());
+
+	     escalations.sort(
+	    		    Comparator.comparing(
+	    		        EscalationDashboardDTO::getDueDate,
+	    		        Comparator.nullsLast(Comparator.naturalOrder())
+	    		    )
+	    		);
+	     Map<String, Object> response = new HashMap<>();
+	     response.put("summary", summary);
+	     response.put("escalations", escalations);
+
+	     return response;
+	 }
+	 
+	 private List<EscalationDashboardDTO> getMaintenance(Long orgId) {
+
+		    List<MaintenanceVO> list = maintenanceRepo.getMaintenanceDashboard(orgId);
+
+		    List<EscalationDashboardDTO> response = new ArrayList<>();
+
+		    for (MaintenanceVO m : list) {
+
+		        EscalationDashboardDTO dto = new EscalationDashboardDTO();
+
+		        dto.setType("Vehicle Maintenance Due");
+		        dto.setVehicleNumber(m.getVehicle() != null ? m.getVehicle().getVehicleNumber() : "");
+		        dto.setDriver(m.getMechanic());
+		        dto.setDueDate(m.getScheduledDate());
+		        dto.setStatus(m.getStatus());
+
+		        setSeverityAndDays(dto, m.getScheduledDate());
+
+		        response.add(dto);
+		    }
+
+		    return response;
+		}
+	 
+	 
+	 private List<EscalationDashboardDTO> getInsurance(Long orgId) {
+
+		    List<TvehicleVO> list = tVehiclesrepo.getInsuranceDashboard(orgId);
+
+		    List<EscalationDashboardDTO> response = new ArrayList<>();
+
+		    for (TvehicleVO v : list) {
+
+		        EscalationDashboardDTO dto = new EscalationDashboardDTO();
+
+		        dto.setType("Insurance Expiry");
+		        dto.setVehicleNumber(v.getVehicleNumber());
+		        dto.setDriver(v.getDriver());
+		        dto.setDueDate(v.getInsuranceExpiry());
+		        dto.setStatus(v.getActive());
+
+		        setSeverityAndDays(dto, v.getInsuranceExpiry());
+
+		        response.add(dto);
+		    }
+
+		    return response;
+		}
+	 
+	 private List<EscalationDashboardDTO> getFitness(Long orgId) {
+
+		    List<TvehicleVO> list = tVehiclesrepo.getFitnessDashboard(orgId);
+
+		    List<EscalationDashboardDTO> response = new ArrayList<>();
+
+		    for (TvehicleVO v : list) {
+
+		        EscalationDashboardDTO dto = new EscalationDashboardDTO();
+
+		        dto.setType("Fitness Expiry");
+		        dto.setVehicleNumber(v.getVehicleNumber());
+		        dto.setDriver(v.getDriver());
+		        dto.setDueDate(v.getFitnessExpiry());
+		        dto.setStatus(v.getActive());
+
+		        setSeverityAndDays(dto, v.getFitnessExpiry());
+
+		        response.add(dto);
+		    }
+
+		    return response;
+		}
+	 
+//	 private List<EscalationDashboardDTO> getPermit(Long orgId) {
+//
+//		    List<TvehicleVO> list = tVehiclesrepo.getPermitDashboard(orgId);
+//
+//		    List<EscalationDashboardDTO> response = new ArrayList<>();
+//
+//		    for (TvehicleVO v : list) {
+//
+//		        EscalationDashboardDTO dto = new EscalationDashboardDTO();
+//
+//		        dto.setType("Permit Expiry");
+//		        dto.setVehicleNumber(v.getVehicleNumber());
+//		        dto.setDriver(v.getDriver());
+//		        dto.setDueDate(v.getPermitExpiry());
+//		        dto.setStatus(v.getActive());
+//
+//		        setSeverityAndDays(dto, v.getPermitExpiry());
+//
+//		        response.add(dto);
+//		    }
+//
+//		    return response;
+//		}
+	 
+	 private List<EscalationDashboardDTO> getPuc(Long orgId) {
+
+		    List<TvehicleVO> list = tVehiclesrepo.getPucDashboard(orgId);
+
+		    List<EscalationDashboardDTO> response = new ArrayList<>();
+
+		    for (TvehicleVO v : list) {
+
+		        EscalationDashboardDTO dto = new EscalationDashboardDTO();
+
+		        dto.setType("PUC Expiry");
+		        dto.setVehicleNumber(v.getVehicleNumber());
+		        dto.setDriver(v.getDriver());
+		        dto.setDueDate(v.getPucExpiry());
+		        dto.setStatus(v.getActive());
+
+		        setSeverityAndDays(dto, v.getPucExpiry());
+
+		        response.add(dto);
+		    }
+
+		    return response;
+		}
+	 
+	 private List<EscalationDashboardDTO> getDriverLicense(Long orgId) {
+
+		    List<TdriverVO> list = tDriverRepo.getDriverDashboard(orgId);
+
+		    List<EscalationDashboardDTO> response = new ArrayList<>();
+
+		    for (TdriverVO d : list) {
+
+		        EscalationDashboardDTO dto = new EscalationDashboardDTO();
+
+		        dto.setType("Driver License Expiry");
+		        dto.setVehicleNumber(d.getAssignedVehicle());
+		        dto.setDriver(d.getName());
+		        dto.setDueDate(d.getLicenseExpiry());
+		        dto.setStatus(d.getStatus());
+
+		        setSeverityAndDays(dto, d.getLicenseExpiry());
+
+		        response.add(dto);
+		    }
+
+		    return response;
+		}
+	 
+	 private void setSeverityAndDays(EscalationDashboardDTO dto, LocalDate dueDate) {
+
+		    if (dueDate == null) {
+		        dto.setSeverity("Unknown");
+		        dto.setDays(0L);
+		        return;
+		    }
+
+		    long days = ChronoUnit.DAYS.between(LocalDate.now(), dueDate);
+
+		    dto.setDays(Math.abs(days));
+
+		    if (days < 0) {
+		        dto.setSeverity("Critical");
+		    } else if (days <= 7) {
+		        dto.setSeverity("High");
+		    } else if (days <= 30) {
+		        dto.setSeverity("Medium");
+		    } else {
+		        dto.setSeverity("Low");
+		    }
+		}
+	 
 }
 

@@ -34,6 +34,7 @@ public class TvehicleResponseDTO {
     // Dates
     private LocalDate insuranceExpiry;
     private LocalDate fitnessExpiry;
+	private LocalDate pucExpiry;
     private LocalDate lastService;
     private LocalDate nextService;
     private String registrationType;

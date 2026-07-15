@@ -74,4 +74,12 @@ public interface TdriverRepo extends JpaRepository<TdriverVO, Long> {
 
 	  boolean existsByAadharNumberAndOrgId(String aadhar, Long orgIdStr);
 
+	  @Query("""
+			  SELECT d
+			  FROM TdriverVO d
+			  WHERE d.orgId=:orgId
+			  AND d.active=true
+			  """)
+			  List<TdriverVO> getDriverDashboard(
+			          @Param("orgId") Long orgId);
 }

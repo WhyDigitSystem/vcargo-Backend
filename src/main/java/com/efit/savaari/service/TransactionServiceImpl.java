@@ -1681,6 +1681,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setFitnessExpiry(vehicle.getFitnessExpiry());
 		dto.setLastService(vehicle.getLastService());
 		dto.setNextService(vehicle.getNextService());
+		dto.setPucExpiry(vehicle.getPucExpiry());
 
 		dto.setActive(vehicle.getActive());
 		dto.setCancel(vehicle.isCancel());
@@ -1813,6 +1814,7 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setPermitType(dto.getPermitType());
 		vo.setOwnerName(dto.getOwnerName());
 		vo.setRegistrationType(dto.getRegistrationType());
+		vo.setPucExpiry(dto.getPucExpiry());
 
 		vo.setActive(dto.getActive());
 		vo.setOrgId(dto.getOrgId());

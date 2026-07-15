@@ -95,6 +95,9 @@ public class MaintenanceVO {
 	@Column(name = "orgid")
 	private Long orgId;
 	
+//	@Column(name = "nextservicemonth")
+//	private LocalDate nextServiceMonth;
+	
 	@ManyToOne
 	@JoinColumn(name = "userid")
     private UserVO user;

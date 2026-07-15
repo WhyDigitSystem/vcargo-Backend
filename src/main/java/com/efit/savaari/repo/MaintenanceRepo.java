@@ -40,6 +40,67 @@ public interface MaintenanceRepo extends JpaRepository<MaintenanceVO, Long> {
 		        @Param("fromDate") String fromDate,
 		        @Param("toDate") String toDate);
 
+
+
+
+//	 @Query("""
+//			 SELECT m
+//			 FROM MaintenanceVO m
+//			 WHERE m.orgId = :orgId
+//	 		AND (:vehicleNumber IS NULL OR m.vehicle.vehicleNumber = :vehicleNumber)
+//			 AND m.scheduledDate BETWEEN :fromDate AND :toDate
+//			 AND LOWER(m.status) <> 'completed'
+//			 ORDER BY m.scheduledDate
+//			 """)
+//			 List<MaintenanceVO> findWeekSchedule(
+//			         @Param("orgId") Long orgId,
+//			         @Param("vehicleNumber") String vehicleNumber,
+//			         @Param("fromDate") LocalDate fromDate,
+//			         @Param("toDate") LocalDate toDate);
+//	 
+//
+//	 
+//	 @Query("""
+//			 SELECT m
+//			 FROM MaintenanceVO m
+//			 WHERE m.orgId = :orgId
+//	 		AND (:vehicleNumber IS NULL OR m.vehicle.vehicleNumber = :vehicleNumber)
+//			 AND m.scheduledDate BETWEEN :fromDate AND :toDate
+//			 AND LOWER(m.status) <> 'completed'
+//			 ORDER BY m.scheduledDate
+//			 """)
+//			 List<MaintenanceVO> findMonthSchedule(
+//					  @Param("orgId") Long orgId,
+//				         @Param("vehicleNumber") String vehicleNumber,
+//				         @Param("fromDate") LocalDate fromDate,
+//				         @Param("toDate") LocalDate toDate);
+//	 
+//	 @Query("""
+//			 SELECT m
+//			 FROM MaintenanceVO m
+//			 WHERE m.orgId = :orgId
+//	 		AND (:vehicleNumber IS NULL OR m.vehicle.vehicleNumber = :vehicleNumber)
+//			 AND m.scheduledDate < :today
+//			 AND LOWER(m.status) <> 'completed'
+//			 ORDER BY m.scheduledDate
+//			 """)
+//			 List<MaintenanceVO> findExpiredSchedule(
+//			         @Param("orgId") Long orgId,
+//			         @Param("vehicleNumber") String vehicleNumber,
+//			         @Param("today") LocalDate today);
+//
+
+
+	 @Query("""
+			 SELECT m
+			 FROM MaintenanceVO m
+			 WHERE m.orgId=:orgId
+			 AND LOWER(m.status)<>'completed'
+			 """)
+			 List<MaintenanceVO> getMaintenanceDashboard(
+			         @Param("orgId") Long orgId);
+	 
+	 
 	 
 	 
 }
