@@ -2837,7 +2837,7 @@ public class TransactionServiceImpl implements TransactionService {
 		return paginationService.buildResponse(approvedQuotes);
 	}
 
-	@Scheduled(cron = "0 0 5 * * ?")
+//	@Scheduled(cron = "0 0 5 * * ?")
 	public void notifyVehicleExpiry() {
 
 		List<Object[]> results = vehicleRepo.findVehiclesExpiringWithin30Days();
@@ -2873,7 +2873,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 	}
 	
-	@Scheduled(cron = "0 1 5 * * ?")
+//	@Scheduled(cron = "0 1 5 * * ?")
 	public void notifyDriverExpiry() {
 
 		List<Object[]> results = tdriverRepo.findTdriverExpiringWithin30Days();

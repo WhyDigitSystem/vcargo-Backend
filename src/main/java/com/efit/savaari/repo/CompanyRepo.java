@@ -46,6 +46,8 @@ public interface CompanyRepo extends JpaRepository<CompanyVO, Long> {
 	@Query(value = "SELECT companyid FROM company WHERE active = 1", nativeQuery = true)
 	List<Long> findActiveCompanyIds();
 
+
+
 	
 //	CompanyVO findByCompanyId(Long orgId);
 
