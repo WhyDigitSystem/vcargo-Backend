@@ -33,6 +33,7 @@ import com.efit.savaari.dto.ResetPasswordFormDTO;
 import com.efit.savaari.dto.ResponsibilityDTO;
 import com.efit.savaari.dto.RolesDTO;
 import com.efit.savaari.dto.SignUpFormDTO;
+import com.efit.savaari.dto.UserListDTO;
 import com.efit.savaari.dto.UserResponseDTO;
 import com.efit.savaari.entity.ResponsibilityVO;
 import com.efit.savaari.entity.RolesVO;
@@ -526,10 +527,7 @@ public class AuthController extends BaseController {
 	
 	@GetMapping("/getAllUsersList")
 	public ResponseEntity<ResponseDTO> getUsersByOrgId(
-	        @RequestParam(required = false) String branchCode,
-	        @RequestParam(defaultValue = "") String search,
-	        @RequestParam(defaultValue = "1") int page,
-	        @RequestParam(defaultValue = "10") int count
+	        @RequestParam(required = false) String branchCode
 	) {
 	    String methodName = "getAllUsersList()";
 	    LOGGER.debug("Starting {}", methodName);
@@ -538,7 +536,7 @@ public class AuthController extends BaseController {
 	    ResponseDTO responseDTO;
 
 	    try {
-	        Map<String, Object> userVO = authService.getAllUsersList( branchCode, search, page, count);
+	    	List<UserListDTO> userVO = authService.getAllUsersList( branchCode);
 	        responseMap.put("message", "Users retrieved successfully");
 	        responseMap.put("userVO", userVO);
 	        responseDTO = createServiceResponse(responseMap);

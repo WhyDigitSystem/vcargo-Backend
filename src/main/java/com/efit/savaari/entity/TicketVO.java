@@ -1,0 +1,100 @@
+package com.efit.savaari.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import com.efit.savaari.dto.CreatedUpdatedDate;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "ticket")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class TicketVO {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ticketgen")
+	@SequenceGenerator(name = "ticketgen", sequenceName = "ticketseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "ticketid")
+	private Long id;
+
+	private String subject;
+
+	private String description;
+	
+	@Column(name = "uploadon")
+	private LocalDateTime uploadOn;
+
+	@Column(name = "createdby")
+	private String createdBy;
+	@Column(name = "modifiedy")
+	private String updatedBy;
+	@Column(name = "username")
+	private String userName;
+	@Column(name = "orgid")
+	private Long orgId;
+
+	@Column(name = "email")
+	private String email;
+
+	private String status;
+	
+	@Column(name = "ticketstatus")
+	private String ticketStatus;
+
+	@Column(name = "statusflag")
+	private Boolean statusFlag = true;
+
+	@Column(name = "notificationflag")
+	private Boolean notificationFlag = false;
+
+	private boolean cancel;
+
+	@Column(name = "companyname")
+	private String companyName;
+
+	@Column(name = "branch")
+	private String branch;
+
+	@Column(name = "branchcode")
+	private String branchCode;
+
+	@Column(name = "sourceId")
+	private Long sourceId;
+	
+	@Column(name="updateddate")
+	private LocalDate updatedDate;
+	
+	@Column(name = "filename")
+	private String fileName;
+
+	@Column(name = "filepath")
+	private String filePath;
+	
+	@Column(name = "filesize")
+	private Long fileSize;
+
+	@Column(name = "contenttype")
+	private String contentType;
+
+	@Lob
+	@Column(name = "screenshot", columnDefinition = "LONGBLOB")
+	private byte[] screenShot;
+
+	@Embedded
+	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
+}

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.efit.savaari.dto.CustomerAddressDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,17 @@ public class TripResponseDTO {
     private Long id;
     private String source;
     private String destination;
+    private Long customerId;
     private String customer;
+    private String primaryAddress;
+   	private String additionalAddress;
+   	private String city;
+   	private String state;
+   	private String type;
+   	private int pincode;
+   	private String email;
+    private String phoneNo;
+
     private double distance;
     private String estimatedDuration;
     private String sourceLat;

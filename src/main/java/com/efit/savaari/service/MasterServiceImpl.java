@@ -394,28 +394,38 @@ public class MasterServiceImpl implements MasterService {
 		vo.setBranch(dto.getBranch());
 	}
 
+	
+	private String generateCustomerCode() {
+
+	    String lastCode = customerRepo.getLastCustomerCode();
+
+	    if (lastCode == null || lastCode.isEmpty()) {
+	        return "CUS0001";
+	    }
+
+	    // Extract number part
+	    String numberPart = lastCode.replaceAll("[^0-9]", "");
+
+	    int nextNumber = Integer.parseInt(numberPart) + 1;
+
+	    return String.format("CUS%03d", nextNumber);
+	}
+	
+	@Override
+	public String getNextCustomerCode() {
+	    return generateCustomerCode();
+	}
+	
 	@Override
 	public CustomerVO getCustomerById(Long id) throws ApplicationException {
 		return customerRepo.findById(id).orElseThrow(() -> new ApplicationException("customer not found"));
 	}
 
 	@Override
-	public Map<String, Object> getCustomerByOrgId(String branchCode,Long orgId, String search, int page, int count) {
-
-		if (search != null) {
-			search = search.trim();
-			if (search.isEmpty()) {
-				search = null;
-			}
-		}
-
-		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("customerName").ascending());
-		Page<CustomerVO> customerPage = customerRepo.getCustomerByOrgId(branchCode,orgId, search, pageable);
-
-		// return paginated response
-		return paginationService.buildResponse(customerPage);
-
+	public List<CustomerVO> getCustomerByOrgId(String branchCode, Long orgId) {
+	    return customerRepo.getCustomerByOrgId(branchCode, orgId);
 	}
+
 
 	@Override
 	public Map<String, Object> createUpdateIndents(IndentsDTO indentsDTO, List<MultipartFile> tripFiles)

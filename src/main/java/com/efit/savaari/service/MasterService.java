@@ -47,7 +47,7 @@ public interface MasterService {
 
 	CustomerVO getCustomerById(Long id) throws ApplicationException;
 
-	Map<String, Object> getCustomerByOrgId(String branchCode, Long orgId, String search, int page, int count);
+//	Map<String, Object> getCustomerByOrgId(String branchCode, Long orgId, String search, int page, int count);
 
 	Map<String, Object> createUpdateIndents(IndentsDTO indentsDTO, List<MultipartFile> tripLinkedAttachment) throws Exception;
 
@@ -110,6 +110,11 @@ public interface MasterService {
 	Map<String, Object> getAllCompanyProfileByOrgId(Long orgId, int page, int count);
 
 	CompanyProfileResponseDTO getCompanyProfileById(Long id);
+
+	List<CustomerVO> getCustomerByOrgId(String branchCode, Long orgId);
+
+	String getNextCustomerCode();
+
 
 
 

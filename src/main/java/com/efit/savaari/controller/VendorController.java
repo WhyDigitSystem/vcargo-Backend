@@ -229,5 +229,40 @@ public class VendorController extends BaseController {
 	    return ResponseEntity.ok(responseDTO);
 	}
 	
+	@GetMapping("/getNextVendorCode")
+	public ResponseEntity<ResponseDTO> getNextVendorCode() {
+
+	    String methodName = "getNextVendorCode()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+
+	        String vendorCode = vendorService.getNextVendorCode();
+
+	        responseObjectsMap.put("message", "Vendor Code generated successfully");
+	        responseObjectsMap.put("vendorCode", vendorCode);
+
+	        responseDTO = createServiceResponse(responseObjectsMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Unexpected Error",
+	                e.getMessage()
+	        );
+
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
 
 }

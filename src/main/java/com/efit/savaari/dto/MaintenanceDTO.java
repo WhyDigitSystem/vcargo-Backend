@@ -31,6 +31,7 @@ public class MaintenanceDTO {
 	private String branchCode;
 	private String branchName;
 	private Long orgId;
+//	private LocalDate nextServiceMonth;
     private Long user;
 	private Long vehicleId;
     private List<MaintenancePartDTO> parts;

@@ -50,17 +50,67 @@ public interface VehicleRepo extends JpaRepository<VehicleVO, Long>{
 
 	Optional<VehicleVO> findByOrgIdAndVehicleNumber(Long orgId, String vehicle);
 	
-	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'ACTIVE'", nativeQuery = true)
-	Long getActiveVehicleCount(Long orgId);
+	@Query(value = """
+		    SELECT COUNT(*)
+		    FROM tvehicle
+		    WHERE orgid = :orgId
+		      AND active = 'ACTIVE'
+		      AND (
+		            :fromDate IS NULL
+		            OR DATE(
+		                STR_TO_DATE(createdon, '%d-%m-%Y %h:%i:%s %p')
+		            ) BETWEEN :fromDate AND :toDate
+		      )
+		    """, nativeQuery = true)
+		Long getActiveVehicleCount(
+		        @Param("orgId") Long orgId,
+		        @Param("fromDate") String fromDate,
+		        @Param("toDate") String toDate);
 
-	@Query(value = "SELECT COUNT(*) FROM tvehicle WHERE orgid = ?1 AND active = 'MAINTENANCE'", nativeQuery = true)
-	Number getMaintenanceVehicleCount(Long orgId);
+	@Query(value = """
+		    SELECT COUNT(*)
+		    FROM tvehicle
+		    WHERE orgid = :orgId
+		      AND active = 'MAINTENANCE'
+		      AND (
+		            :fromDate IS NULL
+		            OR DATE(
+		                STR_TO_DATE(createdon, '%d-%m-%Y %h:%i:%s %p')
+		            ) BETWEEN :fromDate AND :toDate
+		      )
+		    """, nativeQuery = true)
+		Long getMaintenanceVehicleCount(
+		        @Param("orgId") Long orgId,
+		        @Param("fromDate") String fromDate,
+		        @Param("toDate") String toDate);
 
-	@Query(value = "select Count(*) from maintenance where completeddate > current_date() and orgid=?1", nativeQuery = true)
-	Number getUpcomingMaintenanceVehicle(Long orgId);
+	@Query(value = """
+		    SELECT COUNT(*)
+		    FROM maintenance
+		    WHERE orgid = :orgId
+		      AND (
+		            :fromDate IS NULL
+		            OR completeddate BETWEEN :fromDate AND :toDate
+		      )
+		    """, nativeQuery = true)
+		Long getUpcomingMaintenanceVehicle(
+		        @Param("orgId") Long orgId,
+		        @Param("fromDate") String fromDate,
+		        @Param("toDate") String toDate);
 
-	@Query(value = "select sum(estimatedcost) from maintenance where completeddate < current_date() and orgid=?1", nativeQuery = true)
-	BigDecimal getmaintenanceCost(Long orgId);
+	@Query(value = """
+			SELECT SUM(estimatedcost)
+			FROM maintenance
+			WHERE orgid=:orgId
+			AND (
+			    :fromDate IS NULL
+			    OR completeddate BETWEEN :fromDate AND :toDate
+			)
+			""", nativeQuery = true)
+			BigDecimal getMaintenanceCost(
+			        @Param("orgId") Long orgId,
+			        @Param("fromDate") String fromDate,
+			        @Param("toDate") String toDate);
 
 	@Query(value = "SELECT vehiclenumber, orgid, insuranceexpiry, fitnessexpiry, nextservice\r\n"
 			+ "		    FROM tvehicle\r\n"

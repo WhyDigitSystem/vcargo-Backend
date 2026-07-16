@@ -2,10 +2,12 @@ package com.efit.savaari.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +18,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.efit.savaari.dto.CreatedUpdatedDate;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.AllArgsConstructor;
@@ -89,6 +95,9 @@ public class MaintenanceVO {
 	@Column(name = "orgid")
 	private Long orgId;
 	
+//	@Column(name = "nextservicemonth")
+//	private LocalDate nextServiceMonth;
+	
 	@ManyToOne
 	@JoinColumn(name = "userid")
     private UserVO user;
@@ -96,8 +105,20 @@ public class MaintenanceVO {
 	@ManyToOne
 	@JoinColumn(name = "vehicle")
 	private TvehicleVO vehicle;
+	
+//	@CreationTimestamp
+//	@Column(name = "createdon", updatable = false)
+//	private LocalDateTime createdOn;
+//
+//	@UpdateTimestamp
+//	@Column(name = "modifiedon")
+//	private LocalDateTime modifiedOn;
 
 	@OneToMany(mappedBy = "maintenanceVO", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private List<MaintenancePartVO> parts;
+	
+
+	@Embedded
+	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 }

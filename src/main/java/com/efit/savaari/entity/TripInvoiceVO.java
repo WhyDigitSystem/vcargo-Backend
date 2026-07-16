@@ -2,10 +2,12 @@ package com.efit.savaari.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +17,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.efit.savaari.dto.CreatedUpdatedDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,8 +47,8 @@ public class TripInvoiceVO {
 
     /* ================= RELATIONS ================= */
 
-    @Column(name = "customer")
-    private String customer;
+//    @Column(name = "customer")
+//    private String customer;
 
     @ManyToOne
     @JoinColumn(name = "tvehicleid")
@@ -121,6 +128,18 @@ public class TripInvoiceVO {
 
     @Column(name = "cancel")
     private Boolean cancel = false;
+    
+//    @CreationTimestamp
+//    @Column(name = "createdon", updatable = false)
+//    private LocalDateTime createdOn;
+//
+//    @UpdateTimestamp
+//    @Column(name = "modifiedon")
+//    private LocalDateTime modifiedOn;
+    
+    @ManyToOne
+	@JoinColumn(name = "customer")
+	private CustomerVO customer;
 
     /* ================= INVOICE ITEMS ================= */
 
@@ -130,4 +149,7 @@ public class TripInvoiceVO {
         orphanRemoval = true
     )
     private List<TripInvoiceItemVO> items;
+    
+    @Embedded
+	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.persistence.Column;
+
 import lombok.Data;
 
 @Data
@@ -12,11 +14,21 @@ public class TripInvoiceResponseDTO {
     private Long Id;
     private Long orgId;
 
+    private Long customerId;
     private String customer;
+    private String primaryAddress;
+	private String additionalAddress;
+	private String city;
+	private String state;
+	private String type;
+	private int pincode;
+    private String email;
+    private String phoneNo;
     private String vehicleNumber;
     private Long vehicleId;
     private String driverNumber;
     private Long driverId;
+    private String driverName;
     private Long tripId;
     private String trip;
 

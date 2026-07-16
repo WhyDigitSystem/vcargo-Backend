@@ -19,10 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -261,6 +257,7 @@ public class AuthServiceImpl implements AuthService {
 			userVO.setCreatedby(signUpRequest.getCreatedby());
 			userVO.setActive(false);
 			userVO.setStatus(UserStatus.PENDING);
+			userVO.setUserType("USER");
 
 			if (!StringUtils.isBlank(signUpRequest.getPassword())) {
 				try {
@@ -282,6 +279,7 @@ public class AuthServiceImpl implements AuthService {
 			userVO.setOrganizationName(signUpRequest.getOrganizationName());
 			userVO.setCreatedby(signUpRequest.getCreatedby());
 			userVO.setActive(false);
+			userVO.setUserType("USER");
 			userVO.setStatus(UserStatus.PENDING);
 
 			try {
@@ -783,6 +781,7 @@ public class AuthServiceImpl implements AuthService {
 		userDTO.setOrganizationName(userVO.getOrganizationName());
 		userDTO.setStatus(userVO.getStatus());
 		userDTO.setCreatedby(userVO.getCreatedby());
+		userDTO.setUserType(userVO.getUserType());
 
 		// userDTO.setIsActive(userVO.getIsActive());
 		userDTO.setCommonDate(userVO.getCommonDate());
@@ -1035,49 +1034,45 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public Map<String, Object> getAllUsersList(String branchCode, String search, int page, int count) {
+	public List<UserListDTO> getAllUsersList(String branchCode) {
 
-		if (search != null) {
-			search = search.trim();
-			if (search.isEmpty()) {
-				search = null;
-			}
-		}
+	    List<Map<String, Object>> userList = userRepo.getAllUsersList(branchCode);
 
-		Pageable pageable = PageRequest.of(page - 1, count, Sort.by("userName").ascending());
-		Page<Map<String, Object>> userPage = userRepo.getAllUsersList(branchCode, search, pageable);
+	    List<UserListDTO> dtoList = new ArrayList<>();
 
-		Page<UserListDTO> dtoPage = userPage.map(row -> {
+	    for (Map<String, Object> row : userList) {
 
-			UserListDTO dto = new UserListDTO();
+	        UserListDTO dto = new UserListDTO();
 
-			dto.setUserId(row.get("userid") != null ? ((Number) row.get("userid")).longValue() : null);
-			dto.setUserName((String) row.get("username"));
-			dto.setEmail((String) row.get("email"));
-			dto.setMobileNo((String) row.get("mobileno"));
-			dto.setPassword((String) row.get("password"));
-			dto.setType((String) row.get("type"));
-			dto.setOrgId(row.get("orgid") != null ? ((Number) row.get("orgid")).longValue() : null);
-			dto.setOrganizationName((String) row.get("organizationname"));
-			dto.setBranch((String) row.get("branch"));
-			dto.setBranchCode((String) row.get("branchcode"));
-			dto.setActive(row.get("active") != null && ((Boolean) row.get("active")));
+	        dto.setUserId(row.get("userid") != null ? ((Number) row.get("userid")).longValue() : null);
+	        dto.setUserName((String) row.get("username"));
+	        dto.setEmail((String) row.get("email"));
+	        dto.setMobileNo((String) row.get("mobileno"));
+	        dto.setPassword((String) row.get("password"));
+	        dto.setType((String) row.get("type"));
+	        dto.setOrgId(row.get("orgid") != null ? ((Number) row.get("orgid")).longValue() : null);
+	        dto.setOrganizationName((String) row.get("organizationname"));
+	        dto.setBranch((String) row.get("branch"));
+	        dto.setBranchCode((String) row.get("branchcode"));
+	        dto.setActive(row.get("active") != null && ((Boolean) row.get("active")));
 
-			if (row.get("status") != null) {
-				int code = ((Number) row.get("status")).intValue();
-				dto.setStatus(UserStatus.values()[code]);
-			}
+	        if (row.get("status") != null) {
+	            int code = ((Number) row.get("status")).intValue();
+	            dto.setStatus(UserStatus.values()[code]);
+	        }
 
-			dto.setCreatedBy((String) row.get("createdby"));
-			dto.setModifiedBy((String) row.get("modifiedby"));
-			dto.setCreatedOn((String) row.get("createdon"));
-			dto.setModifiedOn((String) row.get("modifiedon"));
+	        dto.setCreatedBy((String) row.get("createdby"));
+	        dto.setModifiedBy((String) row.get("modifiedby"));
+	        dto.setCreatedOn(row.get("createdon") != null ? row.get("createdon").toString() : null);
+	        dto.setModifiedOn(row.get("modifiedon") != null ? row.get("modifiedon").toString() : null);
 
-			return dto;
-		});
+	        dtoList.add(dto);
+	    }
 
+	    return dtoList;
+	}
 		// return paginated response
-		return paginationService.buildResponse(dtoPage);
+//		return paginationService.buildResponse(dtoPage);
 //
 //	    Map<String, Object> result = new HashMap<>();
 //	    result.put("totalCount", userPage.getTotalElements());
@@ -1086,7 +1081,7 @@ public class AuthServiceImpl implements AuthService {
 //	    result.put("users", dtoList);
 
 //	    return paginationService.buildResponse(userPage);
-	}
+	
 
 	@Override
 	public void checkUserExists(String email) throws ApplicationException {

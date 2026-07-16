@@ -2,6 +2,7 @@ package com.efit.savaari.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import javax.persistence.Column;
@@ -14,6 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.efit.savaari.dto.CreatedUpdatedDate;
 
@@ -96,11 +100,19 @@ public class FuelVO {
 	@ManyToOne
 	@JoinColumn(name = "vehicle")
 	private TvehicleVO vehicle;
+//	
+//	@CreationTimestamp
+//	@Column(name = "createdon", updatable = false)
+//	private LocalDateTime createdOn;
+//
+//	@UpdateTimestamp
+//	@Column(name = "modifiedon")
+//	private LocalDateTime modifiedOn;
 	
 	@ManyToOne
 	@JoinColumn(name = "driver")
 	private TdriverVO driver;
 
 	@Embedded
-	private CreatedUpdatedDate createdUpdatedDate;
+	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 }

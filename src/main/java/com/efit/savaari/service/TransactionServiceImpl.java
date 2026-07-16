@@ -1681,6 +1681,7 @@ public class TransactionServiceImpl implements TransactionService {
 		dto.setFitnessExpiry(vehicle.getFitnessExpiry());
 		dto.setLastService(vehicle.getLastService());
 		dto.setNextService(vehicle.getNextService());
+		dto.setPucExpiry(vehicle.getPucExpiry());
 
 		dto.setActive(vehicle.getActive());
 		dto.setCancel(vehicle.isCancel());
@@ -1813,6 +1814,7 @@ public class TransactionServiceImpl implements TransactionService {
 		vo.setPermitType(dto.getPermitType());
 		vo.setOwnerName(dto.getOwnerName());
 		vo.setRegistrationType(dto.getRegistrationType());
+		vo.setPucExpiry(dto.getPucExpiry());
 
 		vo.setActive(dto.getActive());
 		vo.setOrgId(dto.getOrgId());
@@ -2835,7 +2837,7 @@ public class TransactionServiceImpl implements TransactionService {
 		return paginationService.buildResponse(approvedQuotes);
 	}
 
-	@Scheduled(cron = "0 0 5 * * ?")
+//	@Scheduled(cron = "0 0 5 * * ?")
 	public void notifyVehicleExpiry() {
 
 		List<Object[]> results = vehicleRepo.findVehiclesExpiringWithin30Days();
@@ -2871,7 +2873,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 	}
 	
-	@Scheduled(cron = "0 1 5 * * ?")
+//	@Scheduled(cron = "0 1 5 * * ?")
 	public void notifyDriverExpiry() {
 
 		List<Object[]> results = tdriverRepo.findTdriverExpiringWithin30Days();
@@ -2902,5 +2904,228 @@ public class TransactionServiceImpl implements TransactionService {
 			notificationService.createNotification(orgId, message, type);
 		}
 	}
+	
+	
+	//Tdriver Excel Upload
+	
+	@Transactional(rollbackOn = Exception.class)
+	@Override
+	public Map<String, Object> tDriverExcelUpload(
+	        MultipartFile file,
+	        Long createdBy,
+	        Long orgId) throws Exception {
+
+	    Map<String, Object> response = new HashMap<>();
+
+	    List<TdriverVO> drivers = new ArrayList<>();
+	    List<String> failedMessages = new ArrayList<>();
+
+	    Workbook workbook = WorkbookFactory.create(file.getInputStream());
+	    Sheet sheet = workbook.getSheetAt(0);
+
+	    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+	        Row row = sheet.getRow(i);
+	        if (row == null) {
+	            throw new RuntimeException("Row " + (i + 1) + " is empty");
+	        }
+
+	        TdriverVO driver = new TdriverVO();
+
+	        String name = getString(row.getCell(0));
+	        String phone = getString(row.getCell(1));
+	        String email = getString(row.getCell(2));
+	        String license = getString(row.getCell(3));
+	        String aadhar = getString(row.getCell(5));
+
+	        // =============================
+	        // 🔥 DUPLICATE VALIDATION
+	        // =============================
+
+	        if (tdriverRepo.existsByPhoneAndOrgId(phone, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " : Duplicate Phone " + phone);
+
+	        if (tdriverRepo.existsByEmailAndOrgId(email, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " : Duplicate Email " + email);
+
+	        if (tdriverRepo.existsByLicenseNumberAndOrgId(license, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " : Duplicate License " + license);
+
+	        if (tdriverRepo.existsByAadharNumberAndOrgId(aadhar, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " : Duplicate Aadhar " + aadhar);
+
+	        // =============================
+	        // 🔥 SET VALUES
+	        // =============================
+
+	        driver.setName(name);
+	        driver.setPhone(phone);
+	        driver.setEmail(email);
+	        driver.setLicenseNumber(license);
+	        driver.setAadharNumber(aadhar);
+
+	        if (row.getCell(4) != null) {
+	            driver.setLicenseExpiry(
+	                    row.getCell(4)
+	                       .getLocalDateTimeCellValue()
+	                       .toLocalDate()
+	            );
+	        }
+
+	        driver.setAddress(getString(row.getCell(6)));
+	        driver.setExperience(getString(row.getCell(7)));
+	        driver.setSalary(getString(row.getCell(8)));
+	        driver.setPerformance(getString(row.getCell(9)));
+	        driver.setBranchCode(getString(row.getCell(10)));
+	        driver.setBranchName(getString(row.getCell(11)));
+	        driver.setBloodGroup(getString(row.getCell(12)));
+	        driver.setEmergencyContact(getString(row.getCell(13)));
+	        driver.setCurrentLocation(getString(row.getCell(14)));
+
+	        if (row.getCell(15) != null) {
+	            driver.setJoinedDate(
+	                    row.getCell(15)
+	                       .getLocalDateTimeCellValue()
+	                       .toLocalDate()
+	            );
+	        }
+
+	        driver.setStatus(getString(row.getCell(16)));
+	        driver.setActive(true);
+	        driver.setCreatedBy(String.valueOf(createdBy));
+	        driver.setUpdatedBy(String.valueOf(createdBy));
+	        driver.setOrgId(orgId);
+	        if (createdBy != null) {
+				UserVO user = userRepo.findById(createdBy)
+						.orElseThrow(() -> new ApplicationException("Invalid User ID"));
+				driver.setUser(user);
+			}
+
+	        drivers.add(driver);
+	    }
+
+	    workbook.close();
+
+	    // 🔥 SAVE ONLY IF ALL ROWS VALID
+	    tdriverRepo.saveAll(drivers);
+
+	    response.put("TotalRows", sheet.getLastRowNum());
+	    response.put("SuccessRows", drivers.size());
+	    response.put("FailedRows", 0);
+	    response.put("Message", "Driver Excel Uploaded Successfully");
+
+	    return response;
+	}
+
+	private String getString(Cell cell) {
+
+	    if(cell == null) return "";
+
+	    cell.setCellType(CellType.STRING);
+	    return cell.getStringCellValue().trim();
+	}
+	
+	
+	@Transactional(rollbackOn = Exception.class)
+	@Override
+	public Map<String, Object> tVehicleExcelUpload(
+	        MultipartFile file,
+	        Long createdBy,
+	        Long orgId) throws Exception {
+
+	    Map<String, Object> response = new HashMap<>();
+
+	    List<TvehicleVO> vehicles = new ArrayList<>();
+
+	    Workbook workbook = WorkbookFactory.create(file.getInputStream());
+	    Sheet sheet = workbook.getSheetAt(0);
+
+	    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+	        Row row = sheet.getRow(i);
+	        if (row == null)
+	            throw new RuntimeException("Row " + (i + 1) + " is empty");
+
+	        String vehicleNumber = getString(row.getCell(0));
+	        String chassisNo = getString(row.getCell(14));
+	        String engineNo = getString(row.getCell(15));
+
+	        // -------------------
+	        // DUPLICATE CHECKS
+	        // -------------------
+
+	        if (tvehicleRepo.existsByVehicleNumberAndOrgId(vehicleNumber, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " Duplicate Vehicle Number: " + vehicleNumber);
+
+	        if (tvehicleRepo.existsByChassisNumberAndOrgId(chassisNo, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " Duplicate Chassis Number: " + chassisNo);
+
+	        if (tvehicleRepo.existsByEngineNumberAndOrgId(engineNo, orgId))
+	            throw new RuntimeException("Row " + (i + 1) + " Duplicate Engine Number: " + engineNo);
+
+	        // -------------------
+	        // SET ENTITY
+	        // -------------------
+
+	        TvehicleVO v = new TvehicleVO();
+
+	        v.setVehicleNumber(vehicleNumber);
+	        v.setType(getString(row.getCell(1)));
+	        v.setModel(getString(row.getCell(2)));
+	        v.setCapacity(getString(row.getCell(3)));
+
+	        if (row.getCell(4) != null)
+	            v.setInsuranceExpiry(row.getCell(4).getLocalDateTimeCellValue().toLocalDate());
+
+	        if (row.getCell(5) != null)
+	            v.setFitnessExpiry(row.getCell(5).getLocalDateTimeCellValue().toLocalDate());
+
+	        if (row.getCell(6) != null)
+	            v.setLastService(row.getCell(6).getLocalDateTimeCellValue().toLocalDate());
+
+	        if (row.getCell(7) != null)
+	            v.setNextService(row.getCell(7).getLocalDateTimeCellValue().toLocalDate());
+
+	        v.setDriver(getString(row.getCell(8)));
+	        v.setDriverPhone(getString(row.getCell(9)));
+	        v.setCurrentLocation(getString(row.getCell(10)));
+	        v.setFuelEfficiency(getString(row.getCell(11)));
+	        v.setMaintenanceRequired(Boolean.parseBoolean(getString(row.getCell(12))));
+	        v.setYear(Integer.parseInt(getString(row.getCell(13))));
+	        v.setChassisNumber(chassisNo);
+	        v.setEngineNumber(engineNo);
+	        v.setPermitType(getString(row.getCell(16)));
+	        v.setOwnerName(getString(row.getCell(17)));
+	        v.setRegistrationType(getString(row.getCell(18)));
+	        v.setBranchCode(getString(row.getCell(19)));
+	        v.setBranchName(getString(row.getCell(20)));
+
+	        v.setActive("ACTIVE");
+	        v.setCreatedBy(String.valueOf(createdBy));
+	        v.setUpdatedBy(String.valueOf(createdBy));
+	        v.setOrgId(orgId);
+	        if (createdBy != null) {
+				UserVO user = userRepo.findById(createdBy)
+						.orElseThrow(() -> new ApplicationException("Invalid User ID"));
+				v.setUser(user);
+			}
+
+	        vehicles.add(v);
+	    }
+
+	    workbook.close();
+
+	    // SAVE ONLY IF ALL ROWS VALID
+	    tvehicleRepo.saveAll(vehicles);
+
+	    response.put("TotalRows", sheet.getLastRowNum());
+	    response.put("SuccessRows", vehicles.size());
+	    response.put("Message", "Vehicle Excel Uploaded Successfully");
+
+	    return response;
+	}
+
+	
+	
 
 }

@@ -1,6 +1,7 @@
 package com.efit.savaari.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +11,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.efit.savaari.dto.MaintenanceDTO;
@@ -88,6 +86,10 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
         maintenance = maintenanceRepo.save(maintenance);
 
+//        if ("Completed".equalsIgnoreCase(maintenance.getStatus())) {
+//            createNextMaintenanceSchedule(maintenance);
+//        }
+//        
         MaintenanceResponseDTO responseDTO = mapToMaintenanceResponseDTO(maintenance);
 
         Map<String, Object> response = new HashMap<>();
@@ -118,6 +120,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         dto.setDescription(vo.getDescription());
         dto.setNotes(vo.getNotes());
         dto.setActive(vo.isActive());
+//        dto.setNextServiceMonth(vo.getNextServiceMonth());
 
         dto.setCreatedBy(vo.getCreatedBy());
         dto.setBranchCode(vo.getBranchCode());
@@ -209,6 +212,9 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 	    vo.setEstimatedCost(dto.getEstimatedCost());
 	    vo.setServiceCenter(dto.getServiceCenter());
 	    vo.setMechanic(dto.getMechanic());
+//	    vo.setNextServiceMonth(dto.getNextServiceMonth());
+//	    vo.setNextServiceMonth(6);
+
 	    vo.setDescription(dto.getDescription());
 	    vo.setNotes(dto.getNotes());
 	    vo.setBranchCode(dto.getBranchCode());
@@ -216,7 +222,57 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 	    vo.setOrgId(dto.getOrgId());
 	}
 
-
+//	private void createNextMaintenanceSchedule(MaintenanceVO currentMaintenance) {
+//
+//		if (currentMaintenance.getCompletedDate() == null
+//		        || currentMaintenance.getNextServiceMonth() <= 0) {
+//		    return;
+//		}
+//
+////	    LocalDate nextScheduleDate = currentMaintenance.getCompletedDate()
+////	            .plusMonths(currentMaintenance.getNextServiceMonth());
+//		
+//		LocalDate nextScheduleDate = currentMaintenance.getCompletedDate()
+//	            .plusMonths(6);
+//
+//	    MaintenanceVO nextMaintenance = new MaintenanceVO();
+//
+//	    nextMaintenance.setVehicle(currentMaintenance.getVehicle());
+//	    nextMaintenance.setUser(currentMaintenance.getUser());
+//
+//	    nextMaintenance.setTitle(currentMaintenance.getTitle());
+//	    nextMaintenance.setType(currentMaintenance.getType());
+//
+//	    nextMaintenance.setPriority(currentMaintenance.getPriority());
+//
+//	    nextMaintenance.setScheduledDate(nextScheduleDate);
+//
+//	    nextMaintenance.setStatus("Scheduled");
+//
+//	    nextMaintenance.setEstimatedCost(currentMaintenance.getEstimatedCost());
+//
+//	    nextMaintenance.setServiceCenter(currentMaintenance.getServiceCenter());
+//
+//	    nextMaintenance.setMechanic(currentMaintenance.getMechanic());
+//
+//	    nextMaintenance.setDescription(currentMaintenance.getDescription());
+//
+//	    nextMaintenance.setNotes(currentMaintenance.getNotes());
+//
+//	    nextMaintenance.setNextServiceMonth(currentMaintenance.getNextServiceMonth());
+//
+//	    nextMaintenance.setBranchCode(currentMaintenance.getBranchCode());
+//
+//	    nextMaintenance.setBranchName(currentMaintenance.getBranchName());
+//
+//	    nextMaintenance.setOrgId(currentMaintenance.getOrgId());
+//
+//	    nextMaintenance.setCreatedBy(currentMaintenance.getCreatedBy());
+//
+//	    nextMaintenance.setUpdatedBy(currentMaintenance.getUpdatedBy());
+//
+//	    maintenanceRepo.save(nextMaintenance);
+//	}
 
 //	@Override
 //	public Map<String, Object> getAllMaintenanceByOrgId(Long orgId) {
