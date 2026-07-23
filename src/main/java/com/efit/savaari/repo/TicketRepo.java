@@ -60,4 +60,7 @@ public interface TicketRepo extends JpaRepository<TicketVO, Long> {
 			+ "ORDER BY ticketid DESC;")
 	List<TicketVO> getTicketReport(Long orgId, String fromDate, String toDate);
 
+	@Query(nativeQuery = true, value = "select docid from ticket where orgid=?1 order by docid desc limit 1")
+	String findByDocId(Long orgId);
+
 }
