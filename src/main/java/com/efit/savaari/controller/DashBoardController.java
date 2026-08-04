@@ -249,4 +249,139 @@ public class DashBoardController extends BaseController  {
 
 	    return ResponseEntity.ok(responseDTO);
 	}
+	
+	
+	@GetMapping("/getFuelSummaryDashboard")
+	public ResponseEntity<ResponseDTO> getFuelSummaryDashboard(
+	        @RequestParam Long orgId,
+	        @RequestParam String type) {
+
+	    String methodName = "getFuelSummaryDashboard()";
+	    LOGGER.debug("Starting {}", methodName);
+
+	    Map<String, Object> responseMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+
+	        Map<String, Object> dashboard =
+	                dashBoardService.getFuelSummaryDashboard(orgId, type);
+
+	        responseMap.put("message", "Fuel Summary Dashboard fetched successfully");
+	        responseMap.put("dashboard", dashboard);
+
+	        responseDTO = createServiceResponse(responseMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error("Error in {} : {}", methodName, e.getMessage(), e);
+
+	        responseDTO = createServiceResponseError(
+	                responseMap,
+	                "Error fetching fuel summary dashboard",
+	                e.getMessage());
+	    }
+
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/getUpcomingMaintenanceDashboard")
+	public ResponseEntity<ResponseDTO> getUpcomingMaintenanceDashboard(
+	        @RequestParam Long orgId) {
+
+	    String methodName = "getUpcomingMaintenanceDashboard()";
+	    LOGGER.debug("Starting {}", methodName);
+
+	    Map<String, Object> responseMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+
+	        Map<String, Object> dashboard =
+	                dashBoardService.getUpcomingMaintenanceDashboard(orgId);
+
+	        responseMap.put("message", "Upcoming Maintenance Dashboard fetched successfully");
+	        responseMap.put("dashboard", dashboard);
+
+	        responseDTO = createServiceResponse(responseMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error("Error in {} : {}", methodName, e.getMessage(), e);
+
+	        responseDTO = createServiceResponseError(
+	                responseMap,
+	                "Error fetching upcoming maintenance dashboard",
+	                e.getMessage());
+	    }
+
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
+	
+	@GetMapping("/getExpirySummaryDashboard")
+	public ResponseEntity<ResponseDTO> getExpirySummaryDashboard(
+	        @RequestParam Long orgId) {
+
+	    String methodName = "getExpirySummaryDashboard()";
+	    LOGGER.debug("Starting {}", methodName);
+
+	    Map<String, Object> responseMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+
+	        Map<String, Object> dashboard =
+	                dashBoardService.getExpirySummaryDashboard(orgId);
+
+	        responseMap.put("message", "Fitness Expiry Dashboard fetched successfully");
+	        responseMap.put("dashboard", dashboard);
+
+	        responseDTO = createServiceResponse(responseMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error("Error in {} : {}", methodName, e.getMessage(), e);
+
+	        responseDTO = createServiceResponseError(
+	                responseMap,
+	                "Error fetching fitness expiry dashboard",
+	                e.getMessage());
+	    }
+
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
+	@GetMapping("/getTripCompletionDashboard")
+	public ResponseEntity<ResponseDTO> getTripCompletionDashboard(
+	        @RequestParam Long orgId,
+	        @RequestParam String type) {
+
+	    String methodName = "getTripCompletionDashboard()";
+	    LOGGER.debug("Starting {}", methodName);
+
+	    Map<String, Object> responseMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+
+	        Object dashboard = dashBoardService.getTripCompletionDashboard(orgId, type);
+
+	        responseMap.put("message", "Trip Completion Dashboard fetched successfully");
+	        responseMap.put("dashboard", dashboard);
+
+	        responseDTO = createServiceResponse(responseMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error("Error in {} : {}", methodName, e.getMessage(), e);
+
+	        responseDTO = createServiceResponseError(responseMap,
+	                "Error fetching trip completion dashboard",
+	                e.getMessage());
+	    }
+
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
 }

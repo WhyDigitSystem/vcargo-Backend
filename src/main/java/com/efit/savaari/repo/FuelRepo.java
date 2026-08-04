@@ -1,8 +1,8 @@
 package com.efit.savaari.repo;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +73,47 @@ public interface FuelRepo extends JpaRepository<FuelVO, Long> {
 		        @Param("fromDate") String fromDate,
 		        @Param("toDate") String toDate);
 
+	 @Query(value =
+		        "SELECT IFNULL(SUM(cost),0) " +
+		        "FROM fuel " +
+		        "WHERE orgid=:orgId " +
+		        "AND fueldate=CURDATE()",
+		        nativeQuery = true)
+		BigDecimal getTodayFuelAmount(@Param("orgId") Long orgId);
+	 
+	 @Query(value =
+		        "SELECT IFNULL(SUM(cost),0) " +
+		        "FROM fuel " +
+		        "WHERE orgid=:orgId " +
+		        "AND fueldate=DATE_SUB(CURDATE(),INTERVAL 1 DAY)",
+		        nativeQuery = true)
+		BigDecimal getYesterdayFuelAmount(@Param("orgId") Long orgId);
+	 
+	 @Query(value =
+		        "SELECT " +
+		        "fueldate AS fuelDate, " +
+		        "SUM(cost) AS amount " +
+		        "FROM fuel " +
+		        "WHERE orgid=:orgId " +
+		        "AND fueldate BETWEEN DATE_SUB(CURDATE(),INTERVAL 6 DAY) " +
+		        "AND CURDATE() " +
+		        "GROUP BY fueldate " +
+		        "ORDER BY fueldate",
+		        nativeQuery = true)
+		List<Map<String,Object>> getWeekFuelSummary(@Param("orgId") Long orgId);
+	 
+	 @Query(value =
+		        "SELECT " +
+		        "CONCAT('Week ', WEEK(fueldate,1)-WEEK(DATE_FORMAT(fueldate,'%Y-%m-01'),1)+1) AS week, " +
+		        "SUM(cost) AS amount " +
+		        "FROM fuel " +
+		        "WHERE orgid=:orgId " +
+		        "AND MONTH(fueldate)=MONTH(CURDATE()) " +
+		        "AND YEAR(fueldate)=YEAR(CURDATE()) " +
+		        "GROUP BY week " +
+		        "ORDER BY MIN(fueldate)",
+		        nativeQuery = true)
+		List<Map<String,Object>> getMonthFuelSummary(@Param("orgId") Long orgId);
 
 	 
 }

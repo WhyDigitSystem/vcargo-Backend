@@ -39,18 +39,14 @@ import com.efit.savaari.dto.UserListDTO;
 import com.efit.savaari.dto.UserResponseDTO;
 import com.efit.savaari.dto.UserStatus;
 import com.efit.savaari.entity.EmailOtpEntity;
-import com.efit.savaari.entity.IndustryVO;
 import com.efit.savaari.entity.ResponsibilityVO;
 import com.efit.savaari.entity.RolesResponsibilityVO;
 import com.efit.savaari.entity.RolesVO;
 import com.efit.savaari.entity.ScreensVO;
 import com.efit.savaari.entity.TokenVO;
 import com.efit.savaari.entity.UserVO;
-import com.efit.savaari.entity.VendorVO;
 import com.efit.savaari.exception.ApplicationException;
-import com.efit.savaari.repo.CompanyRepo;
 import com.efit.savaari.repo.EmailOtpRepo;
-import com.efit.savaari.repo.IndustryRepo;
 import com.efit.savaari.repo.ResponsibilitiesRepo;
 import com.efit.savaari.repo.RolesRepo;
 import com.efit.savaari.repo.RolesResponsibilityRepo;
@@ -60,7 +56,6 @@ import com.efit.savaari.repo.UserActionRepo;
 import com.efit.savaari.repo.UserBranchAccessRepo;
 import com.efit.savaari.repo.UserLoginRolesRepo;
 import com.efit.savaari.repo.UserRepo;
-import com.efit.savaari.repo.VendorRepo;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.security.TokenProvider;
 import com.efit.savaari.util.CryptoUtils;
@@ -107,9 +102,6 @@ public class AuthServiceImpl implements AuthService {
 	RolesResponsibilityRepo rolesResponsibilityRepo;
 
 	@Autowired
-	CompanyRepo companyRepo;
-
-	@Autowired
 	OtpService otpService;
 
 	@Autowired
@@ -121,11 +113,9 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	PaginationService paginationService;
 
-	@Autowired
-	IndustryRepo industryRepo;
-
-	@Autowired
-	VendorRepo vendorRepo;
+//
+//	@Autowired
+//	VendorRepo vendorRepo;
 
 //	@Override
 //	@Transactional
@@ -289,16 +279,13 @@ public class AuthServiceImpl implements AuthService {
 			}
 		}
 
-		IndustryVO existingIndustry = industryRepo.findByEmail(email);
-		VendorVO existingVendor = vendorRepo.findByPrimaryEmail(email);
+//		VendorVO existingVendor = vendorRepo.findByPrimaryEmail(email);
 
-		if (existingIndustry != null) {
-			throw new ApplicationContextException("Email Already Exists In Industry Details");
-		}
+		
 
-		if (existingVendor != null) {
-			throw new ApplicationContextException("Email Already Exists In Vendor Details");
-		}
+//		if (existingVendor != null) {
+//			throw new ApplicationContextException("Email Already Exists In Vendor Details");
+//		}
 
 		if (userVO.getType() == null || StringUtils.isBlank(userVO.getType())) {
 			throw new ApplicationContextException("Invalid Type Details");
@@ -316,21 +303,25 @@ public class AuthServiceImpl implements AuthService {
 //			industryRepo.save(industryVO);
 //		}
 
-		else if (userVO.getType().equalsIgnoreCase("Transporter")) {
+//		else if (userVO.getType().equalsIgnoreCase("Transporter")) {
+//
+//			VendorVO vendorVO = new VendorVO();
+//			vendorVO.setBranch(userVO.getBranch());
+//			vendorVO.setBranchCode(userVO.getBranchCode());
+//			vendorVO.setCreatedBy(userVO.getCreatedby());
+//			vendorVO.setPrimaryEmail(userVO.getEmail());
+//			vendorVO.setUserName(userVO.getUserName());
+//			vendorVO.setUserPassword(userVO.getPassword());
+//			vendorVO.setOrganization(userVO.getOrganizationName());
+//			vendorVO.setVendorType(userVO.getType());
+//			vendorRepo.save(vendorVO);
+//			userVO.setVendorId(vendorVO.getId());
+//			userVO.setOrgId(vendorVO.getId());
+//		}
+		userVO = userRepo.save(userVO);
 
-			VendorVO vendorVO = new VendorVO();
-			vendorVO.setBranch(userVO.getBranch());
-			vendorVO.setBranchCode(userVO.getBranchCode());
-			vendorVO.setCreatedBy(userVO.getCreatedby());
-			vendorVO.setPrimaryEmail(userVO.getEmail());
-			vendorVO.setUserName(userVO.getUserName());
-			vendorVO.setUserPassword(userVO.getPassword());
-			vendorVO.setOrganization(userVO.getOrganizationName());
-			vendorVO.setVendorType(userVO.getType());
-			vendorRepo.save(vendorVO);
-			userVO.setVendorId(vendorVO.getId());
-			userVO.setOrgId(vendorVO.getId());
-		}
+		userVO.setOrgId(userVO.getId());
+
 		userRepo.save(userVO);
 
 		// Audit log

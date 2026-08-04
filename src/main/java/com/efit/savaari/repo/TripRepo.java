@@ -1,7 +1,7 @@
 package com.efit.savaari.repo;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import javax.transaction.Transactional;
 
@@ -80,4 +80,68 @@ public interface TripRepo extends JpaRepository<TripVO, Long> {
 	        @Param("fromDate") String fromDate,
 	        @Param("toDate") String toDate);
 
+	@Query(value =
+	        "SELECT COUNT(*) AS completedTrips " +
+	        "FROM trip " +
+	        "WHERE orgid=:orgId " +
+	        "AND cancel=0 " +
+	        "AND UPPER(status)='COMPLETED' " +
+	        "AND startdate=CURDATE()",
+	        nativeQuery = true)
+	Map<String,Object> getTodayCompletedTrips(@Param("orgId") Long orgId);
+
+
+	@Query(value =
+		    "SELECT " +
+		    "DATE(t.startdate) AS tripDate, " +
+		    "COUNT(*) AS completedTrips, " +
+		    "(SELECT COUNT(*) " +
+		    " FROM tvehicle v " +
+		    " WHERE v.orgid=:orgId " +
+		    " AND v.cancel=0 " +
+		    " AND v.active='ACTIVE') AS totalActiveVehicles " +
+		    "FROM trip t " +
+		    "WHERE t.orgid=:orgId " +
+		    "AND t.cancel=0 " +
+		    "AND UPPER(t.status)='COMPLETED' " +
+		    "AND t.startdate BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE() " +
+		    "GROUP BY DATE(t.startdate) " +
+		    "ORDER BY DATE(t.startdate)",
+		    nativeQuery = true)
+		List<Map<String,Object>> getWeekCompletedTrips(@Param("orgId") Long orgId);
+	
+	
+	@Query(value =
+		    "SELECT " +
+		    "weekNo, " +
+		    "COUNT(*) AS completedTrips, " +
+		    "(SELECT COUNT(*) " +
+		    " FROM tvehicle v " +
+		    " WHERE v.orgid=:orgId " +
+		    " AND v.cancel=0 " +
+		    " AND v.active='ACTIVE') AS totalActiveVehicles " +
+		    "FROM ( " +
+		    "   SELECT FLOOR((DAY(startdate)-1)/7)+1 AS weekNo " +
+		    "   FROM trip " +
+		    "   WHERE orgid=:orgId " +
+		    "   AND cancel=0 " +
+		    "   AND UPPER(status)='COMPLETED' " +
+		    "   AND YEAR(startdate)=YEAR(CURDATE()) " +
+		    "   AND MONTH(startdate)=MONTH(CURDATE()) " +
+		    ") x " +
+		    "GROUP BY weekNo " +
+		    "ORDER BY weekNo",
+		    nativeQuery = true)
+		List<Map<String,Object>> getMonthCompletedTrips(@Param("orgId") Long orgId);
+	
+	
+	@Query(value =
+	        "SELECT COUNT(*) " +
+	        "FROM tvehicle " +
+	        "WHERE orgid=:orgId " +
+	        "AND cancel=0 " +
+	        "AND active='ACTIVE'",
+	        nativeQuery = true)
+	Long getTotalActiveVehicles(@Param("orgId") Long orgId);
+	
 }

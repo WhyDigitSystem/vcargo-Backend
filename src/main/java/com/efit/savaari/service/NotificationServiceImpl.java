@@ -16,7 +16,6 @@ import com.efit.savaari.entity.NotificationVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TvehicleVO;
 import com.efit.savaari.entity.UserVO;
-import com.efit.savaari.repo.CompanyRepo;
 import com.efit.savaari.repo.MaintenanceRepo;
 import com.efit.savaari.repo.NotificationRepo;
 import com.efit.savaari.repo.TdriverRepo;
@@ -30,9 +29,6 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Autowired
 	NotificationRepo notificationRepo;
-
-	@Autowired
-	CompanyRepo companyRepo;
 
 	@Autowired
 	private MaintenanceRepo maintenanceRepo;

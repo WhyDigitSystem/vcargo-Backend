@@ -15,14 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.efit.savaari.dto.DriverDTO;
 import com.efit.savaari.dto.VehicleDTO;
 import com.efit.savaari.dto.VehicleTypeDTO;
-import com.efit.savaari.entity.DriverVO;
 import com.efit.savaari.entity.VehicleTypeVO;
 import com.efit.savaari.entity.VehicleVO;
 import com.efit.savaari.exception.ApplicationException;
-import com.efit.savaari.repo.DriverRepo;
 import com.efit.savaari.repo.VehicleRepo;
 import com.efit.savaari.repo.VehicleTypeRepo;
 
@@ -36,9 +33,7 @@ public class VehicleServiceImpl implements VehicleService {
   
   @Autowired
   PaginationService paginationService;
-  
-  @Autowired
-  DriverRepo driverRepo;
+
   
   @Autowired
   VehicleTypeRepo vehicleTypeRepo;
@@ -154,101 +149,6 @@ public class VehicleServiceImpl implements VehicleService {
 		}
 		
 		// End Vehicle Service here
-		
-		// Driver Service start here
-	
-		
-		@Override
-		@Transactional
-		public Map<String, Object> createUpdateDriver(DriverDTO dto) throws Exception {
-
-		    DriverVO driverVO;
-		    String message = null;
-
-		    // CREATE
-		    if (ObjectUtils.isEmpty(dto.getId())) {
-
-		        if (driverRepo.existsByDriverNumberAndOrgId(dto.getDriverNumber(), dto.getOrgId())) {
-		            throw new ApplicationException(
-		                "This Driver Number: " + dto.getDriverNumber() + " Already Exists in This Organization"
-		            );
-		        }
-
-		        driverVO = new DriverVO();
-		        driverVO.setCreatedBy(dto.getCreatedBy());
-		        driverVO.setUpdatedBy(dto.getCreatedBy());
-		   
-
-		        message = "Driver Created Successfully";
-
-		    } else {
-
-		        driverVO = driverRepo.findById(dto.getId())
-		                .orElseThrow(() -> new ApplicationException("Driver not found with id: " + dto.getId()));
-
-		        driverVO.setUpdatedBy(dto.getCreatedBy());
-
-		        if (!driverVO.getDriverNumber().equalsIgnoreCase(dto.getDriverNumber())) {
-
-		            if (driverRepo.existsByDriverNumberAndOrgId(dto.getDriverNumber(), dto.getOrgId())) {
-		                throw new ApplicationException(
-		                    "This Driver Number: " + dto.getDriverNumber() + " Already Exists in This Organization"
-		                );
-		            }
-
-		            driverVO.setDriverNumber(dto.getDriverNumber());
-		        }
-
-		        message = "Driver Updated Successfully";
-		    }
-
-		    // Copy DTO → VO
-		    getDriverVOFromDTO(driverVO, dto);
-
-		    // Save
-		    driverRepo.save(driverVO);
-
-		    Map<String, Object> response = new HashMap<>();
-		    response.put("message", message);
-		    response.put("driverVO", driverVO);
-
-		    return response;
-		}
-
-		private void getDriverVOFromDTO(DriverVO driverVO, DriverDTO dto) {
-		    driverVO.setDriverName(dto.getDriverName().toUpperCase());
-		    driverVO.setDriverNumber(dto.getDriverNumber());
-		    driverVO.setBranch(dto.getBranch().toUpperCase());
-		    driverVO.setBranchCode(dto.getBranchCode().toUpperCase());
-		    driverVO.setOrgId(dto.getOrgId());
-		    driverVO.setActive(dto.isActive());
-
-		}
-		
-		@Override
-		public DriverVO getDriverById(Long id) throws ApplicationException {
-
-			return driverRepo.findById(id)
-                    .orElseThrow(() -> new ApplicationException("driver not found"));
-		}
-		
-		@Override
-		public Map<String, Object> getAllDriver(String branchCode,Long orgId, String search, int page, int count) {
-
-			if (search != null) {
-		        search = search.trim();
-		        if (search.isEmpty()) {
-		            search = null;
-		        }
-		    }
-			
-		    Pageable pageable = PageRequest.of(page - 1, count, Sort.by("drivernumber").ascending());
-		    Page<DriverVO> driverPage = driverRepo.getAllDriver(branchCode,orgId, search, pageable);
-
-		    // return paginated response
-		    return paginationService.buildResponse(driverPage);
-
-		}
 		
 // Vehicle Type Service Start here
 		

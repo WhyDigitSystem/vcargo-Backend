@@ -17,13 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.common.UserConstants;
-import com.efit.savaari.dto.DriverDTO;
 import com.efit.savaari.dto.VehicleDTO;
 import com.efit.savaari.dto.VehicleTypeDTO;
-import com.efit.savaari.entity.DriverVO;
 import com.efit.savaari.entity.VehicleTypeVO;
 import com.efit.savaari.entity.VehicleVO;
-import com.efit.savaari.repo.DriverRepo;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.VehicleService;
 
@@ -36,8 +33,6 @@ public class VehicleController extends BaseController{
 	@Autowired
     VehicleService vehicleService;
 	
-	@Autowired
-	DriverRepo driverRepo;
 
     // Vehicle controller start here
 
@@ -136,105 +131,7 @@ public class VehicleController extends BaseController{
     
     //Driver controller start here
     
-    @PutMapping("/createUpdateDriver")
-    public ResponseEntity<ResponseDTO> createUpdateDriver(@RequestBody DriverDTO driverDTO) {
-
-        String methodName = "createUpdateDriver()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
-
-        try {
-            Map<String, Object> createdDriverVO = vehicleService.createUpdateDriver(driverDTO);
-
-            responseObjectsMap.put(
-                    CommonConstant.STRING_MESSAGE,
-                    createdDriverVO.get("message")
-            );
-
-            responseObjectsMap.put("driverVO", createdDriverVO.get("driverVO"));
-
-            responseDTO = createServiceResponse(responseObjectsMap);
-
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-            responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
-        }
-
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
-    
-    
-    @GetMapping("/driverById")
-    public ResponseEntity<ResponseDTO> getDriverById(@RequestParam Long id) {
-
-        String methodName = "getDriverById()";
-        LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-        String errorMsg = null;
-        Map<String, Object> responseObjectsMap = new HashMap<>();
-        ResponseDTO responseDTO = null;
-        DriverVO driverVO = null;
-
-        try {
-            driverVO = vehicleService.getDriverById(id);  // <-- DIRECT OBJECT RETURN
-
-        } catch (Exception e) {
-            errorMsg = e.getMessage();
-            LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-        }
-
-        if (StringUtils.isEmpty(errorMsg)) {
-            responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Vehicle found by ID");
-            responseObjectsMap.put("driver", driverVO);
-            responseDTO = createServiceResponse(responseObjectsMap);
-        } else {
-            errorMsg = "Driver not found for ID: " + id;
-            responseDTO = createServiceResponseError(responseObjectsMap, "Driver not found", errorMsg);
-        }
-
-        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-        return ResponseEntity.ok().body(responseDTO);
-    }
-    
-    
-    @GetMapping("/getAllDriver")
-    public ResponseEntity<ResponseDTO> getAllDriver(
-            @RequestParam(required = false) String branchCode,
-            @RequestParam Long orgId,
-            @RequestParam(defaultValue = "") String search,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int count
-    ) {
-        String methodName = "getAllDriver()";
-        LOGGER.debug("Starting {}", methodName);
-
-        Map<String, Object> responseMap = new HashMap<>();
-        ResponseDTO responseDTO;
-
-        try {
-
-            // 🔥 Correct service call
-            Map<String, Object> driverData = vehicleService.getAllDriver(branchCode, orgId, search, page, count);
-
-            responseMap.put("message", "Drivers retrieved successfully");
-            responseMap.put("driverVO", driverData);
-
-            responseDTO = createServiceResponse(responseMap);
-
-        } catch (Exception e) {
-            LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-            responseDTO = createServiceResponseError(responseMap, "Error fetching drivers", e.getMessage());
-        }
-
-        LOGGER.debug("Ending {}", methodName);
-        return ResponseEntity.ok(responseDTO);
-    }
-
+  
     // Driver controller end here
     
  // Vehicle Type controller start here

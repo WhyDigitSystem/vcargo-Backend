@@ -18,8 +18,6 @@ public interface EInvoiceService {
 
 	Map<String, Object> generateToken(List<EInvoiceGetToketDTO> eInvoiceGetToketDTO1) throws Exception;
 
-	EwayBillNonIRNDTO generateEwayBillByNonIRN(String docIds);
 
-	Map<String, Object> createEWayBillNonIRN(List<String> docId) throws JsonProcessingException;
 
 }

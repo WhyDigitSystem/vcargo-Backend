@@ -1,5 +1,7 @@
 package com.efit.savaari.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -241,10 +243,14 @@ public class DashBoardServiceImpl implements DashBoardService {
 		        d.setQuantity(f.getQuantity());
 		        d.setTotal(f.getCost());
 
-		        if (f.getCost() != null && f.getQuantity() != null) {
-		            d.setRate(f.getCost().divide(f.getQuantity()));
-		        }
+		        if (f.getCost() != null
+		                && f.getQuantity() != null
+		                && f.getQuantity().compareTo(BigDecimal.ZERO) != 0) {
 
+		            d.setRate(
+		                f.getCost().divide(f.getQuantity(), 2, RoundingMode.HALF_UP)
+		            );
+		        }
 		        d.setDate(f.getDate() != null ? f.getDate().toString() : "");
 		        d.setDriver(f.getDriver() != null ? f.getDriver().getName() : "");
 
@@ -393,6 +399,9 @@ public class DashBoardServiceImpl implements DashBoardService {
 
 	     dashboard.put("tDriver",
 	             getDriver(orgId, fromDate, toDate));
+	     
+	     dashboard.put("criticalEscalationCount",
+	             getCriticalEscalationCount(orgId));
 
 	     return dashboard;
 	 }
@@ -411,6 +420,22 @@ public class DashBoardServiceImpl implements DashBoardService {
 		    }
 
 		    return d;
+		}
+	 
+	 private Long getCriticalEscalationCount(Long orgId) {
+
+		    List<EscalationDashboardDTO> escalations = new ArrayList<>();
+
+		    escalations.addAll(getMaintenance(orgId));
+		    escalations.addAll(getInsurance(orgId));
+		    escalations.addAll(getFitness(orgId));
+//		    escalations.addAll(getPermit(orgId));
+		    escalations.addAll(getPuc(orgId));
+		    escalations.addAll(getDriverLicense(orgId));
+
+		    return escalations.stream()
+		            .filter(e -> "Critical".equals(e.getSeverity()))
+		            .count();
 		}
 
 	 @Override
@@ -899,10 +924,175 @@ public class DashBoardServiceImpl implements DashBoardService {
 		        dto.setSeverity("High");
 		    } else if (days <= 30) {
 		        dto.setSeverity("Medium");
-		    } else {
-		        dto.setSeverity("Low");
-		    }
+		    } 
+//		        else {
+//		        dto.setSeverity("Low");
+//		    }
 		}
+	 
+	 
+	 @Override
+	 public Map<String, Object> getFuelSummaryDashboard(Long orgId, String type) {
+
+	     Map<String, Object> dashboard = new HashMap<>();
+
+	     switch (type.toLowerCase()) {
+
+	     case "today":
+
+	         dashboard.put("type", "today");
+	         dashboard.put("totalAmount", fuelRepo.getTodayFuelAmount(orgId));
+	         break;
+
+	     case "yesterday":
+
+	         dashboard.put("type", "yesterday");
+	         dashboard.put("totalAmount", fuelRepo.getYesterdayFuelAmount(orgId));
+	         break;
+
+	     case "week":
+
+	         dashboard.put("type", "week");
+	         dashboard.put("fuelSummary", fuelRepo.getWeekFuelSummary(orgId));
+	         break;
+
+	     case "month":
+
+	         dashboard.put("type", "month");
+	         dashboard.put("fuelSummary", fuelRepo.getMonthFuelSummary(orgId));
+	         break;
+
+	     default:
+	         throw new RuntimeException("Invalid Type");
+	     }
+
+	     return dashboard;
+	 }
+	 
+	 @Override
+	 public Map<String, Object> getUpcomingMaintenanceDashboard(Long orgId) {
+
+	     List<Map<String, Object>> maintenances =
+	             maintenanceRepo.getUpcomingMaintenance(orgId);
+
+	     Map<String, Object> summary = new HashMap<>();
+
+	     summary.put("high",
+	             maintenances.stream()
+	                     .filter(m -> "High".equalsIgnoreCase((String) m.get("priority")))
+	                     .count());
+
+	     summary.put("medium",
+	             maintenances.stream()
+	                     .filter(m -> "Medium".equalsIgnoreCase((String) m.get("priority")))
+	                     .count());
+
+	     summary.put("low",
+	             maintenances.stream()
+	                     .filter(m -> "Low".equalsIgnoreCase((String) m.get("priority")))
+	                     .count());
+
+	     summary.put("total", maintenances.size());
+
+	     Map<String, Object> response = new HashMap<>();
+	     response.put("summary", summary);
+	     response.put("maintenanceList", maintenances);
+
+	     return response;
+	 }
+	 
+	 @Override
+	 public Map<String, Object> getExpirySummaryDashboard(Long orgId) {
+
+	     Map<String, Object> summary = tVehiclesrepo.getExpirySummaryDashboard(orgId);
+
+	     Map<String, Object> response = new HashMap<>();
+
+	     response.put("summary", summary);
+
+	     return response;
+	 }
+	 
+	 
+	 @Override
+	 public Object getTripCompletionDashboard(Long orgId, String type) {
+
+	     Long totalVehicles = tripRepo.getTotalActiveVehicles(orgId);
+
+	     switch (type.toLowerCase()) {
+
+	     case "today":
+
+	         Map<String, Object> today = tripRepo.getTodayCompletedTrips(orgId);
+
+	         Map<String, Object> todayResponse = new HashMap<>();
+
+	         long completedToday = ((Number) today.get("completedTrips")).longValue();
+
+	         todayResponse.put("totalActiveVehicles", totalVehicles);
+	         todayResponse.put("completedTrips", completedToday);
+	         todayResponse.put("completionPercentage",
+	                 totalVehicles == 0 ? 0 :
+	                 Math.round((completedToday * 100.0 / totalVehicles) * 100.0) / 100.0);
+
+	         return todayResponse;
+
+	     case "week":
+
+	         List<Map<String, Object>> week = tripRepo.getWeekCompletedTrips(orgId);
+
+	         List<Map<String, Object>> weekResponseList = new ArrayList<>();
+
+	         for (Map<String, Object> row : week) {
+
+	             Map<String, Object> map = new HashMap<>(row);
+
+	             long completed = ((Number) map.get("completedTrips")).longValue();
+
+	             double percentage = totalVehicles == 0 ? 0
+	                     : Math.round((completed * 100.0 / totalVehicles) * 100.0) / 100.0;
+
+	             map.put("completionPercentage", percentage);
+
+	             weekResponseList.add(map);
+	         }
+
+	         Map<String, Object> weekResponse = new HashMap<>();
+	         weekResponse.put("totalActiveVehicles", totalVehicles);
+	         weekResponse.put("tripSummary", weekResponseList);
+
+	         return weekResponse;
+
+	     case "month":
+
+	         List<Map<String, Object>> month = tripRepo.getMonthCompletedTrips(orgId);
+
+	         List<Map<String, Object>> monthResponseList = new ArrayList<>();
+
+	         for (Map<String, Object> row : month) {
+
+	             Map<String, Object> map = new HashMap<>(row);
+
+	             long completed = ((Number) map.get("completedTrips")).longValue();
+
+	             double percentage = totalVehicles == 0 ? 0
+	                     : Math.round((completed * 100.0 / totalVehicles) * 100.0) / 100.0;
+
+	             map.put("completionPercentage", percentage);
+
+	             monthResponseList.add(map);
+	         }
+
+	         Map<String, Object> monthResponse = new HashMap<>();
+	         monthResponse.put("totalActiveVehicles", totalVehicles);
+	         monthResponse.put("tripSummary", monthResponseList);
+
+	         return monthResponse;
+
+	     default:
+	         throw new IllegalArgumentException("Invalid type");
+	     }
+	 }
 	 
 }
 

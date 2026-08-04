@@ -25,6 +25,15 @@ public interface DashBoardService {
 
 	Map<String, Object> getEscalationDashboard(Long orgId);
 
+	Map<String, Object> getFuelSummaryDashboard(Long orgId, String type);
+
+	Map<String, Object> getUpcomingMaintenanceDashboard(Long orgId);
+
+	Map<String, Object> getExpirySummaryDashboard(Long orgId);
+
+	Object getTripCompletionDashboard(Long orgId, String type);
+
+
 //	List<MaintenanceResponseDTO> getMaintenanceScheduleForDashBoard(Long orgId, String vehicleNumber, String type) throws ApplicationException;
 //
 //	List<TvehicleResponseDTO> getInsuranceExpiryForDashBoard(Long orgId, String vehicleNumber, String type) throws ApplicationException;

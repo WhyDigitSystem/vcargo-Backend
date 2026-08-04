@@ -2,6 +2,7 @@ package com.efit.savaari.repo;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -166,6 +167,36 @@ public interface TvehicleRepo extends JpaRepository<TvehicleVO, Long> {
 			""")
 			List<TvehicleVO> getPucDashboard(
 			        @Param("orgId") Long orgId);
+
+
+	@Query(value =
+		    "SELECT " +
+		    "SUM(CASE WHEN v.fitnessexpiry < CURDATE() THEN 1 ELSE 0 END) AS critical, " +
+
+		    "SUM(CASE WHEN DATEDIFF(v.fitnessexpiry, CURDATE()) BETWEEN 0 AND 7 THEN 1 ELSE 0 END) AS high, " +
+
+		    "SUM(CASE WHEN DATEDIFF(v.fitnessexpiry, CURDATE()) BETWEEN 8 AND 15 THEN 1 ELSE 0 END) AS medium, " +
+
+		    "SUM(CASE WHEN DATEDIFF(v.fitnessexpiry, CURDATE()) BETWEEN 16 AND 30 THEN 1 ELSE 0 END) AS low, " +
+
+		    "COUNT(*) AS totalActiveVehicles, " +
+
+		    "SUM(CASE " +
+		    "       WHEN v.fitnessexpiry < CURDATE() " +
+		    "       OR DATEDIFF(v.fitnessexpiry, CURDATE()) BETWEEN 0 AND 30 " +
+		    "       THEN 1 " +
+		    "       ELSE 0 " +
+		    "END) AS totalExpiringVehicles " +
+
+		    "FROM tvehicle v " +
+		    "WHERE v.orgid = :orgId " +
+		    "AND v.cancel = 0 " +
+		    "AND v.active = 'ACTIVE'",
+		    nativeQuery = true)
+		Map<String, Object> getExpirySummaryDashboard(@Param("orgId") Long orgId);
+
+
+
 
 
 //	@Query("""

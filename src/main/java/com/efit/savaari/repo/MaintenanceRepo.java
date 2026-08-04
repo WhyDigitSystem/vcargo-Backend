@@ -1,17 +1,14 @@
 package com.efit.savaari.repo;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.efit.savaari.entity.MaintenanceVO;
-import com.efit.savaari.entity.TripVO;
 
 @Repository
 public interface MaintenanceRepo extends JpaRepository<MaintenanceVO, Long> {
@@ -99,8 +96,28 @@ public interface MaintenanceRepo extends JpaRepository<MaintenanceVO, Long> {
 			 """)
 			 List<MaintenanceVO> getMaintenanceDashboard(
 			         @Param("orgId") Long orgId);
-	 
-	 
-	 
-	 
+
+
+	 @Query(value =
+			    "SELECT " +
+			    "v.vehiclenumber AS vehicle, " +
+			    "m.title AS service, " +
+			    "m.scheduleddate AS scheduledDate, " +
+			    "DATEDIFF(m.scheduleddate, CURDATE()) AS daysLeft, " +
+			    "CASE " +
+			    "   WHEN DATEDIFF(m.scheduleddate, CURDATE()) <= 3 THEN 'High' " +
+			    "   WHEN DATEDIFF(m.scheduleddate, CURDATE()) <= 7 THEN 'Medium' " +
+			    "   ELSE 'Low' " +
+			    "END AS priority " +
+			    "FROM maintenance m " +
+			    "LEFT JOIN tvehicle v ON v.tvehicleid = m.vehicle " +
+			    "WHERE m.orgid = :orgId " +
+			    "AND m.cancel = 0 " +
+			    "AND LOWER(m.status) <> 'completed' " +
+			    "AND m.scheduleddate BETWEEN CURDATE() " +
+			    "AND DATE_ADD(CURDATE(), INTERVAL 30 DAY) " +
+			    "ORDER BY m.scheduleddate ASC",
+			    nativeQuery = true)
+			List<Map<String, Object>> getUpcomingMaintenance(@Param("orgId") Long orgId);
+
 }

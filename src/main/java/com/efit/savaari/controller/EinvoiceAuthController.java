@@ -28,25 +28,6 @@ public class EinvoiceAuthController extends BaseController {
 	@Autowired
 	EInvoiceService eInvoiceService;
 
-	@PostMapping("/createEWayBillNonIRN")
-	public ResponseEntity<ResponseDTO> createEWayBillNonIRN(@RequestParam List<String> docId) {
-		String methodName = "createEWayBillNonIRN()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		try {
-			Map<String, Object> ewayResponseDTO = eInvoiceService.createEWayBillNonIRN(docId);
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "EwayBill Generated Successfully");
-			responseObjectsMap.put("ewayResponseDTO", ewayResponseDTO);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
-	}
-
 	@PostMapping("/getToken")
 	public ResponseEntity<ResponseDTO> generateToken(@RequestBody List<EInvoiceGetToketDTO> eInvoiceGetToketDTO1) {
 		String methodName = "generateToken()";
@@ -72,28 +53,4 @@ public class EinvoiceAuthController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@GetMapping("/getEwayBillNonIRNByDocId")
-	public ResponseEntity<EwayBillNonIRNDTO> getEwayBillNonIRNByDocId(@RequestParam String docid) {
-		String methodName = "getEwayBillNonIRNByDocId()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		EwayBillNonIRNDTO ewayBillDTO = new EwayBillNonIRNDTO();
-		try {
-			ewayBillDTO = eInvoiceService.generateEwayBillByNonIRN(docid);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "EWayBill Information Get Successfully");
-			responseObjectsMap.put("ewayBillDTO", ewayBillDTO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap, "EWayBill Information Get Filed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(ewayBillDTO);
-	}
 }

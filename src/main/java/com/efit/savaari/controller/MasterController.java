@@ -1,13 +1,9 @@
 package com.efit.savaari.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,26 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.efit.savaari.common.CommonConstant;
-import com.efit.savaari.common.UserConstants;
-import com.efit.savaari.dto.BranchDTO;
 import com.efit.savaari.dto.ChargeTypeDTO;
 import com.efit.savaari.dto.CompanyProfileDTO;
 import com.efit.savaari.dto.CustomerDTO;
 import com.efit.savaari.dto.CustomerRateDTO;
-import com.efit.savaari.dto.IndentsDTO;
-import com.efit.savaari.dto.ListOfValuesDTO;
-import com.efit.savaari.dto.PlaceDetailsDTO;
 import com.efit.savaari.dto.RoutesDTO;
-import com.efit.savaari.dto.VendorRateDTO;
-import com.efit.savaari.entity.BranchVO;
 import com.efit.savaari.entity.ChargeTypeVO;
 import com.efit.savaari.entity.CustomerRateVO;
 import com.efit.savaari.entity.CustomerVO;
-import com.efit.savaari.entity.IndentsVO;
-import com.efit.savaari.entity.ListOfValuesVO;
-import com.efit.savaari.entity.PlaceDetailsVO;
 import com.efit.savaari.entity.RoutesVO;
-import com.efit.savaari.entity.VendorRateVO;
 import com.efit.savaari.responseDTO.CompanyProfileResponseDTO;
 import com.efit.savaari.responseDTO.ResponseDTO;
 import com.efit.savaari.service.MasterService;
@@ -62,81 +46,6 @@ public class MasterController extends BaseController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MasterController.class);
 
-	// Branch
-		@GetMapping("/branch")
-		public ResponseEntity<ResponseDTO> getAllBranch(@RequestParam Long orgid) {
-			String methodName = "getAllBranch()";
-			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-			String errorMsg = null;
-			Map<String, Object> responseObjectsMap = new HashMap<>();
-			ResponseDTO responseDTO = null;
-			List<BranchVO> branchVO = new ArrayList<>();
-			try {
-				branchVO = masterService.getAllBranch(orgid);
-			} catch (Exception e) {
-				errorMsg = e.getMessage();
-				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			}
-			if (StringUtils.isBlank(errorMsg)) {
-				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Branch information get successfully");
-				responseObjectsMap.put("branchVO", branchVO);
-				responseDTO = createServiceResponse(responseObjectsMap);
-			} else {
-				responseDTO = createServiceResponseError(responseObjectsMap, "Branch information receive failed", errorMsg);
-			}
-			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-			return ResponseEntity.ok().body(responseDTO);
-		}
-
-		@GetMapping("/branch/{branchid}")
-		public ResponseEntity<ResponseDTO> getBranchById(@PathVariable Long branchid) {
-			String methodName = "getBranchById()";
-			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-			String errorMsg = null;
-			Map<String, Object> responseObjectsMap = new HashMap<>();
-			ResponseDTO responseDTO = null;
-			BranchVO branchVO = null;
-			try {
-				branchVO = masterService.getBranchById(branchid).orElse(null);
-			} catch (Exception e) {
-				errorMsg = e.getMessage();
-				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			}
-			if (StringUtils.isEmpty(errorMsg)) {
-				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Branch found by ID");
-				responseObjectsMap.put("Branch", branchVO);
-				responseDTO = createServiceResponse(responseObjectsMap);
-			} else {
-				errorMsg = "Branch not found for ID: " + branchid;
-				responseDTO = createServiceResponseError(responseObjectsMap, "Branch not found", errorMsg);
-			}
-			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-			return ResponseEntity.ok().body(responseDTO);
-		}
-	 
-		@PutMapping("/createUpdateBranch")
-		public ResponseEntity<ResponseDTO> createUpdateBranch(@RequestBody BranchDTO branchDTO) {
-			String methodName = "createBranch()";
-			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-			String errorMsg = null;
-			Map<String, Object> responseObjectsMap = new HashMap<>();
-			ResponseDTO responseDTO = null;
-			try {
-				Map<String, Object> createdBranchVO = masterService.createUpdateBranch(branchDTO);
-				responseObjectsMap.put(CommonConstant.STRING_MESSAGE,createdBranchVO.get("message"));
-				responseObjectsMap.put("branchVO", createdBranchVO.get("branchVO"));
-				responseDTO = createServiceResponse(responseObjectsMap);
-			} catch (Exception e) {
-		        errorMsg = e.getMessage();
-		        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		        responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
-		    }
-		    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		    return ResponseEntity.ok().body(responseDTO);
-		}
-		
-
-		
 		
 		@PutMapping("/createUpdateCustomer")
 		public ResponseEntity<ResponseDTO> createUpdateCustomer(@RequestBody CustomerDTO dto) {
@@ -224,277 +133,7 @@ public class MasterController extends BaseController {
 		}
 
 
-		@PutMapping(value = "/createUpdateIndents", consumes = "multipart/form-data")
-		public ResponseEntity<ResponseDTO> createUpdateIndents(
-		        @RequestPart("indentsDTO") IndentsDTO indentsDTO,
-		        @RequestPart(value = "tripLinkedAttachment", required = false) List<MultipartFile> tripLinkedAttachment
-		) {
-
-		    String methodName = "createUpdateIndents()";
-		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-		    try {
-
-		        Map<String, Object> indentsResponse =
-		        		masterService.createUpdateIndents(indentsDTO, tripLinkedAttachment);
-
-		        ResponseDTO responseDTO = createServiceResponse(indentsResponse);
-		        return ResponseEntity.ok(responseDTO);
-
-		    } catch (Exception e) {
-		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
-		        ResponseDTO responseDTO = createServiceResponseError(
-		                new HashMap<>(),
-		                "Unexpected Error",
-		                e.getMessage()
-		        );
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
-		    }
-		}
-
 		
-		@GetMapping("/getIndentsById")
-		public ResponseEntity<ResponseDTO> getIndentsById(@RequestParam Long id) {
-
-		    String methodName = "getIndentsById()";
-		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-		    Map<String, Object> responseObjectsMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		        IndentsVO indentsVO = masterService.getIndentsById(id);
-
-		        if (indentsVO == null) {
-		            String errorMsg = "Indents not found for ID: " + id;
-		            responseDTO = createServiceResponseError(responseObjectsMap, "Not Found", errorMsg);
-		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDTO);
-		        }
-
-		        responseObjectsMap.put("message", "Indents found successfully");
-		        responseObjectsMap.put("indentsVO", indentsVO);
-
-		        responseDTO = createServiceResponse(responseObjectsMap);
-
-		    } catch (Exception e) {
-		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
-		        responseDTO = createServiceResponseError(responseObjectsMap, "Unexpected Error", e.getMessage());
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
-		    }
-
-		    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		    
-		    return ResponseEntity.ok(responseDTO);
-		}
-		 
-		
-		@GetMapping("/getIndentsByOrgId")
-		public ResponseEntity<ResponseDTO> getIndentsByOrgId(
-		        @RequestParam(required = false) String branchCode,
-		        @RequestParam Long orgId,
-		        @RequestParam(defaultValue = "") String search,
-		        @RequestParam(defaultValue = "1") int page,
-		        @RequestParam(defaultValue = "10") int count
-		) {
-		    String methodName = "getIndentsByOrgId()";
-		    LOGGER.debug("Starting {}", methodName);
-
-		    Map<String, Object> responseMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		        Map<String, Object> indentsVO = masterService.getIndentsByOrgId( branchCode, orgId,search, page, count);
-		        responseMap.put("message", "Indents retrieved successfully");
-		        responseMap.put("indentsVO", indentsVO);
-		        responseDTO = createServiceResponse(responseMap);
-		    } catch (Exception e) {
-		        LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-		        responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
-		    }
-		    
-		    
-
-		    LOGGER.debug("Ending {}", methodName);
-		    return ResponseEntity.ok(responseDTO);
-		}
-
-		
-		@PutMapping("/createUpdatePlaceDetails")
-		public ResponseEntity<ResponseDTO> createUpdatePlaceDetails(
-		        @RequestBody PlaceDetailsDTO placeDetailsDTO	) {
-
-		    String methodName = "createUpdatePlaceDetails()";
-		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-		    try {
-		        Map<String, Object> Response = masterService.createUpdatePlaceDetails(placeDetailsDTO);
-
-		        ResponseDTO responseDTO = createServiceResponse(Response);
-		        return ResponseEntity.ok(responseDTO);
-
-		    } catch (Exception e) {
-		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
-		        ResponseDTO responseDTO = createServiceResponseError(
-		                new HashMap<>(),
-		                "Unexpected Error",
-		                e.getMessage()
-		        );
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
-		    }
-		}
-		
-		
-		@GetMapping("/getPlaceDetailsById")
-		public ResponseEntity<ResponseDTO> getPlaceDetailsById(@RequestParam Long id) {
-
-		    String methodName = "getPlaceDetailsById()";
-		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-		    Map<String, Object> responseObjectsMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		    	PlaceDetailsVO placeDetailsVO = masterService.getPlaceDetailsById(id);
-
-		        if (placeDetailsVO == null) {
-		            String errorMsg = "PlaceDetails not found for ID: " + id;
-		            responseDTO = createServiceResponseError(responseObjectsMap, "Not Found", errorMsg);
-		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDTO);
-		        }
-
-		        responseObjectsMap.put("message", "PlaceDetails found successfully");
-		        responseObjectsMap.put("placeDetailsVO", placeDetailsVO);
-
-		        responseDTO = createServiceResponse(responseObjectsMap);
-
-		    } catch (Exception e) {
-		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
-		        responseDTO = createServiceResponseError(responseObjectsMap, "Unexpected Error", e.getMessage());
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
-		    }
-
-		    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		    
-		    return ResponseEntity.ok(responseDTO);
-		}
-
-		
-		@GetMapping("/getPlaceDetailsByOrgId")
-		public ResponseEntity<ResponseDTO> getPlaceDetailsByOrgId(
-		        @RequestParam(required = false) String branchCode,
-		        @RequestParam(defaultValue = "") String search,
-		        @RequestParam(defaultValue = "1") int page,
-		        @RequestParam(defaultValue = "10") int count
-		) {
-		    String methodName = "getPlaceDetailsByOrgId()";
-		    LOGGER.debug("Starting {}", methodName);
-
-		    Map<String, Object> responseMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		        Map<String, Object> placeDetailsVO = masterService.getPlaceDetailsByOrgId( branchCode, search, page, count);
-		        responseMap.put("message", "PlaceDetails retrieved successfully");
-		        responseMap.put("placeDetailsVO", placeDetailsVO);
-		        responseDTO = createServiceResponse(responseMap);
-		    } catch (Exception e) {
-		        LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-		        responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
-		    }
-
-		    LOGGER.debug("Ending {}", methodName);
-		    return ResponseEntity.ok(responseDTO);
-		}
-
-		
-		@PutMapping("/createUpdateVendorRate")
-		public ResponseEntity<ResponseDTO> createUpdateVendorRate(
-		        @RequestBody VendorRateDTO vendorRateDTO	) {
-
-		    String methodName = "createUpdateVendorRate()";
-		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-		    try {
-		        Map<String, Object> Response = masterService.createUpdateVendorRate(vendorRateDTO);
-
-		        ResponseDTO responseDTO = createServiceResponse(Response);
-		        return ResponseEntity.ok(responseDTO);
-
-		    } catch (Exception e) {
-		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
-		        ResponseDTO responseDTO = createServiceResponseError(
-		                new HashMap<>(),
-		                "Unexpected Error",
-		                e.getMessage()
-		        );
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
-		    }
-		}
-		
-		
-		@GetMapping("/getVendorRateById")
-		public ResponseEntity<ResponseDTO> getVendorRateById(@RequestParam Long id) {
-
-		    String methodName = "getVendorRateById()";
-		    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-
-		    Map<String, Object> responseObjectsMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		        VendorRateVO vendorRateVO = masterService.getVendorRateById(id);
-
-		        if (vendorRateVO == null) {
-		            String errorMsg = "VendorRate not found for ID: " + id;
-		            responseDTO = createServiceResponseError(responseObjectsMap, "Not Found", errorMsg);
-		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDTO);
-		        }
-
-		        responseObjectsMap.put("message", "VendorRate found successfully");
-		        responseObjectsMap.put("vendorRateVO", vendorRateVO);
-
-		        responseDTO = createServiceResponse(responseObjectsMap);
-
-		    } catch (Exception e) {
-		        LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
-		        responseDTO = createServiceResponseError(responseObjectsMap, "Unexpected Error", e.getMessage());
-		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDTO);
-		    }
-
-		    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		    
-		    return ResponseEntity.ok(responseDTO);
-		}
-		
-		
-		@GetMapping("/getVendorRateByOrgId")
-		public ResponseEntity<ResponseDTO> getVendorRateByOrgId(
-		        @RequestParam(required = false) String branchCode,
-		        @RequestParam Long orgId,
-		        @RequestParam(defaultValue = "") String search,
-		        @RequestParam(defaultValue = "1") int page,
-		        @RequestParam(defaultValue = "10") int count
-		) {
-		    String methodName = "getVendorRateByOrgId()";
-		    LOGGER.debug("Starting {}", methodName);
-
-		    Map<String, Object> responseMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		        Map<String, Object> vendorRateVO = masterService.getVendorRateByOrgId( branchCode,orgId, search, page, count);
-		        responseMap.put("message", "VendorRate retrieved successfully");
-		        responseMap.put("vendorRateVO", vendorRateVO);
-		        responseDTO = createServiceResponse(responseMap);
-		    } catch (Exception e) {
-		        LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-		        responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
-		    }
-
-		    LOGGER.debug("Ending {}", methodName);
-		    return ResponseEntity.ok(responseDTO);
-		}
-
 		
 		@PutMapping("/createUpdateCustomerRate")
 		public ResponseEntity<ResponseDTO> createUpdateCustomerRate(
@@ -935,120 +574,6 @@ public class MasterController extends BaseController {
 		}
 		
 		
-		// ListOfValues
-
-		@GetMapping("/getListOfValuesById")
-		public ResponseEntity<ResponseDTO> getListOfValuesById(@RequestParam(required = false) Long id) {
-			String methodName = "getListOfValuesById()";
-			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-			String errorMsg = null;
-			Map<String, Object> responseObjectsMap = new HashMap<>();
-			ResponseDTO responseDTO = null;
-			List<ListOfValuesVO> listOfValuesVO = new ArrayList<>();
-			try {
-				listOfValuesVO = masterService.getListOfValuesById(id);
-			} catch (Exception e) {
-				errorMsg = e.getMessage();
-				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			}
-			if (StringUtils.isBlank(errorMsg)) {
-				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "listOfValues information get successfully By Id");
-				responseObjectsMap.put("listOfValuesVO", listOfValuesVO);
-				responseDTO = createServiceResponse(responseObjectsMap);
-			} else {
-				responseDTO = createServiceResponseError(responseObjectsMap,
-						"listOfValues information receive failed By Id", errorMsg);
-			}
-			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-			return ResponseEntity.ok().body(responseDTO);
-		}
-
-		@GetMapping("/getListOfValuesByOrgId")
-		public ResponseEntity<ResponseDTO> getListOfValuesByOrgId(@RequestParam(required = false) Long orgid) {
-			String methodName = "getListOfValuesByOrgId()";
-			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-			String errorMsg = null;
-			Map<String, Object> responseObjectsMap = new HashMap<>();
-			ResponseDTO responseDTO = null;
-			List<ListOfValuesVO> listOfValuesVO = new ArrayList<>();
-			try {
-				listOfValuesVO = masterService.getListOfValuesByOrgId(orgid);
-			} catch (Exception e) {
-				errorMsg = e.getMessage();
-				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-			}
-			if (StringUtils.isBlank(errorMsg)) {
-				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "listOfValues information get successfully By OrgId");
-				responseObjectsMap.put("listOfValuesVO", listOfValuesVO);
-				responseDTO = createServiceResponse(responseObjectsMap);
-			} else {
-				responseDTO = createServiceResponseError(responseObjectsMap,
-						"listOfValues information receive failed By OrgId", errorMsg);
-			}
-			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-			return ResponseEntity.ok().body(responseDTO);
-		}
-
-		@PutMapping("/updateCreateListOfValues")
-		public ResponseEntity<ResponseDTO> updateCreateListOfValues(@Valid @RequestBody ListOfValuesDTO listOfValuesDTO) {
-			String methodName = "updateCreateListOfValues()";
-
-			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-			String errorMsg = null;
-			Map<String, Object> responseObjectsMap = new HashMap<>();
-			ResponseDTO responseDTO = null;
-
-			try {
-				ListOfValuesVO listOfValuesVO = masterService.updateCreateListOfValues(listOfValuesDTO);
-				boolean isUpdate = listOfValuesDTO.getId() != null;
-				if (listOfValuesVO != null) {
-					responseObjectsMap.put(CommonConstant.STRING_MESSAGE,
-							isUpdate ? "ListOfValues updated successfully" : "ListOfValues created successfully");
-					responseObjectsMap.put("listOfValuesVO", listOfValuesVO);
-					responseDTO = createServiceResponse(responseObjectsMap);
-				} else {
-					errorMsg = isUpdate ? "ListOfValues not found for ID: " + listOfValuesDTO.getId()
-							: "ListOfValues creation failed";
-					responseDTO = createServiceResponseError(responseObjectsMap,
-							isUpdate ? "ListOfValues update failed" : "ListOfValues creation failed", errorMsg);
-				}
-			} catch (Exception e) {
-				errorMsg = e.getMessage();
-				boolean isUpdate = listOfValuesDTO.getId() != null;
-				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-				responseDTO = createServiceResponseError(responseObjectsMap,
-						isUpdate ? "ListOfValues update failed" : "ListOfValues creation failed", errorMsg);
-			}
-			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-			return ResponseEntity.ok().body(responseDTO);
-		}
-
-		
-		@GetMapping("/getValueDescriptionByListOfValues")
-		public ResponseEntity<ResponseDTO> getValueDescriptionByListOfValues(
-		        @RequestParam Long orgId,
-		        @RequestParam String listDescription
-
-		) {
-		    String methodName = "getValueDescriptionByListOfValues()";
-		    LOGGER.debug("Starting {}", methodName);
-
-		    Map<String, Object> responseMap = new HashMap<>();
-		    ResponseDTO responseDTO;
-
-		    try {
-		    	List<Map<String, Object>> listOfValuesVO = masterService.getValueDescriptionByListOfValues( orgId,listDescription);
-		        responseMap.put("message", "listOfValuesVO retrieved successfully");
-		        responseMap.put("listOfValuesVO", listOfValuesVO);
-		        responseDTO = createServiceResponse(responseMap);
-		    } catch (Exception e) {
-		        LOGGER.error("Error in {}: {}", methodName, e.getMessage());
-		        responseDTO = createServiceResponseError(responseMap, "Error fetching users", e.getMessage());
-		    }
-		    
-		    LOGGER.debug("Ending {}", methodName);
-		    return ResponseEntity.ok(responseDTO);
-		}
 		
 		
 		//CompanyProfile
@@ -1190,6 +715,7 @@ public class MasterController extends BaseController {
 		    return ResponseEntity.ok(responseDTO);
 		}
 
+		
 
 		
 }
