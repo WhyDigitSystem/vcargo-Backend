@@ -1,6 +1,7 @@
 package com.efit.savaari.service;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -84,6 +85,8 @@ public class TicketServiceImpl implements TicketService {
 
 	@Autowired
 	private AsyncService asyncService;
+	
+
 
 	@Override
 	@Transactional
@@ -122,6 +125,19 @@ public class TicketServiceImpl implements TicketService {
 		vo.setStatus(dto.getStatus());
 		vo.setEmail(dto.getEmail());
 		vo.setBranch(dto.getBranch());
+		
+		String lastDocId = ticketRepo.findByDocId(dto.getOrgId());
+
+		String newDocId;
+
+		if (lastDocId == null || lastDocId.trim().isEmpty()) {
+			newDocId = "VCA-001";
+		} else {
+			int count = Integer.parseInt(lastDocId.substring(lastDocId.lastIndexOf("-") + 1));
+			newDocId = "VCA-" + String.format("%03d", count + 1);
+		}
+
+		vo.setDocId(newDocId);
 		vo.setBranchCode(dto.getBranchCode());
 		vo.setCompanyName(dto.getCompanyName());
 		vo.setTicketStatus(dto.getTicketStatus());
