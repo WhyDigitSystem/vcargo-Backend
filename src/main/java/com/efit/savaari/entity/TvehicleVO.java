@@ -1,5 +1,6 @@
 package com.efit.savaari.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -100,6 +101,17 @@ public class TvehicleVO {
 	
 	@Column(name = "registrationtype", length = 100)
 	private String registrationType;
+	
+	//new fields 
+	
+	@Column(name = "hiredate")
+	private LocalDate hireDate;
+	@Column(name = "hirecost")
+	private BigDecimal hireCost;
+	@Column(name = "pickuplocation")
+	private String pickupLocation;
+	@Column(name = "droplocation")
+	private String dropLocation;
 	
 	@Column(name = "active")
 	private String active;

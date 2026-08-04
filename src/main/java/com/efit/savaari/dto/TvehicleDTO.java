@@ -1,6 +1,9 @@
 package com.efit.savaari.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import javax.persistence.Column;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,4 +42,10 @@ public class TvehicleDTO {
 	private String branchName;
 	private String registrationType;
 
+	
+	private LocalDate hireDate;
+	private BigDecimal hireCost;
+	private String pickupLocation;
+	private String dropLocation;
+	
 }

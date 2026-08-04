@@ -196,6 +196,9 @@ public interface TvehicleRepo extends JpaRepository<TvehicleVO, Long> {
 		Map<String, Object> getExpirySummaryDashboard(@Param("orgId") Long orgId);
 
 
+	Optional<TvehicleVO> findByVehicleNumber(String vehicleNumber);
+
+
 
 
 

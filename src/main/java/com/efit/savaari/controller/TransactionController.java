@@ -28,6 +28,7 @@ import com.efit.savaari.common.CommonConstant;
 import com.efit.savaari.dto.CustomerBookingRequestDTO;
 import com.efit.savaari.dto.TdriverDTO;
 import com.efit.savaari.dto.TvehicleDTO;
+import com.efit.savaari.dto.VehicleHireDTO;
 import com.efit.savaari.entity.CustomerBookingRequestVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TvehicleVO;
@@ -151,6 +152,33 @@ public class TransactionController extends BaseController {
 
 			responseMap.put("message", serviceResponse.get("message"));
 			responseMap.put("tvehicleVO", serviceResponse.get("tvehicleVO"));
+
+			ResponseDTO responseDTO = createServiceResponse(responseMap);
+			return ResponseEntity.ok(responseDTO);
+
+		} catch (Exception e) {
+
+			LOGGER.error("{} - Unexpected Error: {}", methodName, e.getMessage(), e);
+
+			ResponseDTO errorDTO = createServiceResponseError(responseMap, "Unexpected Error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+		}
+	}
+	
+	@PutMapping(value = "/createUpdateHireTvehicle")
+	public ResponseEntity<ResponseDTO> createUpdateHireTvehicle(
+			@RequestBody VehicleHireDTO vehicleHireDTO) {
+
+		String methodName = "createUpdateTvehicle()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseMap = new HashMap<>();
+
+		try {
+			Map<String, Object> serviceResponse = transactionService.createUpdateHireTvehicle(vehicleHireDTO);
+
+			responseMap.put("message", serviceResponse.get("message"));
+			responseMap.put("tvehicleVO", serviceResponse.get("vehicle"));
 
 			ResponseDTO responseDTO = createServiceResponse(responseMap);
 			return ResponseEntity.ok(responseDTO);

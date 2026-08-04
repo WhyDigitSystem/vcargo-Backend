@@ -71,21 +71,6 @@ public class VehicleVO {
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 
 
-//	@Override
-//	public String toString() {
-//		return "VehicleVO [id=" + id + ", vehicleNumber=" + vehicleNumber + ", vehicleType=" + vehicleType + ", status="
-//				+ status + ", branch=" + branch + ", branchCode=" + branchCode + ", active=" + active + ", createdBy="
-//				+ createdBy + ", updatedBy=" + updatedBy + ", orgId=" + orgId + ", cancel=" + cancel + ", screenName="
-//				+ screenName + ", screenCode=" + screenCode + ", commonDate=" + commonDate + ", getActive()="
-//				+ getActive() + ", getCancel()=" + getCancel() + ", getId()=" + getId() + ", getVehicleNumber()="
-//				+ getVehicleNumber() + ", getVehicleType()=" + getVehicleType() + ", getStatus()=" + getStatus()
-//				+ ", getBranch()=" + getBranch() + ", getBranchCode()=" + getBranchCode() + ", getCreatedBy()="
-//				+ getCreatedBy() + ", getUpdatedBy()=" + getUpdatedBy() + ", getOrgId()=" + getOrgId()
-//				+ ", getScreenName()=" + getScreenName() + ", getScreenCode()=" + getScreenCode() + ", getCommonDate()="
-//				+ getCommonDate() + ", hashCode()=" + hashCode() + ", getClass()=" + getClass() + ", toString()="
-//				+ super.toString() + "]";
-//	}
-
 
 
 }

@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.efit.savaari.dto.CustomerBookingRequestDTO;
 import com.efit.savaari.dto.TdriverDTO;
 import com.efit.savaari.dto.TvehicleDTO;
+import com.efit.savaari.dto.VehicleHireDTO;
 import com.efit.savaari.entity.CustomerBookingRequestVO;
 import com.efit.savaari.entity.TdriverVO;
 import com.efit.savaari.entity.TvehicleVO;
@@ -62,5 +63,7 @@ public interface TransactionService {
 	Map<String, Object> tDriverExcelUpload(MultipartFile file,Long createdBy,Long orgId) throws Exception;
 
 	Map<String, Object> tVehicleExcelUpload(MultipartFile file, Long createdBy, Long orgId) throws Exception;
+
+	Map<String, Object> createUpdateHireTvehicle(VehicleHireDTO vehicleHireDTO) throws ApplicationException;
 
 }

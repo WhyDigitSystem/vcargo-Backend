@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +48,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.efit.savaari.dto.CustomerBookingRequestDTO;
 import com.efit.savaari.dto.TdriverDTO;
 import com.efit.savaari.dto.TvehicleDTO;
+import com.efit.savaari.dto.VehicleHireDTO;
 import com.efit.savaari.entity.CustomerBookingRequestVO;
 import com.efit.savaari.entity.TdriverDocumentsVO;
 import com.efit.savaari.entity.TdriverVO;
@@ -66,6 +68,7 @@ import com.efit.savaari.responseDTO.TdriverDocumentResponseDTO;
 import com.efit.savaari.responseDTO.TdriverResponseDTO;
 import com.efit.savaari.responseDTO.TvehicleDocumentResponseDTO;
 import com.efit.savaari.responseDTO.TvehicleResponseDTO;
+import com.efit.savaari.responseDTO.VehicleHireResponseDTO;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -1321,5 +1324,107 @@ public class TransactionServiceImpl implements TransactionService {
 
 		
 	
+	@Override
+	@Transactional
+	public Map<String, Object> createUpdateHireTvehicle(VehicleHireDTO dto) throws ApplicationException {
 
+	    TvehicleVO vo;
+	    String message;
+
+	    // Check duplicate vehicle number
+	    Optional<TvehicleVO> existingVehicle =
+	            tvehicleRepo.findByVehicleNumber(dto.getVehicleNumber());
+
+	    // UPDATE
+	    if (dto.getId() != null) {
+
+	        vo = tvehicleRepo.findById(dto.getId())
+	                .orElseThrow(() -> new ApplicationException("Invalid Vehicle ID"));
+
+	        // Vehicle number belongs to another vehicle
+	        if (existingVehicle.isPresent()
+	                && !existingVehicle.get().getId().equals(dto.getId())) {
+	            throw new ApplicationException("Vehicle Number already exists");
+	        }
+
+	        vo.setUpdatedBy(dto.getCreatedBy());
+	        message = "Vehicle Updated Successfully";
+
+	    } else {
+
+	        // CREATE
+	        if (existingVehicle.isPresent()) {
+	            throw new ApplicationException("Vehicle Number already exists");
+	        }
+
+	        vo = new TvehicleVO();
+	        vo.setCreatedBy(dto.getCreatedBy());
+	        vo.setUpdatedBy(dto.getCreatedBy());
+
+	        message = "Vehicle Created Successfully";
+	    }
+
+	    // Map DTO to Entity
+	    mapVehicleHireDTOToVO(dto, vo);
+
+	    // Save
+	    vo = tvehicleRepo.save(vo);
+	    
+
+	    VehicleHireResponseDTO responseDTO = mapVehicleHireVOToResponseDTO(vo);
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("vehicle", responseDTO);
+	    response.put("message", message);
+
+	    return response;
+	}
+
+	private void mapVehicleHireDTOToVO(VehicleHireDTO dto, TvehicleVO vo) {
+
+	    vo.setHireDate(dto.getHireDate());
+	    vo.setHireCost(dto.getHireCost());
+
+	    vo.setPickupLocation(dto.getPickupLocation());
+	    vo.setDropLocation(dto.getDropLocation());
+
+	    vo.setVehicleNumber(dto.getVehicleNumber());
+	    vo.setType(dto.getType());
+
+	    vo.setDriver(dto.getDriver());
+	    vo.setDriverPhone(dto.getDriverPhone());
+	    vo.setActive(dto.getActive());
+	    vo.setOrgId(dto.getOrgId());
+	    vo.setBranchCode(dto.getBranchCode());
+	    vo.setBranchName(dto.getBranchName());
+	    vo.setDriverPhone(dto.getDriverPhone());
+	}
+	
+	private VehicleHireResponseDTO mapVehicleHireVOToResponseDTO(TvehicleVO vo) {
+
+	    VehicleHireResponseDTO dto = new VehicleHireResponseDTO();
+
+	    dto.setId(vo.getId());
+	    dto.setVehicleNumber(vo.getVehicleNumber());
+	    dto.setType(vo.getType());
+
+	    dto.setDriver(vo.getDriver());
+	    dto.setDriverPhone(vo.getDriverPhone());
+
+	    dto.setHireDate(vo.getHireDate());
+	    dto.setHireCost(vo.getHireCost());
+
+	    dto.setPickupLocation(vo.getPickupLocation());
+	    dto.setDropLocation(vo.getDropLocation());
+
+	    dto.setCreatedBy(vo.getCreatedBy());
+	    dto.setUpdatedBy(vo.getUpdatedBy());
+	    dto.setActive(vo.getActive());
+	    dto.setOrgId(vo.getOrgId());
+	    dto.setBranchCode(vo.getBranchCode());
+	    dto.setBranchName(vo.getBranchName());
+	    dto.setDriverPhone(vo.getDriverPhone());
+
+	    return dto;
+	}
 }
